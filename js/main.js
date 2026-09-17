@@ -172,16 +172,37 @@ function initLightbox() {
     galleryItems.forEach(item => {
         item.addEventListener('click', () => {
             const img = item.querySelector('img');
-            const caption = item.querySelector('.gallery-caption')?.textContent || '';
-            const sub = item.querySelector('.gallery-sub')?.textContent || '';
+            if (!img) return;
 
-            if (img) {
-                openLightbox(
-                    img.src,
-                    img.alt || caption,
-                    `<strong>${caption}</strong><br><span style="font-size:0.85rem; color: #94a3b8;">${sub}</span>`
-                );
+            // Check if structured data attributes exist
+            const speaker = item.dataset.speaker;
+            const title = item.dataset.title;
+            const date = item.dataset.date;
+            const venue = item.dataset.venue;
+
+            let captionHtml = '';
+            if (speaker || title || date || venue) {
+                captionHtml = `
+                    <div class="lightbox-info">
+                        ${title ? `<div class="lightbox-title">${title}</div>` : ''}
+                        <div class="lightbox-meta">
+                            ${speaker ? `<span class="lightbox-speaker"><i class="fa-solid fa-circle-user"></i> ${speaker}</span>` : ''}
+                            ${date ? `<span class="lightbox-date"><i class="fa-regular fa-calendar"></i> ${date}</span>` : ''}
+                            ${venue ? `<span class="lightbox-venue"><i class="fa-solid fa-location-dot"></i> ${venue}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            } else {
+                const caption = item.querySelector('.gallery-caption')?.textContent || '';
+                const sub = item.querySelector('.gallery-sub')?.textContent || '';
+                captionHtml = `<strong>${caption}</strong><br><span style="font-size:0.85rem; color: #94a3b8;">${sub}</span>`;
             }
+
+            openLightbox(
+                img.src,
+                img.alt || title || speaker || 'Photo View',
+                captionHtml
+            );
         });
     });
 

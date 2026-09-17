@@ -71,7 +71,7 @@
                 <ul class="nav-menu" id="nav-menu">
                     <li><a href="index.html" class="nav-link">Home</a></li>
                     <li><a href="events.html" class="nav-link">Events</a></li>
-                    <!-- <li><a href="gallery.html" class="nav-link active">Gallery</a></li> -->
+                    <li><a href="gallery.html" class="nav-link active">Gallery</a></li>
                     <li><a href="contact.html" class="nav-link">Contact</a></li>
                 </ul>
             </nav>
@@ -100,75 +100,35 @@
         <!-- Category Pills -->
         <div class="controls-bar" style="justify-content: center;">
             <div class="category-pills">
-                <button class="pill-btn active" data-filter="all">All Slots</button>
+                <button class="pill-btn active" data-filter="all">All Photos</button>
                 <button class="pill-btn" data-filter="presentation">Presentations</button>
+                <button class="pill-btn" data-filter="keynote">Keynotes & Talks</button>
                 <button class="pill-btn" data-filter="discussion">Discussions</button>
-                <button class="pill-btn" data-filter="keynote">Keynotes</button>
-                <button class="pill-btn" data-filter="hall">Seminar Hall</button>
             </div>
         </div>
 
-        <!-- Gallery Grid (Ready for actual photos) -->
+        <!-- Gallery Grid -->
         <div class="gallery-grid">
 
-            <!-- Photo Card Slot 1 -->
-            <div class="gallery-item filterable-item" data-category="presentation">
-                <div class="photo-placeholder">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    <div class="photo-placeholder-title">Seminar Presentation Photo</div>
-                    <div class="photo-placeholder-tag">Upload your image here</div>
+            <!-- Photo Card: Dr. Mahesh Mohan M R Seminar Session -->
+            <div class="gallery-item filterable-item" 
+                 data-category="presentation keynote"
+                 data-speaker="Dr. Mahesh Mohan M R"
+                 data-title="Learning the ESG Geometry with Domain-Aware Language Models"
+                 data-date="15 Sep 2026"
+                 data-venue="Dept. of Artificial Intelligence, CRR Building, IIT Kharagpur">
+                <img src="gallery_image/MMMR_ICL_2026.jpg" alt="Dr. Mahesh Mohan M R &bull; Seminar Session (15 Sep 2026)" loading="lazy">
+                
+                <!-- Subtle corner badge: Name and Date in small font -->
+                <div class="gallery-corner-tag">
+                    <span class="corner-name">Dr. Mahesh Mohan M R</span>
+                    <span class="corner-date"><i class="fa-regular fa-calendar"></i> 15 Sep 2026</span>
                 </div>
-                <!-- To add actual photo, uncomment below and replace src:
-                <img src="images/gallery/seminar_session.jpg" alt="Seminar Presentation">
+
                 <div class="gallery-overlay">
-                    <div class="gallery-caption">Weekly Talk Session</div>
-                    <div class="gallery-sub">Dept. of AI, IIT Kharagpur</div>
-                </div> 
-                -->
-            </div>
-
-            <!-- Photo Card Slot 2 -->
-            <div class="gallery-item filterable-item" data-category="discussion">
-                <div class="photo-placeholder">
-                    <i class="fa-solid fa-comments"></i>
-                    <div class="photo-placeholder-title">Interactive Q&A Discussion</div>
-                    <div class="photo-placeholder-tag">Upload your image here</div>
-                </div>
-            </div>
-
-            <!-- Photo Card Slot 3 -->
-            <div class="gallery-item filterable-item" data-category="keynote">
-                <div class="photo-placeholder">
-                    <i class="fa-solid fa-chalkboard-user"></i>
-                    <div class="photo-placeholder-title">Keynote & Paper Walkthrough</div>
-                    <div class="photo-placeholder-tag">Upload your image here</div>
-                </div>
-            </div>
-
-            <!-- Photo Card Slot 4 -->
-            <div class="gallery-item filterable-item" data-category="hall">
-                <div class="photo-placeholder">
-                    <i class="fa-solid fa-building"></i>
-                    <div class="photo-placeholder-title">CRR Building Seminar Hall</div>
-                    <div class="photo-placeholder-tag">Upload your image here</div>
-                </div>
-            </div>
-
-            <!-- Photo Card Slot 5 -->
-            <div class="gallery-item filterable-item" data-category="discussion">
-                <div class="photo-placeholder">
-                    <i class="fa-solid fa-users"></i>
-                    <div class="photo-placeholder-title">Peer Research Exchange</div>
-                    <div class="photo-placeholder-tag">Upload your image here</div>
-                </div>
-            </div>
-
-            <!-- Photo Card Slot 6 -->
-            <div class="gallery-item filterable-item" data-category="presentation">
-                <div class="photo-placeholder">
-                    <i class="fa-solid fa-display"></i>
-                    <div class="photo-placeholder-title">Slide Presentation Session</div>
-                    <div class="photo-placeholder-tag">Upload your image here</div>
+                    <span class="gallery-overlay-btn">
+                        <i class="fa-solid fa-expand"></i> View Fullscreen
+                    </span>
                 </div>
             </div>
 
@@ -197,7 +157,7 @@
                     <ul class="footer-links">
                         <li><a href="index.html">Home</a></li>
                         <li><a href="events.html">Event Details</a></li>
-                        <!-- <li><a href="gallery.html">Photo Gallery</a></li> -->
+                        <li><a href="gallery.html">Photo Gallery</a></li>
                         <li><a href="contact.html">Contact</a></li>
                     </ul>
                 </div>
@@ -218,6 +178,15 @@
             </div>
         </div>
     </footer>
+
+    <!-- Lightbox Modal for Gallery View -->
+    <div id="lightbox-modal" class="lightbox-modal">
+        <div class="lightbox-content">
+            <button class="lightbox-close" aria-label="Close lightbox">&times;</button>
+            <img class="lightbox-img" src="" alt="Enlarged view">
+            <div class="lightbox-caption"></div>
+        </div>
+    </div>
 
     <!-- JavaScript -->
     <script src="js/main.js"></script>
