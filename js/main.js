@@ -207,13 +207,20 @@ function initLightbox() {
     });
 
     posterTriggers.forEach(trigger => {
-        trigger.addEventListener('click', () => {
+        trigger.addEventListener('click', (e) => {
             const img = trigger.querySelector('img');
+            const href = trigger.getAttribute('href');
+            const isImgHref = href && /\.(png|jpe?g|webp|gif|svg)$/i.test(href);
+            const src = img?.src || (isImgHref ? href : null);
             const caption = trigger.dataset.caption || img?.alt || 'Event Poster Preview';
-            if (img) {
+            
+            if (src) {
+                if (trigger.tagName === 'A') {
+                    e.preventDefault();
+                }
                 openLightbox(
-                    img.src,
-                    img.alt || caption,
+                    src,
+                    img?.alt || caption,
                     `<strong>${caption}</strong>`
                 );
             }
