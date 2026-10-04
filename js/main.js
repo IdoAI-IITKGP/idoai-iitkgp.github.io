@@ -66,27 +66,30 @@ function initMobileNav() {
     mobileBtn.setAttribute('aria-expanded', 'false');
     mobileBtn.setAttribute('aria-controls', 'nav-menu');
 
+    // Dimmed layer behind the open menu; tapping it closes the menu
+    const backdrop = document.createElement('div');
+    backdrop.className = 'nav-backdrop';
+    document.body.appendChild(backdrop);
+
     function setMenuOpen(open) {
         navMenu.classList.toggle('open', open);
+        backdrop.classList.toggle('visible', open);
+        document.body.classList.toggle('menu-open', open);
         mobileBtn.setAttribute('aria-expanded', String(open));
-        const icon = mobileBtn.querySelector('i');
-        if (icon) {
-            icon.classList.toggle('fa-bars', !open);
-            icon.classList.toggle('fa-xmark', open);
-        }
+        mobileBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
     }
 
     mobileBtn.addEventListener('click', () => {
         setMenuOpen(!navMenu.classList.contains('open'));
     });
 
-    // Close on link tap, outside tap, or Escape
+    // Close on link tap, tap outside the header (e.g. the backdrop), or Escape
     navMenu.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => setMenuOpen(false));
     });
 
     document.addEventListener('click', (e) => {
-        if (navMenu.classList.contains('open') && !navMenu.contains(e.target) && !mobileBtn.contains(e.target)) {
+        if (navMenu.classList.contains('open') && !e.target.closest('.site-header')) {
             setMenuOpen(false);
         }
     });
@@ -96,6 +99,11 @@ function initMobileNav() {
             setMenuOpen(false);
             mobileBtn.focus();
         }
+    });
+
+    // Don't leave the page scroll-locked if the screen grows to desktop width
+    window.matchMedia('(min-width: 901px)').addEventListener('change', (e) => {
+        if (e.matches) setMenuOpen(false);
     });
 }
 
@@ -229,7 +237,7 @@ function initLightbox() {
     let lastFocused = null;
 
     // Let keyboard users open clickable photos/posters with Enter or Space
-    document.querySelectorAll('.gallery-item, .talk-poster-preview').forEach(el => {
+    document.querySelectorAll('.gallery-item, .lightbox-trigger, #talk-poster-trigger').forEach(el => {
         el.setAttribute('role', 'button');
         el.setAttribute('tabindex', '0');
         el.addEventListener('keydown', (e) => {
@@ -282,7 +290,8 @@ function initLightbox() {
             const img = trigger.querySelector('img');
             const href = trigger.getAttribute('href');
             const isImgHref = href && /\.(png|jpe?g|webp|gif|svg)$/i.test(href);
-            const src = img?.src || (isImgHref ? href : null);
+            // currentSrc is the file a <picture> actually chose (e.g. WebP over GIF)
+            const src = img?.currentSrc || img?.src || (isImgHref ? href : null);
             const caption = trigger.dataset.caption || img?.alt || 'Event Poster Preview';
             
             if (src) {
