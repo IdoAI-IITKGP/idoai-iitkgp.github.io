@@ -109,6 +109,44 @@ function initMobileNav() {
     window.matchMedia('(min-width: 901px)').addEventListener('change', (e) => {
         if (e.matches) setMenuOpen(false);
     });
+
+    initNavHoverPill(navMenu);
+}
+
+/* Desktop: a highlight pill that glides to whichever tab is hovered or focused */
+function initNavHoverPill(navMenu) {
+    const desktop = window.matchMedia('(min-width: 901px)');
+    const pill = document.createElement('li');
+    pill.className = 'nav-hover-pill';
+    pill.setAttribute('aria-hidden', 'true');
+    navMenu.appendChild(pill);
+
+    function moveTo(link) {
+        if (!desktop.matches) return;
+        const menuBox = navMenu.getBoundingClientRect();
+        const box = link.getBoundingClientRect();
+        const appearing = !pill.classList.contains('visible');
+        if (appearing) pill.classList.add('no-slide');
+        pill.style.setProperty('--x', `${box.left - menuBox.left}px`);
+        pill.style.setProperty('--y', `${box.top - menuBox.top}px`);
+        pill.style.setProperty('--w', `${box.width}px`);
+        pill.style.setProperty('--h', `${box.height}px`);
+        pill.classList.toggle('on-active', link.classList.contains('active'));
+        if (appearing) {
+            void pill.offsetWidth; // commit the position before re-enabling the slide
+            pill.classList.remove('no-slide');
+        }
+        pill.classList.add('visible');
+    }
+
+    navMenu.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('mouseenter', () => moveTo(link));
+        link.addEventListener('focus', () => moveTo(link));
+    });
+    navMenu.addEventListener('mouseleave', () => pill.classList.remove('visible'));
+    navMenu.addEventListener('focusout', (e) => {
+        if (!navMenu.contains(e.relatedTarget)) pill.classList.remove('visible');
+    });
 }
 
 /* ==========================================================================
@@ -315,8 +353,9 @@ function initLightbox() {
         closeBtn.addEventListener('click', closeLightbox);
     }
 
+    // Tapping anywhere outside the photo and its caption closes the viewer
     lightboxModal.addEventListener('click', (e) => {
-        if (e.target === lightboxModal) {
+        if (!e.target.closest('.lightbox-img, .lightbox-caption > *, .lightbox-close')) {
             closeLightbox();
         }
     });
@@ -695,64 +734,220 @@ async function buildSearchIndex() {
         }
     }));
 
-    return docs.filter(Boolean).flatMap(([page, doc]) => buildEntriesFromDoc(doc, page)).map(e => ({
-        ...e,
-        n: {
+    return docs.filter(Boolean).flatMap(([page, doc]) => buildEntriesFromDoc(doc, page)).map(e => {
+        const n = {
             title: normalizeText(e.title),
             speaker: normalizeText(e.speaker),
             meta: normalizeText(`${e.meta} ${e.tags || ''}`),
             body: normalizeText(e.body)
+        };
+        const w = {}, s = {};
+        for (const field of Object.keys(n)) {
+            w[field] = searchWords(n[field]);
+            s[field] = w[field].map(stemWord);
         }
-    }));
+        return { ...e, n, w, s };
+    });
+}
+
+/* --------------------------------------------------------------------------
+   Matching. Each query word is tried, strongest first, as:
+   exact text → same word family (imaging ≈ image ≈ imagery) → related term
+   (medical ≈ clinical) → small typo (robtics ≈ robotics).
+   Every word must match; if no result has them all, the closest are shown.
+   -------------------------------------------------------------------------- */
+const SEARCH_FIELDS = { title: 12, speaker: 10, meta: 5, body: 3 };
+const SEARCH_STOPWORDS = new Set(['a', 'an', 'the', 'of', 'and', 'or', 'for', 'with', 'in', 'on', 'to', 'by', 'at', 'from', 'about']);
+const SEARCH_RELATED = [
+    ['medical', 'clinical', 'clinic', 'healthcare', 'health', 'diagnosis', 'diagnostic', 'radiology', 'radiologist', 'cancer'],
+    ['imaging', 'image', 'imagery', 'ultrasound', 'radiology', 'computer vision', 'visual'],
+    ['vision', 'computer vision', 'image', 'visual', 'detection', 'yolo'],
+    ['ml', 'machine learning', 'deep learning', 'learning'],
+    ['dl', 'deep learning', 'neural network', 'neural networks'],
+    ['ai', 'artificial intelligence'],
+    ['cv', 'computer vision'],
+    ['gnn', 'graph neural network', 'graph machine learning', 'graph learning'],
+    ['llm', 'language model', 'language models'],
+    ['nlp', 'language model', 'natural language'],
+    ['robot', 'robotic', 'robotics', 'manipulator', 'ros'],
+    ['privacy', 'eavesdropping', 'adversaries', 'security', 'encryption'],
+    ['finance', 'financial', 'esg', 'investing', 'portfolio', 'asset'],
+    ['fairness', 'bias', 'biasness'],
+    ['pruning', 'sparse', 'sparsity', 'lottery ticket', 'subnetworks'],
+    ['behaviour', 'behavior', 'gesture', 'gaze', 'social'],
+    ['talk', 'seminar', 'session', 'lecture'],
+    ['slides', 'presentation', 'pptx', 'pdf']
+];
+
+function searchWords(text) {
+    return text.split(/[^a-z0-9]+/).filter(Boolean);
+}
+
+/* Light suffix stripping so word families share a stem */
+function stemWord(word) {
+    if (word.length <= 3) return word;
+    const rules = [['ational', 'ate'], ['ization', 'ize'], ['ations', 'ate'], ['ation', 'ate'], ['ings', ''], ['ing', ''],
+        ['ies', 'y'], ['ied', 'y'], ['ery', ''], ['ity', ''], ['ment', ''], ['ers', ''], ['er', ''], ['ed', ''],
+        ['es', ''], ['ly', ''], ['s', '']];
+    for (const [suffix, replacement] of rules) {
+        if (word.endsWith(suffix) && word.length - suffix.length >= 3) {
+            word = word.slice(0, -suffix.length) + replacement;
+            break;
+        }
+    }
+    return word.length > 4 && word.endsWith('e') ? word.slice(0, -1) : word;
+}
+
+function stemsMatch(a, b) {
+    return a === b || (Math.min(a.length, b.length) >= 4 && (a.startsWith(b) || b.startsWith(a)));
+}
+
+/* Edit distance allowing insert / delete / substitute / swapped neighbours; stops early past `max` */
+function editDistance(a, b, max) {
+    if (Math.abs(a.length - b.length) > max) return max + 1;
+    let prev2 = null;
+    let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) {
+        const cur = [i];
+        let rowMin = i;
+        for (let j = 1; j <= b.length; j++) {
+            let v = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+            if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) v = Math.min(v, prev2[j - 2] + 1);
+            cur[j] = v;
+            rowMin = Math.min(rowMin, v);
+        }
+        if (rowMin > max) return max + 1;
+        prev2 = prev;
+        prev = cur;
+    }
+    return prev[b.length];
+}
+
+function escapeRegExp(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/* Whole words for short terms (so "ai" doesn't match "domain"), word starts for longer ones */
+function containsTerm(text, term) {
+    const t = escapeRegExp(term);
+    return term.length <= 3
+        ? new RegExp(`(^|[^a-z0-9])${t}([^a-z0-9]|$)`).test(text)
+        : new RegExp(`(^|[^a-z0-9])${t}`).test(text);
+}
+
+function relatedTerms(token) {
+    const stem = stemWord(token);
+    const out = new Set();
+    SEARCH_RELATED.forEach(group => {
+        const inGroup = group.some(term => term === token || (!term.includes(' ') && stemsMatch(stemWord(term), stem)));
+        if (inGroup) group.forEach(term => out.add(term));
+    });
+    out.delete(token);
+    return [...out];
+}
+
+function prepareToken(t) {
+    return { t, stem: stemWord(t), related: relatedTerms(t), maxTypos: t.length >= 8 ? 2 : t.length >= 4 ? 1 : 0 };
+}
+
+/* Typos are rarely in the first letters: whole words must share the first letter,
+   word beginnings (still being typed) the first two */
+function isTypoOf(t, word, k) {
+    if (word.length < 3 || word[0] !== t[0]) return false;
+    if (editDistance(t, word, k) <= k) return true;
+    return word.length > t.length && word[1] === t[1]
+        && (editDistance(t, word.slice(0, t.length), k) <= k || editDistance(t, word.slice(0, t.length + 1), k) <= k);
+}
+
+function matchTokenInEntry(entry, tok) {
+    let best = null;
+    const allHits = new Set(); // every matched word, from every field, for highlighting
+    for (const [field, weight] of Object.entries(SEARCH_FIELDS)) {
+        const text = entry.n[field];
+        if (!text) continue;
+        const words = entry.w[field];
+        let level = 0;
+        let hits = [];
+
+        if (tok.t.length <= 2 ? containsTerm(text, tok.t) : text.includes(tok.t)) {
+            level = containsTerm(text, tok.t) ? 1 : 0.7;
+            hits = [tok.t];
+        } else {
+            const family = tok.stem.length >= 3 ? words.filter((w, i) => stemsMatch(entry.s[field][i], tok.stem)) : [];
+            const related = family.length ? [] : tok.related.filter(r => containsTerm(text, r));
+            if (family.length) {
+                level = 0.85;
+                hits = family;
+            } else if (related.length) {
+                level = 0.6;
+                hits = related;
+            } else if (tok.maxTypos) {
+                const typos = words.filter(w => isTypoOf(tok.t, w, tok.maxTypos));
+                if (typos.length) {
+                    level = 0.5;
+                    hits = typos;
+                }
+            }
+        }
+        if (!level) continue;
+        hits.forEach(h => allHits.add(h));
+        if (!best || weight * level > best.score) best = { score: weight * level };
+    }
+    return best && { score: best.score, hits: [...allHits] };
 }
 
 function searchEntries(index, query) {
-    const tokens = normalizeText(query).split(/\s+/).filter(Boolean);
-    if (!tokens.length) return [];
-    const wordStart = (text, t) => text.startsWith(t) || text.includes(' ' + t);
+    let words = searchWords(normalizeText(query));
+    const meaningful = words.filter(w => !SEARCH_STOPWORDS.has(w));
+    if (meaningful.length) words = meaningful;
+    if (!words.length) return { items: [], partial: false };
+    const tokens = [...new Set(words)].map(prepareToken);
 
     const scored = index.map(entry => {
-        const { title, speaker, meta, body } = entry.n;
-        let score = 0;
-        for (const t of tokens) {
-            let s = 0;
-            if (title.includes(t)) s = wordStart(title, t) ? 12 : 8;
-            else if (speaker.includes(t)) s = wordStart(speaker, t) ? 10 : 6;
-            else if (meta.includes(t)) s = 5;
-            else if (body.includes(t)) s = wordStart(body, t) ? 3 : 1;
-            if (!s) return null; // every word must match somewhere
-            score += s;
-        }
-        return { entry, score: score + (entry.boost || 0) };
+        const found = tokens.map(tok => matchTokenInEntry(entry, tok)).filter(Boolean);
+        if (!found.length) return null;
+        return {
+            entry,
+            matched: found.length,
+            score: found.reduce((sum, m) => sum + m.score, 0) + (entry.boost || 0),
+            hits: [...new Set(found.flatMap(m => m.hits))]
+        };
     }).filter(Boolean);
+
+    // Prefer results containing every word; otherwise fall back to the closest partial matches
+    let pool = scored.filter(r => r.matched === tokens.length);
+    const partial = !pool.length && scored.length > 0;
+    if (partial) pool = scored.map(r => ({ ...r, score: r.score * (r.matched / tokens.length) }));
 
     // Results stay grouped by type, but the group holding the strongest match comes first
     const groupBest = {};
-    scored.forEach(r => { groupBest[r.entry.type] = Math.max(groupBest[r.entry.type] || 0, r.score); });
-    return scored
+    pool.forEach(r => { groupBest[r.entry.type] = Math.max(groupBest[r.entry.type] || 0, r.score); });
+    const items = pool
         .sort((a, b) => (groupBest[b.entry.type] - groupBest[a.entry.type])
             || (SEARCH_TYPES[a.entry.type].order - SEARCH_TYPES[b.entry.type].order)
             || (b.score - a.score))
         .slice(0, 24)
-        .map(r => r.entry);
+        .map(r => ({ ...r.entry, hits: r.hits }));
+    return { items, partial };
 }
 
 function escapeHtml(s) {
     return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-function highlightMatches(text, tokens) {
+function highlightMatches(text, terms) {
     const html = escapeHtml(text);
-    if (!tokens.length) return html;
-    const pattern = tokens.map(t => escapeHtml(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+    if (!terms.length) return html;
+    const pattern = [...terms].sort((a, b) => b.length - a.length)
+        .map(t => t.length <= 3 ? `\\b${escapeRegExp(escapeHtml(t))}\\b` : escapeRegExp(escapeHtml(t))).join('|');
     return html.replace(new RegExp(`(${pattern})`, 'gi'), '<mark>$1</mark>');
 }
 
 /* A short excerpt of the body centred on the first matching word */
-function matchSnippet(text, tokens) {
+function matchSnippet(text, terms) {
     if (!text) return '';
-    const lower = text.toLowerCase();
-    const hit = tokens.map(t => lower.indexOf(t)).filter(i => i >= 0).sort((a, b) => a - b)[0];
+    const lower = normalizeText(text);
+    const hit = terms.map(t => lower.indexOf(t)).filter(i => i >= 0).sort((a, b) => a - b)[0];
     if (hit === undefined) return text.length > 140 ? text.slice(0, 140).trim() + '…' : text;
     // Window around the hit, snapped to whole words
     let start = Math.max(0, hit - 50);
@@ -760,6 +955,38 @@ function matchSnippet(text, tokens) {
     if (start > 0) { const sp = text.indexOf(' ', start); if (sp > -1 && sp < hit) start = sp + 1; }
     if (end < text.length) { const sp = text.lastIndexOf(' ', end); if (sp > hit) end = sp; }
     return (start > 0 ? '…' : '') + text.slice(start, end).trim() + (end < text.length ? '…' : '');
+}
+
+/* Recent searches, kept only in this browser */
+const SEARCH_HISTORY_KEY = 'idoai-search-history';
+const SEARCH_HISTORY_MAX = 6;
+
+function loadSearchHistory() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY));
+        return Array.isArray(saved) ? saved.filter(q => typeof q === 'string').slice(0, SEARCH_HISTORY_MAX) : [];
+    } catch {
+        return [];
+    }
+}
+
+function saveSearchHistory(list) {
+    try {
+        if (list.length) localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(list));
+        else localStorage.removeItem(SEARCH_HISTORY_KEY);
+    } catch { /* storage blocked (private mode etc.): history just isn't kept */ }
+}
+
+function rememberSearch(query) {
+    const q = query.trim().replace(/\s+/g, ' ');
+    if (q.length < 2) return;
+    const list = loadSearchHistory().filter(item => item.toLowerCase() !== q.toLowerCase());
+    list.unshift(q);
+    saveSearchHistory(list.slice(0, SEARCH_HISTORY_MAX));
+}
+
+function forgetSearch(query) {
+    saveSearchHistory(loadSearchHistory().filter(item => item !== query));
 }
 
 function initSiteSearch() {
@@ -845,8 +1072,11 @@ function initSiteSearch() {
         if (lastFocused) lastFocused.focus();
     }
 
+    // Arrow keys move through results, or through recent searches when the box is empty
+    const navigable = () => list.querySelectorAll('.search-result, .search-history-item:not(.removing)');
+
     function setActive(i) {
-        const items = list.querySelectorAll('.search-result');
+        const items = navigable();
         items.forEach(el => el.classList.remove('active'));
         active = items.length ? (i + items.length) % items.length : -1;
         if (active >= 0) {
@@ -858,12 +1088,60 @@ function initSiteSearch() {
         }
     }
 
+    function historyHtml() {
+        const history = loadSearchHistory();
+        if (!history.length) return '';
+        return `
+            <li class="search-history">
+                <div class="search-idle-head">
+                    <span class="search-idle-title">Recent searches</span>
+                    <button type="button" class="search-history-clear">Clear all</button>
+                </div>
+                <ul class="search-history-list">
+                    ${history.map((q, i) => `
+                        <li class="search-history-item" id="search-hist-${i}" role="option" data-query="${escapeHtml(q)}" style="--i:${i}">
+                            <button type="button" class="search-history-run" tabindex="-1">
+                                <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i><span>${escapeHtml(q)}</span>
+                            </button>
+                            <button type="button" class="search-history-remove" aria-label="Remove “${escapeHtml(q)}” from recent searches">
+                                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                            </button>
+                        </li>`).join('')}
+                </ul>
+            </li>`;
+    }
+
+    function runQuery(q) {
+        input.value = q;
+        runSearch();
+        input.focus();
+    }
+
+    /* Slide one recent search out, then drop it (and the section, once empty) */
+    function removeHistoryItem(item) {
+        forgetSearch(item.dataset.query);
+        item.classList.add('removing');
+        setTimeout(() => {
+            const section = item.closest('.search-history');
+            item.remove();
+            if (section && !section.querySelector('.search-history-item')) section.remove();
+            setActive(-1);
+        }, prefersReducedMotion ? 0 : 280);
+    }
+
+    function clearHistory(section) {
+        saveSearchHistory([]);
+        section.classList.add('clearing');
+        setTimeout(() => { section.remove(); setActive(-1); }, prefersReducedMotion ? 0 : 420);
+    }
+
     function renderIdle() {
         results = [];
         active = -1;
         field.classList.remove('is-searching');
         status.textContent = '';
         list.innerHTML = `
+            ${historyHtml()}
             <li class="search-idle">
                 <div class="search-idle-title">Try searching for</div>
                 <div class="search-chips">
@@ -876,11 +1154,13 @@ function initSiteSearch() {
                     <a class="search-chip" style="--i:8" href="contact.html#propose"><i class="fa-solid fa-paper-plane"></i> Propose a talk</a>
                 </div>
             </li>`;
-        list.querySelectorAll('button.search-chip').forEach(chip => chip.addEventListener('click', () => {
-            input.value = chip.textContent;
-            runSearch();
-            input.focus();
-        }));
+        list.querySelectorAll('button.search-chip').forEach(chip => chip.addEventListener('click', () => runQuery(chip.textContent)));
+        list.querySelectorAll('.search-history-item').forEach(item => {
+            item.addEventListener('mousemove', () => {
+                const i = [...navigable()].indexOf(item);
+                if (i >= 0 && active !== i) setActive(i);
+            });
+        });
     }
 
     function renderSkeleton() {
@@ -891,8 +1171,7 @@ function initSiteSearch() {
             </li>`).join('');
     }
 
-    function render(query) {
-        const tokens = normalizeText(query).split(/\s+/).filter(Boolean);
+    function render(query, partial) {
         input.setAttribute('aria-expanded', String(results.length > 0));
 
         if (!results.length) {
@@ -906,10 +1185,12 @@ function initSiteSearch() {
             return;
         }
 
-        status.textContent = `${results.length} result${results.length === 1 ? '' : 's'}`;
+        const count = `${results.length} result${results.length === 1 ? '' : 's'}`;
+        status.textContent = partial ? `No result has every word. Showing the closest ${count}` : count;
         let html = '';
         let lastType = null;
         results.forEach((r, i) => {
+            const tokens = r.hits;
             if (r.type !== lastType) {
                 html += `<li class="search-group" role="presentation" style="--i:${i}">${SEARCH_TYPES[r.type].label}</li>`;
                 lastType = r.type;
@@ -948,9 +1229,10 @@ function initSiteSearch() {
         debounce = setTimeout(async () => {
             const index = await loadIndex();
             if (input.value.trim() !== query) return; // a newer keystroke took over
-            results = searchEntries(index, query);
+            const { items, partial } = searchEntries(index, query);
+            results = items;
             field.classList.remove('is-searching');
-            render(query);
+            render(query, partial);
         }, prefersReducedMotion ? 0 : 220);
     }
 
@@ -958,6 +1240,7 @@ function initSiteSearch() {
         const url = new URL(link.href, location.href);
         const samePage = url.pathname === location.pathname
             || (url.pathname.split('/').pop() === currentPageName());
+        if (input.value.trim()) rememberSearch(input.value);
         closeSearch();
         if (samePage && url.hash) {
             if (location.hash === url.hash) revealHashTarget();
@@ -974,6 +1257,23 @@ function initSiteSearch() {
     input.addEventListener('input', runSearch);
 
     list.addEventListener('click', (e) => {
+        const removeBtn = e.target.closest('.search-history-remove');
+        if (removeBtn) {
+            removeHistoryItem(removeBtn.closest('.search-history-item'));
+            input.focus();
+            return;
+        }
+        const clearBtn = e.target.closest('.search-history-clear');
+        if (clearBtn) {
+            clearHistory(clearBtn.closest('.search-history'));
+            input.focus();
+            return;
+        }
+        const historyItem = e.target.closest('.search-history-item');
+        if (historyItem) {
+            runQuery(historyItem.dataset.query);
+            return;
+        }
         const link = e.target.closest('a');
         if (!link) return;
         e.preventDefault();
@@ -981,18 +1281,27 @@ function initSiteSearch() {
     });
 
     input.addEventListener('keydown', (e) => {
+        const current = navigable()[active];
         if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); }
         else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }
         else if (e.key === 'Enter') {
-            const link = list.querySelectorAll('.search-result')[active]?.querySelector('a');
+            if (current?.classList.contains('search-history-item')) {
+                e.preventDefault();
+                runQuery(current.dataset.query);
+                return;
+            }
+            const link = current?.querySelector('a');
             if (link) { e.preventDefault(); go(link); }
+        } else if (e.key === 'Delete' && current?.classList.contains('search-history-item')) {
+            e.preventDefault();
+            removeHistoryItem(current); // Delete key removes the highlighted recent search
         }
     });
 
     // Keep Tab inside the dialog
     panel.addEventListener('keydown', (e) => {
         if (e.key !== 'Tab') return;
-        const focusables = [input, ...panel.querySelectorAll('.search-chip'), closeBtn];
+        const focusables = [input, ...panel.querySelectorAll('.search-history-clear, .search-history-remove, .search-chip'), closeBtn];
         const i = focusables.indexOf(document.activeElement);
         e.preventDefault();
         focusables[(i + (e.shiftKey ? -1 : 1) + focusables.length) % focusables.length].focus();
