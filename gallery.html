@@ -4,12 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <script>
+        /* Runs before the page is drawn, so the theme and lite mode never flash */
         (function () {
-            const savedTheme = localStorage.getItem('idoai-theme');
+            var root = document.documentElement;
+            var savedTheme = null;
+            try { savedTheme = localStorage.getItem('idoai-theme'); } catch (e) { /* storage blocked */ }
             if (savedTheme) {
-                document.documentElement.setAttribute('data-theme', savedTheme);
+                root.setAttribute('data-theme', savedTheme);
             } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-                document.documentElement.setAttribute('data-theme', 'light');
+                root.setAttribute('data-theme', 'light');
+            }
+            // Lighter build for low-end devices (few cores / little memory / Data Saver); ?lite previews it
+            var cores = navigator.hardwareConcurrency || 8;
+            var memory = navigator.deviceMemory;
+            var saveData = navigator.connection && navigator.connection.saveData;
+            if (/[?&]lite\b/.test(location.search) || saveData || cores <= 2
+                || (memory !== undefined && (memory <= 2 || (memory <= 4 && cores <= 4)))) {
+                root.classList.add('lite');
             }
         })();
     </script>
@@ -81,8 +92,13 @@
             </nav>
 
             <div class="nav-actions">
+                <button type="button" class="search-trigger" aria-label="Search the site (Ctrl+K)" aria-haspopup="dialog">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    <span class="search-trigger-label">Search</span><kbd class="search-trigger-kbd">Ctrl K</kbd>
+                </button>
                 <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
-                    <i class="fa-solid fa-moon"></i>
+                    <i class="fa-solid fa-sun theme-icon-sun" aria-hidden="true"></i>
+                    <i class="fa-solid fa-moon theme-icon-moon" aria-hidden="true"></i>
                 </button>
                 <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Open menu">
                     <span class="hamburger" aria-hidden="true"><span></span><span></span><span></span></span>
@@ -121,7 +137,7 @@
                  data-title="Learning the ESG Geometry with Domain-Aware Language Models"
                  data-date="15 Sep 2026"
                  data-venue="CRR Classroom, Dept. of Artificial Intelligence, IIT Kharagpur">
-                <img src="gallery_image/MMMR_ICL_2026.jpg" alt="Dr. Mahesh Mohan M R &bull; Seminar Session (15 Sep 2026)" loading="lazy">
+                <img src="gallery_image/MMMR_ICL_2026.jpg" alt="Dr. Mahesh Mohan M R &bull; Seminar Session (15 Sep 2026)" loading="lazy" decoding="async">
                 
                 <!-- Subtle corner badge: Name and Date in small font -->
                 <div class="gallery-corner-tag">
@@ -161,6 +177,7 @@
                     <ul class="footer-links">
                         <li><a href="index.html">Home</a></li>
                         <li><a href="events.html">Event Details</a></li>
+                        <li><a href="events.html#archive-2024">Archive Seminars</a></li>
                         <li><a href="gallery.html">Photo Gallery</a></li>
                         <li><a href="contact.html">Contact</a></li>
                     </ul>

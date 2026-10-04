@@ -39,7 +39,7 @@
     --transition-fast: 0.2s ease;
     --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-    --header-height: 76px;
+    --header-height: 4.75rem;
 }
 
 [data-theme="light"] {
@@ -192,7 +192,7 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 76px;
+    height: var(--header-height);
 }
 
 .brand-logo {
@@ -203,7 +203,7 @@ a:hover {
 }
 
 .brand-logo img {
-    height: 42px;
+    height: 2.625rem;
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
@@ -291,6 +291,7 @@ a:hover {
     view-transition-name: nav-indicator;
 }
 
+/* Underline grows softly from the centre as the page opens */
 .nav-indicator::after {
     content: '';
     position: absolute;
@@ -300,58 +301,21 @@ a:hover {
     height: 2px;
     border-radius: 2px;
     background: var(--primary-gradient);
+    transform-origin: center;
+    animation: underlineIn 0.9s cubic-bezier(0.25, 0.8, 0.25, 1) 0.25s backwards;
 }
 
-/* Hover pill that glides between tabs (desktop only; element added by js/main.js) */
-.nav-hover-pill {
-    display: none;
+@keyframes underlineIn {
+    from {
+        opacity: 0;
+        transform: scaleX(0);
+    }
 }
 
 @media (min-width: 901px) {
-    .nav-menu {
-        position: relative;
-    }
-
-    .nav-menu li {
-        position: relative;
-        z-index: 1;
-    }
-
-    .nav-menu .nav-hover-pill {
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 0;
-        width: var(--w, 0);
-        height: var(--h, 0);
-        transform: translate(var(--x, 0), var(--y, 0));
-        border-radius: var(--radius-sm);
-        background: color-mix(in srgb, var(--primary) 16%, transparent);
-        border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
-        box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--primary) 60%, transparent);
-        opacity: 0;
-        pointer-events: none;
-        transition: transform 0.4s var(--ease-out-expo), width 0.4s var(--ease-out-expo), opacity 0.2s ease;
-    }
-
-    .nav-menu .nav-hover-pill.visible {
-        opacity: 1;
-    }
-
-    /* Over the current tab the active pill is already there */
-    .nav-menu .nav-hover-pill.on-active {
-        opacity: 0;
-    }
-
-    /* First appearance: show in place instead of sliding in from the last spot */
-    .nav-menu .nav-hover-pill.no-slide {
-        transition: opacity 0.2s ease;
-    }
-
+    /* Hover: a soft background fades in on the tab itself */
     .nav-link:not(.active):hover {
-        background: transparent;
-        transform: translateY(-1px);
+        background: var(--glass-border);
     }
 
     .nav-link.active > span:not(.nav-indicator) {
@@ -374,8 +338,8 @@ a:hover {
     background: var(--bg-card);
     border: 1px solid var(--glass-border);
     color: var(--text-main);
-    width: 42px;
-    height: 42px;
+    width: 2.625rem;
+    height: 2.625rem;
     border-radius: var(--radius-full);
     display: flex;
     align-items: center;
@@ -394,6 +358,16 @@ a:hover {
 
 .theme-toggle-btn i {
     transition: transform 0.5s var(--ease-out-expo);
+}
+
+/* Both icons are in the HTML; the theme picks one before the first paint (no icon flicker) */
+.theme-icon-moon,
+[data-theme="light"] .theme-icon-sun {
+    display: none;
+}
+
+[data-theme="light"] .theme-icon-moon {
+    display: inline-block;
 }
 
 .theme-toggle-btn:hover i {
@@ -473,8 +447,8 @@ a:hover {
 
 /* Hero Section */
 .hero-section {
-    padding-top: 150px;
-    padding-bottom: 70px;
+    padding-top: 9.375rem;
+    padding-bottom: 4.375rem;
     position: relative;
     text-align: center;
 }
@@ -520,7 +494,7 @@ a:hover {
 }
 
 .hero-title {
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-size: clamp(2rem, 1.2rem + 4.5vw, 4.5rem);
     font-weight: 800;
     margin-bottom: 1rem;
     letter-spacing: -0.03em;
@@ -574,7 +548,7 @@ a:hover {
 
 .hero-description {
     font-size: 1.25rem;
-    max-width: 780px;
+    max-width: 48.75rem;
     margin: 0 auto 2.5rem;
     color: var(--text-muted);
 }
@@ -637,14 +611,13 @@ a:hover {
 /* Stat Cards Banner */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
     gap: 1.5rem;
     margin-top: 2rem;
 }
 
 .stat-card {
     background: var(--bg-surface);
-    backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
     padding: 1.5rem;
@@ -693,7 +666,6 @@ a:hover {
 
 .featured-card {
     background: var(--bg-surface);
-    backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     padding: 2.5rem;
@@ -872,7 +844,6 @@ a:hover {
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     padding: 3rem;
-    backdrop-filter: blur(12px);
 }
 
 .about-grid {
@@ -938,7 +909,7 @@ a:hover {
     min-width: 280px;
 }
 
-.search-input-wrapper i {
+.search-input-wrapper > i {
     position: absolute;
     left: 16px;
     top: 50%;
@@ -961,6 +932,101 @@ a:hover {
 .search-input:focus {
     border-color: var(--primary);
     box-shadow: var(--glow-shadow);
+}
+
+/* With fewer than 4 photos the filter buttons are hidden before the first paint, so the grid
+   never jumps up (js/main.js applies the same rule for browsers without :has) */
+.controls-bar:has(+ .gallery-grid):not(:has(+ .gallery-grid > .filterable-item:nth-child(4))) {
+    display: none;
+}
+
+/* Archive search: clear button, "searching" sweep, result count, empty state, highlights */
+.search-input-wrapper .search-input {
+    padding-right: 44px;
+}
+
+.archive-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-50%) scale(0.7);
+    transition: opacity 0.2s ease, transform 0.25s var(--ease-out-expo), visibility 0.2s,
+        background var(--transition-fast), color var(--transition-fast);
+}
+
+.search-input-wrapper.has-value .archive-clear {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%);
+}
+
+.archive-clear:hover {
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+}
+
+.search-input-wrapper .archive-progress {
+    left: 14px;
+    right: 14px;
+    bottom: 0;
+}
+
+.search-input-wrapper.is-searching .archive-progress {
+    opacity: 1;
+}
+
+.search-input-wrapper.is-searching .archive-progress::before {
+    animation: searchSweep 0.9s ease-in-out infinite;
+}
+
+.archive-status {
+    margin: -1.25rem 0 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-dim);
+}
+
+.archive-status:empty {
+    display: none;
+}
+
+.archive-empty[hidden] {
+    display: none;
+}
+
+.archive-empty {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--text-muted);
+    animation: searchItemIn 0.4s var(--ease-out-expo) backwards;
+}
+
+.archive-empty p {
+    margin-top: 4px;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+}
+
+mark.find-hit {
+    background: color-mix(in srgb, var(--primary) 28%, transparent);
+    color: inherit;
+    border-radius: 3px;
+    padding: 0 2px;
+}
+
+/* Cards that come back into view when the filter changes */
+.filter-in {
+    animation: searchItemIn 0.4s var(--ease-out-expo) backwards;
+    animation-delay: calc(min(var(--i, 0), 8) * 40ms);
 }
 
 .category-pills {
@@ -998,7 +1064,6 @@ a:hover {
 
 .event-card {
     background: var(--bg-surface);
-    backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
     overflow: hidden;
@@ -1203,7 +1268,7 @@ span.resource-btn:hover {
 /* Gallery Photos & Cards */
 .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
     gap: 1.75rem;
 }
 
@@ -1215,7 +1280,6 @@ span.resource-btn:hover {
     cursor: pointer;
     border: 1px solid var(--glass-border);
     background: var(--bg-surface);
-    backdrop-filter: blur(12px);
     transition: all var(--transition-normal);
     box-shadow: var(--card-shadow);
 }
@@ -1333,13 +1397,12 @@ span.resource-btn:hover {
 /* Member Card Grid & Card Template */
 .members-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr));
     gap: 2rem;
 }
 
 .member-card {
     background: var(--bg-surface);
-    backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     padding: 2.25rem 1.5rem 1.75rem;
@@ -1779,7 +1842,6 @@ span.resource-btn:hover {
     padding: 0.85rem 1.5rem;
     background: rgba(15, 23, 42, 0.88);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(16px);
     border-radius: var(--radius-md);
     text-align: center;
     max-width: 850px;
@@ -1885,6 +1947,7 @@ span.resource-btn:hover {
         top: var(--header-height);
         left: 0;
         width: 100%;
+        max-height: calc(100vh - var(--header-height));
         max-height: calc(100dvh - var(--header-height));
         overflow-y: auto;
         background: var(--nav-solid);
@@ -2210,7 +2273,7 @@ span.resource-btn:hover {
         padding: 10px 14px 10px 40px;
     }
 
-    .search-input-wrapper i {
+    .search-input-wrapper > i {
         left: 14px;
     }
 
@@ -2471,8 +2534,8 @@ span.resource-btn:hover {
    Site-wide Search (button + command-palette dialog, built by js/main.js)
    ========================================================================== */
 .search-trigger {
-    height: 42px;
-    width: 42px;
+    height: 2.625rem;
+    width: 2.625rem;
     padding: 0;
     border-radius: var(--radius-full);
     background: var(--bg-card);
@@ -2521,7 +2584,7 @@ span.resource-btn:hover {
 @media (min-width: 1100px) {
     .search-trigger {
         width: auto;
-        min-width: 180px;
+        min-width: 11.25rem;
         padding: 0 10px 0 16px;
         justify-content: flex-start;
     }
@@ -3179,6 +3242,7 @@ body.search-open {
     }
 
     .search-panel {
+        max-height: calc(100vh - 1.5rem);
         max-height: calc(100dvh - 1.5rem);
     }
 
@@ -3220,10 +3284,10 @@ body.search-open {
     animation-duration: 0.3s;
 }
 
-/* Active tab pill glides (with a slight spring) to the newly selected link */
+/* Active tab pill slides smoothly to the newly selected link */
 ::view-transition-group(nav-indicator) {
-    animation-duration: 0.55s;
-    animation-timing-function: cubic-bezier(0.34, 1.35, 0.64, 1);
+    animation-duration: 0.4s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     /* The moving pill is drawn above the header; blending keeps the tab labels it passes readable */
     mix-blend-mode: screen;
 }
@@ -3269,6 +3333,258 @@ body.search-open {
 @media (prefers-reduced-motion: reduce) {
     @view-transition {
         navigation: none;
+    }
+}
+
+/* ==========================================================================
+   Responsive Fine-Tuning (small phones → tablets → ultra-wide)
+   ========================================================================== */
+
+/* Headings break into balanced lines (no lone last word) and never overflow narrow screens */
+h1,
+h2,
+h3 {
+    text-wrap: balance;
+    overflow-wrap: break-word;
+}
+
+/* Comfortable reading width (~60–85 characters per line) on wide screens */
+.drawer-abstract,
+.abstract-box p {
+    max-width: 85ch;
+}
+
+.section-subtitle,
+.about-text {
+    max-width: 70ch;
+}
+
+/* Touch screens: tap targets of ~40px */
+@media (pointer: coarse), (max-width: 900px) {
+    .btn-sm {
+        min-height: 40px;
+        padding: 8px 16px;
+    }
+
+    .pill-btn {
+        min-height: 38px;
+    }
+
+    .resource-btn {
+        min-height: 40px;
+    }
+
+    .speaker-profile-badge {
+        padding: 8px 12px;
+    }
+
+    /* Bigger hit area for speaker links without changing the layout */
+    .speaker-profile-link {
+        padding: 8px 0;
+        margin: -8px 0;
+    }
+}
+
+/* Tablets and phones: two-column footer instead of one long stack */
+@media (max-width: 900px) {
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem 1.5rem;
+    }
+
+    .footer-brand {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        padding-top: 7.5rem;
+        padding-bottom: 3rem;
+    }
+
+    .hero-description {
+        font-size: 1.1rem;
+    }
+
+    .hero-buttons {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Tablets: talk link chips sit side by side; they stack full-width only on phones */
+@media (min-width: 601px) and (max-width: 768px) {
+    .resource-links {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .resource-btn {
+        width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section {
+        padding-top: 6.5rem;
+    }
+
+    .hero-description {
+        font-size: 1rem;
+    }
+}
+
+/* Small phones (≤360px): tighter header so logo + three buttons always fit */
+@media (max-width: 360px) {
+    .container {
+        padding: 0 0.85rem;
+    }
+
+    .brand-logo {
+        gap: 8px;
+    }
+
+    .brand-logo img {
+        height: 32px;
+    }
+
+    .brand-title {
+        font-size: 1.15rem;
+    }
+
+    .search-trigger,
+    .theme-toggle-btn,
+    .mobile-menu-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    .nav-actions {
+        gap: 0.35rem;
+    }
+}
+
+/* Phones: footer stacks so the Connect labels don't wrap in a narrow column */
+@media (max-width: 480px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 350px) {
+    .brand-subtitle {
+        display: none;
+    }
+}
+
+/* Large and ultra-wide screens: wider content and proportionally larger type/spacing
+   (sizes are in rem, so raising the root size scales the whole layout evenly) */
+@media (min-width: 1680px) {
+    html {
+        font-size: 17px;
+    }
+
+    .container {
+        max-width: 1320px;
+    }
+}
+
+@media (min-width: 2200px) {
+    html {
+        font-size: 19px;
+    }
+
+    .container {
+        max-width: 1480px;
+    }
+}
+
+@media (min-width: 3200px) {
+    html {
+        font-size: 22px;
+    }
+
+    .container {
+        max-width: 1720px;
+    }
+}
+
+/* ==========================================================================
+   Performance & Older Browsers
+   ========================================================================== */
+
+/* Lighter build for low-end devices (html.lite is set by js/main.js):
+   blur is the most expensive effect on weak GPUs, so swap it for solid backgrounds */
+html.lite .site-header,
+html.lite .search-modal,
+html.lite .lightbox-modal,
+html.lite .nav-backdrop,
+html.lite .gallery-overlay,
+html.lite .gallery-corner-tag,
+html.lite .poster-overlay {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+html.lite .site-header {
+    background: var(--nav-solid);
+}
+
+html.lite .search-modal {
+    background: rgba(5, 8, 15, 0.82);
+}
+
+html.lite .lightbox-modal {
+    background: rgba(10, 13, 20, 0.97);
+}
+
+html.lite .nav-backdrop {
+    background: rgba(5, 8, 15, 0.65);
+}
+
+html.lite .gallery-overlay {
+    background: rgba(10, 15, 26, 0.75);
+}
+
+/* No endlessly repainting animations */
+html.lite .hero-title .text-gradient {
+    animation: none;
+}
+
+/* Browsers without backdrop blur would show page text through the translucent header */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .site-header {
+        background: var(--nav-solid);
+    }
+}
+
+/* Browsers without color-mix() (before 2023) still get visible highlights and active states */
+@supports not (color: color-mix(in srgb, red 50%, blue)) {
+    .search-results mark,
+    mark.find-hit {
+        background: rgba(139, 92, 246, 0.3);
+    }
+
+    .search-result.active a,
+    .search-history-item.active {
+        background: rgba(139, 92, 246, 0.14);
+    }
+
+    .search-result-icon,
+    .connect-icon {
+        background: rgba(139, 92, 246, 0.14);
+        border-color: rgba(139, 92, 246, 0.3);
+    }
+
+    .search-empty-icon {
+        background: rgba(139, 92, 246, 0.12);
+    }
+
+    @media (max-width: 900px) {
+        .nav-link.active {
+            background: rgba(139, 92, 246, 0.14);
+        }
     }
 }
 

@@ -15,11 +15,23 @@ document.addEventListener('DOMContentLoaded', () => {
     initRevealOnScroll();
     assignSearchAnchors(document);
     initSiteSearch();
-    revealHashTarget();
-    window.addEventListener('hashchange', revealHashTarget);
+    revealHashTarget(true);
+    window.addEventListener('hashchange', () => revealHashTarget());
 });
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* Low-end devices get a lighter build: no glass blur, no looping or scroll-in animations,
+   no page transitions. Detected by the inline script in each page's <head> (before first paint). */
+const isLiteMode = document.documentElement.classList.contains('lite');
+
+if (isLiteMode) {
+    // Cancel the cross-page animation before it starts (fired on the page being left)
+    window.addEventListener('pageswap', (e) => { if (e.viewTransition) e.viewTransition.skipTransition(); });
+}
+
+/* How this page was reached: 'navigate', 'reload' or 'back_forward' */
+const navigationType = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0] || {}).type || 'navigate';
 
 /* ==========================================================================
    1. Theme Switcher (Dark & Light Mode)
@@ -38,24 +50,16 @@ function initThemeToggle() {
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         
         document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('idoai-theme', newTheme);
+        try { localStorage.setItem('idoai-theme', newTheme); } catch { /* storage blocked: theme lasts this page only */ }
         updateThemeIcon(newTheme);
     });
 }
 
+/* The sun/moon icon itself is switched by CSS from data-theme; this keeps the tooltip in step */
 function updateThemeIcon(theme) {
     const themeBtn = document.getElementById('theme-toggle');
     if (!themeBtn) return;
-    const icon = themeBtn.querySelector('i');
-    if (icon) {
-        if (theme === 'dark') {
-            icon.className = 'fa-solid fa-sun';
-            themeBtn.setAttribute('title', 'Switch to Light Mode');
-        } else {
-            icon.className = 'fa-solid fa-moon';
-            themeBtn.setAttribute('title', 'Switch to Dark Mode');
-        }
-    }
+    themeBtn.setAttribute('title', theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode');
 }
 
 /* ==========================================================================
@@ -108,44 +112,6 @@ function initMobileNav() {
     // Don't leave the page scroll-locked if the screen grows to desktop width
     window.matchMedia('(min-width: 901px)').addEventListener('change', (e) => {
         if (e.matches) setMenuOpen(false);
-    });
-
-    initNavHoverPill(navMenu);
-}
-
-/* Desktop: a highlight pill that glides to whichever tab is hovered or focused */
-function initNavHoverPill(navMenu) {
-    const desktop = window.matchMedia('(min-width: 901px)');
-    const pill = document.createElement('li');
-    pill.className = 'nav-hover-pill';
-    pill.setAttribute('aria-hidden', 'true');
-    navMenu.appendChild(pill);
-
-    function moveTo(link) {
-        if (!desktop.matches) return;
-        const menuBox = navMenu.getBoundingClientRect();
-        const box = link.getBoundingClientRect();
-        const appearing = !pill.classList.contains('visible');
-        if (appearing) pill.classList.add('no-slide');
-        pill.style.setProperty('--x', `${box.left - menuBox.left}px`);
-        pill.style.setProperty('--y', `${box.top - menuBox.top}px`);
-        pill.style.setProperty('--w', `${box.width}px`);
-        pill.style.setProperty('--h', `${box.height}px`);
-        pill.classList.toggle('on-active', link.classList.contains('active'));
-        if (appearing) {
-            void pill.offsetWidth; // commit the position before re-enabling the slide
-            pill.classList.remove('no-slide');
-        }
-        pill.classList.add('visible');
-    }
-
-    navMenu.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('mouseenter', () => moveTo(link));
-        link.addEventListener('focus', () => moveTo(link));
-    });
-    navMenu.addEventListener('mouseleave', () => pill.classList.remove('visible'));
-    navMenu.addEventListener('focusout', (e) => {
-        if (!navMenu.contains(e.relatedTarget)) pill.classList.remove('visible');
     });
 }
 
@@ -207,29 +173,139 @@ function initSearchAndFilter() {
         if (bar && !bar.querySelector('.search-input')) bar.style.display = 'none';
     }
 
+    // Same matching as the site search (word families, related terms, typos), built from each card's text
+    const searchable = searchInput ? [...filterableItems].map(item => prepareSearchEntry({
+        title: cleanText(item.querySelector('.event-topic')) || item.dataset.title || '',
+        speaker: cleanText(item.querySelector('.event-speaker')) || item.dataset.speaker || '',
+        meta: cleanText(item.querySelector('.event-date-badge')) || item.dataset.date || '',
+        tags: item.dataset.category || '',
+        body: cleanText(item.querySelector('.drawer-abstract')) || item.dataset.venue || ''
+    })) : [];
+
+    let status = null;
+    let empty = null;
+    let wrapper = null;
+    if (searchInput) {
+        wrapper = searchInput.closest('.search-input-wrapper');
+
+        // Clear (×) button inside the box, shown once something is typed
+        const clearBtn = document.createElement('button');
+        clearBtn.type = 'button';
+        clearBtn.className = 'archive-clear';
+        clearBtn.setAttribute('aria-label', 'Clear search');
+        clearBtn.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+        clearBtn.addEventListener('click', () => { searchInput.value = ''; onInput(); searchInput.focus(); });
+        wrapper.appendChild(clearBtn);
+        wrapper.insertAdjacentHTML('beforeend', '<span class="search-progress archive-progress" aria-hidden="true"></span>');
+
+        status = document.createElement('p');
+        status.className = 'archive-status';
+        status.setAttribute('aria-live', 'polite');
+        searchInput.closest('.controls-bar').after(status);
+
+        empty = document.createElement('div');
+        empty.className = 'archive-empty';
+        empty.hidden = true;
+        filterableItems[0]?.parentElement.after(empty);
+    }
+
+    /* Wraps matched words in <mark> inside a card, leaving its markup intact */
+    function highlightIn(item, hits) {
+        item.querySelectorAll('mark.find-hit').forEach(m => m.replaceWith(m.textContent));
+        item.normalize();
+        if (!hits.length) return;
+        const pattern = new RegExp(`(${[...hits].sort((a, b) => b.length - a.length)
+            .map(h => h.length <= 3 ? `\\b${escapeRegExp(h)}\\b` : escapeRegExp(h)).join('|')})`, 'gi');
+        item.querySelectorAll('.event-topic, .event-speaker a, .drawer-abstract').forEach(root => {
+            const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+            const nodes = [];
+            while (walker.nextNode()) nodes.push(walker.currentNode);
+            nodes.forEach(node => {
+                if (!pattern.test(node.nodeValue)) return;
+                pattern.lastIndex = 0;
+                const frag = document.createElement('span');
+                frag.innerHTML = escapeHtml(node.nodeValue).replace(pattern, '<mark class="find-hit">$1</mark>');
+                node.replaceWith(...frag.childNodes);
+            });
+        });
+    }
+
     function filterItems() {
-        filterableItems.forEach(item => {
-            const rawCategory = item.dataset.category || 'all';
-            const categories = rawCategory.toLowerCase().split(/[\s,]+/).filter(Boolean);
-            const textContent = item.textContent.toLowerCase();
+        const tokens = searchInput ? queryTokens(currentSearchQuery) : [];
+        const rows = [...filterableItems].map((item, i) => {
+            const categories = (item.dataset.category || 'all').toLowerCase().split(/[\s,]+/).filter(Boolean);
+            const inCategory = currentCategory === 'all' || categories.includes(currentCategory.toLowerCase());
+            const found = tokens.map(tok => matchTokenInEntry(searchable[i], tok)).filter(Boolean);
+            return { item, inCategory, matched: found.length, hits: [...new Set(found.flatMap(m => m.hits))] };
+        });
 
-            const matchesCategory = (currentCategory === 'all' || categories.includes(currentCategory.toLowerCase()));
-            const matchesSearch = textContent.includes(currentSearchQuery.toLowerCase());
+        // Prefer talks containing every word; otherwise show the closest partial matches
+        const inScope = rows.filter(r => r.inCategory);
+        const full = inScope.filter(r => r.matched === tokens.length);
+        const partial = tokens.length > 0 && !full.length && inScope.some(r => r.matched > 0);
+        const showRow = r => r.inCategory && (partial ? r.matched > 0 : r.matched === tokens.length);
 
-            if (matchesCategory && matchesSearch) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
+        let shown = 0;
+        rows.forEach(r => {
+            const show = showRow(r);
+            const wasHidden = r.item.style.display === 'none';
+            r.item.style.display = show ? '' : 'none';
+            if (searchInput) highlightIn(r.item, show && tokens.length ? r.hits : []);
+            if (!show) return;
+            shown++;
+            if (wasHidden && !prefersReducedMotion) {
+                // Fade back in, skipping any pending scroll-reveal so it isn't left invisible
+                r.item.classList.remove('reveal', 'is-visible', 'filter-in');
+                void r.item.offsetWidth;
+                r.item.style.setProperty('--i', String(shown - 1));
+                r.item.classList.add('filter-in');
+            }
+        });
+
+        if (!status) return;
+        const total = inScope.length;
+        if (!tokens.length) status.textContent = '';
+        else if (partial) status.textContent = `No talk has every word. Showing the closest ${shown} of ${total}.`;
+        else status.textContent = `Showing ${shown} of ${total} talk${total === 1 ? '' : 's'}`;
+
+        empty.hidden = shown > 0;
+        if (!shown) {
+            empty.innerHTML = `
+                <span class="search-empty-icon"><i class="fa-regular fa-face-meh-blank"></i></span>
+                <div>No talks match “<strong>${escapeHtml(currentSearchQuery.trim())}</strong>”</div>
+                <p>Try a speaker name or a topic like “graph”, or clear the search.</p>`;
+        }
+    }
+
+    let debounce = null;
+    function onInput() {
+        currentSearchQuery = searchInput.value;
+        wrapper.classList.toggle('has-value', !!searchInput.value);
+        wrapper.classList.add('is-searching');
+        clearTimeout(debounce);
+        debounce = setTimeout(() => {
+            wrapper.classList.remove('is-searching');
+            filterItems();
+        }, prefersReducedMotion ? 0 : 160);
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', onInput);
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && searchInput.value) {
+                e.stopPropagation();
+                searchInput.value = '';
+                onInput();
             }
         });
     }
 
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            currentSearchQuery = e.target.value;
-            filterItems();
-        });
-    }
+    filterableItems.forEach(item => item.addEventListener('animationend', (e) => {
+        if (e.animationName === 'searchItemIn') item.classList.remove('filter-in');
+    }));
+
+    // A browser that restores the typed text on reload / back gets a matching filter, not a stale list
+    if (searchInput && searchInput.value) onInput();
 
     categoryBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -509,7 +585,9 @@ function initScrollEffects() {
    9. Reveal-on-Scroll Animations
    ========================================================================== */
 function initRevealOnScroll() {
-    if (prefersReducedMotion || !('IntersectionObserver' in window)) return;
+    if (prefersReducedMotion || isLiteMode || !('IntersectionObserver' in window)) return;
+    // On reload / back-forward the browser restores the scroll position; fading content in there would flicker
+    if (navigationType !== 'navigate' || location.hash) return;
 
     const selectors = [
         '.section-title',
@@ -524,8 +602,11 @@ function initRevealOnScroll() {
     ];
     const targets = document.querySelectorAll(selectors.join(','));
 
-    // Stagger siblings in the same list/grid (capped so long lists don't lag)
+    // Stagger siblings in the same list/grid (capped so long lists don't lag).
+    // Anything already on screen stays as painted: hiding it to fade it back in would flicker.
+    const fold = window.innerHeight;
     targets.forEach(el => {
+        if (el.getBoundingClientRect().top < fold) return;
         const siblings = Array.from(el.parentElement.children).filter(c => c.matches(selectors.join(',')));
         const index = siblings.indexOf(el);
         el.style.setProperty('--reveal-delay', `${Math.min(index, 5) * 0.08}s`);
@@ -548,7 +629,7 @@ function initRevealOnScroll() {
         });
     }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
 
-    targets.forEach(el => observer.observe(el));
+    targets.forEach(el => { if (el.classList.contains('reveal')) observer.observe(el); });
 }
 
 /* ==========================================================================
@@ -608,7 +689,8 @@ function assignSearchAnchors(doc) {
 }
 
 /* Scrolls to #anchor targets (from search results), expanding talk cards and flashing a highlight */
-function revealHashTarget() {
+/* `onLoad`: the page was opened with this #hash, so jump straight there (no visible scroll from the top) */
+function revealHashTarget(onLoad = false) {
     const id = decodeURIComponent(location.hash.slice(1));
     if (!id) return;
     const target = document.getElementById(id);
@@ -621,14 +703,33 @@ function revealHashTarget() {
         target.classList.add('expanded');
         target.querySelector('.event-summary')?.setAttribute('aria-expanded', 'true');
     }
+    // Glow a card, not a whole section (sections glow their main card, if they have one)
+    const glow = target.matches('.event-card, .member-card, .gallery-item')
+        ? target : target.querySelector('.featured-card, .about-card');
+
+    // Reload / back-forward: the browser restores the scroll position itself, so don't jump or glow
+    if (onLoad && navigationType !== 'navigate') return;
+
+    if (onLoad) {
+        // Jump now, and again once web fonts have settled the layout (only if the visitor hasn't scrolled since)
+        target.scrollIntoView({ behavior: 'instant', block: 'start' });
+        const landedAt = window.scrollY;
+        if (document.fonts) {
+            document.fonts.ready.then(() => {
+                if (Math.abs(window.scrollY - landedAt) < 4) target.scrollIntoView({ behavior: 'instant', block: 'start' });
+            });
+        }
+    }
+
     // Let layout (fonts, the expanding drawer) settle before scrolling
     setTimeout(() => {
-        target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
-        target.classList.remove('search-hit');
-        void target.offsetWidth; // restart the highlight if it already ran
-        target.classList.add('search-hit');
-        target.addEventListener('animationend', (e) => {
-            if (e.animationName === 'searchHit') target.classList.remove('search-hit');
+        if (!onLoad) target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+        if (!glow) return;
+        glow.classList.remove('search-hit');
+        void glow.offsetWidth; // restart the highlight if it already ran
+        glow.classList.add('search-hit');
+        glow.addEventListener('animationend', (e) => {
+            if (e.animationName === 'searchHit') glow.classList.remove('search-hit');
         });
     }, 120);
 }
@@ -734,20 +835,23 @@ async function buildSearchIndex() {
         }
     }));
 
-    return docs.filter(Boolean).flatMap(([page, doc]) => buildEntriesFromDoc(doc, page)).map(e => {
-        const n = {
-            title: normalizeText(e.title),
-            speaker: normalizeText(e.speaker),
-            meta: normalizeText(`${e.meta} ${e.tags || ''}`),
-            body: normalizeText(e.body)
-        };
-        const w = {}, s = {};
-        for (const field of Object.keys(n)) {
-            w[field] = searchWords(n[field]);
-            s[field] = w[field].map(stemWord);
-        }
-        return { ...e, n, w, s };
-    });
+    return docs.filter(Boolean).flatMap(([page, doc]) => buildEntriesFromDoc(doc, page)).map(prepareSearchEntry);
+}
+
+/* Adds the normalized text, words and word stems the matcher works on */
+function prepareSearchEntry(e) {
+    const n = {
+        title: normalizeText(e.title),
+        speaker: normalizeText(e.speaker),
+        meta: normalizeText(`${e.meta || ''} ${e.tags || ''}`),
+        body: normalizeText(e.body)
+    };
+    const w = {}, s = {};
+    for (const field of Object.keys(n)) {
+        w[field] = searchWords(n[field]);
+        s[field] = w[field].map(stemWord);
+    }
+    return { ...e, n, w, s };
 }
 
 /* --------------------------------------------------------------------------
@@ -896,12 +1000,17 @@ function matchTokenInEntry(entry, tok) {
     return best && { score: best.score, hits: [...allHits] };
 }
 
-function searchEntries(index, query) {
+/* Query → prepared words (stopwords like "the" / "of" dropped unless that's all there is) */
+function queryTokens(query) {
     let words = searchWords(normalizeText(query));
     const meaningful = words.filter(w => !SEARCH_STOPWORDS.has(w));
     if (meaningful.length) words = meaningful;
-    if (!words.length) return { items: [], partial: false };
-    const tokens = [...new Set(words)].map(prepareToken);
+    return [...new Set(words)].map(prepareToken);
+}
+
+function searchEntries(index, query) {
+    const tokens = queryTokens(query);
+    if (!tokens.length) return { items: [], partial: false };
 
     const scored = index.map(entry => {
         const found = tokens.map(tok => matchTokenInEntry(entry, tok)).filter(Boolean);
@@ -995,15 +1104,19 @@ function initSiteSearch() {
 
     const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
-    // Header trigger: icon button on small screens, pill with a shortcut hint on wide ones
-    const trigger = document.createElement('button');
-    trigger.type = 'button';
-    trigger.className = 'search-trigger';
+    // Header trigger is in each page's HTML (so the header never shifts on load); create it if missing
+    let trigger = actions.querySelector('.search-trigger');
+    if (!trigger) {
+        trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'search-trigger';
+        trigger.setAttribute('aria-haspopup', 'dialog');
+        trigger.innerHTML = `<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <span class="search-trigger-label">Search</span><kbd class="search-trigger-kbd"></kbd>`;
+        actions.insertBefore(trigger, actions.firstChild);
+    }
     trigger.setAttribute('aria-label', `Search the site (${isMac ? '⌘' : 'Ctrl'}+K)`);
-    trigger.setAttribute('aria-haspopup', 'dialog');
-    trigger.innerHTML = `<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-        <span class="search-trigger-label">Search</span><kbd class="search-trigger-kbd">${isMac ? '⌘K' : 'Ctrl K'}</kbd>`;
-    actions.insertBefore(trigger, actions.firstChild);
+    trigger.querySelector('.search-trigger-kbd').textContent = isMac ? '⌘K' : 'Ctrl K';
 
     const modal = document.createElement('div');
     modal.className = 'search-modal';
@@ -1047,7 +1160,7 @@ function initSiteSearch() {
     let lastFocused = null;
 
     const loadIndex = () => {
-        indexPromise ||= buildSearchIndex().then(index => { indexReady = true; return index; });
+        if (!indexPromise) indexPromise = buildSearchIndex().then(index => { indexReady = true; return index; });
         return indexPromise;
     };
 
