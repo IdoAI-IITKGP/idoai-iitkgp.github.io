@@ -494,7 +494,7 @@ a:hover {
 }
 
 .hero-title {
-    font-size: clamp(2rem, 1.2rem + 4.5vw, 4.5rem);
+    font-size: clamp(2rem, 1.75rem + 3vw, 4.25rem);
     font-weight: 800;
     margin-bottom: 1rem;
     letter-spacing: -0.03em;
@@ -2808,11 +2808,69 @@ body.search-open {
 }
 
 .search-result {
+    border-radius: var(--radius-md);
+    transition: background var(--transition-fast);
     animation: searchItemIn 0.45s var(--ease-out-expo) backwards;
     animation-delay: calc(min(var(--i), 10) * 35ms);
 }
 
-.search-result a {
+/* Direct download / open chips for the files under a matching talk */
+.search-result-files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 12px 12px 58px;
+    margin-top: -4px;
+}
+
+.search-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    max-width: 100%;
+    padding: 5px 12px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--glass-border);
+    background: var(--bg-card);
+    color: var(--text-main);
+    font-size: 0.78rem;
+    font-weight: 500;
+    transition: border-color var(--transition-fast), background var(--transition-fast), transform 0.25s var(--ease-out-expo);
+}
+
+.search-file span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.search-file .fa-file-pdf {
+    color: #f59e0b;
+}
+
+.search-file .fa-file-powerpoint {
+    color: #ef4444;
+}
+
+.search-file .fa-arrow-up-right-from-square,
+.search-file .fa-circle-user {
+    color: var(--primary-light);
+}
+
+.search-file:hover,
+.search-file:focus-visible {
+    border-color: var(--primary);
+    color: var(--text-main);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+    .search-result-files {
+        padding-left: 12px;
+    }
+}
+
+.search-result > a {
     position: relative;
     display: flex;
     align-items: flex-start;
@@ -2824,7 +2882,7 @@ body.search-open {
 }
 
 /* Gradient bar slides in beside the highlighted result */
-.search-result a::before {
+.search-result > a::before {
     content: '';
     position: absolute;
     left: 0;
@@ -2837,11 +2895,11 @@ body.search-open {
     transition: transform 0.25s var(--ease-out-expo);
 }
 
-.search-result.active a {
+.search-result.active {
     background: color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
-.search-result.active a::before {
+.search-result.active > a::before {
     transform: scaleY(1);
 }
 
@@ -3566,7 +3624,7 @@ html.lite .hero-title .text-gradient {
         background: rgba(139, 92, 246, 0.3);
     }
 
-    .search-result.active a,
+    .search-result.active,
     .search-history-item.active {
         background: rgba(139, 92, 246, 0.14);
     }

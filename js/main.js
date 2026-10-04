@@ -179,7 +179,8 @@ function initSearchAndFilter() {
         speaker: cleanText(item.querySelector('.event-speaker')) || item.dataset.speaker || '',
         meta: cleanText(item.querySelector('.event-date-badge')) || item.dataset.date || '',
         tags: item.dataset.category || '',
-        body: cleanText(item.querySelector('.drawer-abstract')) || item.dataset.venue || ''
+        body: cleanText(item.querySelector('.drawer-abstract')) || item.dataset.venue || '',
+        resources: [...item.querySelectorAll('.resource-links > a, .resource-links > span')].map(el => ({ label: cleanText(el) }))
     })) : [];
 
     let status = null;
@@ -216,7 +217,7 @@ function initSearchAndFilter() {
         if (!hits.length) return;
         const pattern = new RegExp(`(${[...hits].sort((a, b) => b.length - a.length)
             .map(h => h.length <= 3 ? `\\b${escapeRegExp(h)}\\b` : escapeRegExp(h)).join('|')})`, 'gi');
-        item.querySelectorAll('.event-topic, .event-speaker a, .drawer-abstract').forEach(root => {
+        item.querySelectorAll('.event-topic, .event-speaker a, .drawer-abstract, .resource-links').forEach(root => {
             const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
             const nodes = [];
             while (walker.nextNode()) nodes.push(walker.currentNode);
@@ -734,6 +735,20 @@ function revealHashTarget(onLoad = false) {
     }, 120);
 }
 
+/* The links and labels under a talk (slides, references, papers, profile, venue) so they're searchable */
+function resourcesOf(card, page) {
+    return [...card.querySelectorAll('.resource-links > a, .resource-links > span')].map(el => {
+        const href = el.tagName === 'A' ? el.getAttribute('href') : null;
+        return {
+            label: cleanText(el),
+            // resolve relative file paths against the page they came from
+            href: href && !/^[a-z]+:/i.test(href) ? new URL(href, new URL(page, location.href)).href : href,
+            download: el.hasAttribute('download'),
+            newTab: el.getAttribute('target') === '_blank'
+        };
+    });
+}
+
 function buildEntriesFromDoc(doc, page) {
     const entries = [];
     const add = (e) => entries.push({ ...e, url: e.url || page });
@@ -755,6 +770,7 @@ function buildEntriesFromDoc(doc, page) {
                 speaker: cleanText(upcoming.querySelector('.presenter-name')).replace(/^Speaker:\s*/i, '').replace(/\s*Profile$/, ''),
                 meta: cleanText(upcoming.querySelector('.fa-calendar')?.parentElement),
                 body: cleanText(upcoming.querySelector('.abstract-box')).replace(/^Abstract\s*/i, ''),
+                resources: resourcesOf(upcoming, page),
                 url: `${page}#next-talk`,
                 boost: 3
             });
@@ -768,6 +784,7 @@ function buildEntriesFromDoc(doc, page) {
                 meta: cleanText(card.querySelector('.event-date-badge')) + (archived ? ' • PANDA archive' : ''),
                 body: cleanText(card.querySelector('.drawer-abstract')).replace(/^(Abstract|Background & Details):\s*/i, ''),
                 tags: card.dataset.category || '',
+                resources: resourcesOf(card, page),
                 url: `${page}#${card.id}`
             });
         });
@@ -844,7 +861,8 @@ function prepareSearchEntry(e) {
         title: normalizeText(e.title),
         speaker: normalizeText(e.speaker),
         meta: normalizeText(`${e.meta || ''} ${e.tags || ''}`),
-        body: normalizeText(e.body)
+        body: normalizeText(e.body),
+        resources: normalizeText((e.resources || []).map(r => r.label).join(' · '))
     };
     const w = {}, s = {};
     for (const field of Object.keys(n)) {
@@ -860,7 +878,7 @@ function prepareSearchEntry(e) {
    (medical ≈ clinical) → small typo (robtics ≈ robotics).
    Every word must match; if no result has them all, the closest are shown.
    -------------------------------------------------------------------------- */
-const SEARCH_FIELDS = { title: 12, speaker: 10, meta: 5, body: 3 };
+const SEARCH_FIELDS = { title: 12, speaker: 10, resources: 9, meta: 5, body: 3 };
 const SEARCH_STOPWORDS = new Set(['a', 'an', 'the', 'of', 'and', 'or', 'for', 'with', 'in', 'on', 'to', 'by', 'at', 'from', 'about']);
 const SEARCH_RELATED = [
     ['medical', 'clinical', 'clinic', 'healthcare', 'health', 'diagnosis', 'diagnostic', 'radiology', 'radiologist', 'cancer'],
@@ -880,7 +898,10 @@ const SEARCH_RELATED = [
     ['pruning', 'sparse', 'sparsity', 'lottery ticket', 'subnetworks'],
     ['behaviour', 'behavior', 'gesture', 'gaze', 'social'],
     ['talk', 'seminar', 'session', 'lecture'],
-    ['slides', 'presentation', 'pptx', 'pdf']
+    ['slides', 'slide', 'presentation', 'pptx', 'ppt', 'deck'],
+    ['references', 'reference', 'bibliography', 'reading list'],
+    ['paper', 'papers', 'arxiv', 'publication', 'source material'],
+    ['download', 'downloads', 'file', 'files']
 ];
 
 function searchWords(text) {
@@ -963,9 +984,13 @@ function isTypoOf(t, word, k) {
         && (editDistance(t, word.slice(0, t.length), k) <= k || editDistance(t, word.slice(0, t.length + 1), k) <= k);
 }
 
+/* Kind of match, strongest first: exact text > word family > related term > typo */
+const MATCH_TIER = { 1: 3, 0.7: 3, 0.85: 2, 0.5: 1, 0.45: 0 };
+
 function matchTokenInEntry(entry, tok) {
     let best = null;
-    const allHits = new Set(); // every matched word, from every field, for highlighting
+    let topTier = -1;
+    let allHits = new Set(); // matched words for highlighting, from the strongest kind of match only
     for (const [field, weight] of Object.entries(SEARCH_FIELDS)) {
         const text = entry.n[field];
         if (!text) continue;
@@ -983,18 +1008,21 @@ function matchTokenInEntry(entry, tok) {
                 level = 0.85;
                 hits = family;
             } else if (related.length) {
-                level = 0.6;
+                level = 0.5;
                 hits = related;
             } else if (tok.maxTypos) {
                 const typos = words.filter(w => isTypoOf(tok.t, w, tok.maxTypos));
                 if (typos.length) {
-                    level = 0.5;
+                    level = 0.45;
                     hits = typos;
                 }
             }
         }
         if (!level) continue;
-        hits.forEach(h => allHits.add(h));
+        // Weaker kinds of match (e.g. a near-typo) aren't highlighted when a stronger one was found
+        const tier = MATCH_TIER[level];
+        if (tier > topTier) { topTier = tier; allHits = new Set(); }
+        if (tier === topTier) hits.forEach(h => allHits.add(h));
         if (!best || weight * level > best.score) best = { score: weight * level };
     }
     return best && { score: best.score, hits: [...allHits] };
@@ -1038,6 +1066,14 @@ function searchEntries(index, query) {
         .slice(0, 24)
         .map(r => ({ ...r.entry, hits: r.hits }));
     return { items, partial };
+}
+
+function fileIcon(res) {
+    const s = `${res.label} ${res.href}`.toLowerCase();
+    if (/\.pptx?\b|presentation|slides/.test(s) && !/\.pdf\b/.test(res.href.toLowerCase())) return 'fa-solid fa-file-powerpoint';
+    if (/\.pdf\b|\(pdf\)/.test(s)) return 'fa-solid fa-file-pdf';
+    if (/profile/.test(s)) return 'fa-solid fa-circle-user';
+    return 'fa-solid fa-arrow-up-right-from-square';
 }
 
 function escapeHtml(s) {
@@ -1310,6 +1346,17 @@ function initSiteSearch() {
             }
             const meta = [r.speaker, r.meta].filter(Boolean)
                 .map(m => highlightMatches(m, tokens)).join(' <span class="dot">•</span> ');
+            // Files and links under the talk that match the search (e.g. "slides") become direct download chips
+            const files = (r.resources || [])
+                .filter(res => res.href && tokens.some(t => containsTerm(normalizeText(res.label), t)))
+                .slice(0, 3);
+            const filesHtml = files.length ? `
+                <div class="search-result-files">
+                    ${files.map(res => `
+                        <a class="search-file" href="${escapeHtml(res.href)}"${res.download ? ' download' : ''}${res.newTab ? ' target="_blank" rel="noopener noreferrer"' : ''}>
+                            <i class="${fileIcon(res)}" aria-hidden="true"></i><span>${highlightMatches(res.label, tokens)}</span>
+                        </a>`).join('')}
+                </div>` : '';
             html += `
                 <li class="search-result type-${r.type}" id="search-opt-${i}" role="option" style="--i:${i}">
                     <a href="${r.url}" tabindex="-1">
@@ -1320,7 +1367,7 @@ function initSiteSearch() {
                             ${r.body ? `<span class="search-result-snippet">${highlightMatches(matchSnippet(r.body, tokens), tokens)}</span>` : ''}
                         </span>
                         <i class="fa-solid fa-arrow-right search-result-go" aria-hidden="true"></i>
-                    </a>
+                    </a>${filesHtml}
                 </li>`;
         });
         list.innerHTML = html;
@@ -1387,6 +1434,11 @@ function initSiteSearch() {
             runQuery(historyItem.dataset.query);
             return;
         }
+        // File chips download / open directly (default link behaviour); just remember the search
+        if (e.target.closest('.search-file')) {
+            if (input.value.trim()) rememberSearch(input.value);
+            return;
+        }
         const link = e.target.closest('a');
         if (!link) return;
         e.preventDefault();
@@ -1414,7 +1466,7 @@ function initSiteSearch() {
     // Keep Tab inside the dialog
     panel.addEventListener('keydown', (e) => {
         if (e.key !== 'Tab') return;
-        const focusables = [input, ...panel.querySelectorAll('.search-history-clear, .search-history-remove, .search-chip'), closeBtn];
+        const focusables = [input, ...panel.querySelectorAll('.search-history-clear, .search-history-remove, .search-chip, .search-file'), closeBtn];
         const i = focusables.indexOf(document.activeElement);
         e.preventDefault();
         focusables[(i + (e.shiftKey ? -1 : 1) + focusables.length) % focusables.length].focus();
