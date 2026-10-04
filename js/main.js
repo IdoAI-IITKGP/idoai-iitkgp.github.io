@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initCounterAnimation();
     initScrollEffects();
     initRevealOnScroll();
+    assignSearchAnchors(document);
+    initSiteSearch();
+    revealHashTarget();
+    window.addEventListener('hashchange', revealHashTarget);
 });
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -506,4 +510,506 @@ function initRevealOnScroll() {
     }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
 
     targets.forEach(el => observer.observe(el));
+}
+
+/* ==========================================================================
+   10. Site-wide Search (Ctrl/⌘+K or "/")
+   The index is built from the site's own pages, so new talks are searchable
+   automatically. Pages are fetched over HTTP; when opened as local files the
+   browser blocks that, and only the current page is searched.
+   ========================================================================== */
+const SEARCH_PAGES = ['index.html', 'events.html', 'gallery.html', 'contact.html'];
+const SEARCH_TYPES = {
+    upcoming: { label: 'Upcoming Talk', icon: 'fa-bolt', order: 0 },
+    talk: { label: 'Talks', icon: 'fa-microphone-lines', order: 1 },
+    person: { label: 'People', icon: 'fa-user', order: 2 },
+    photo: { label: 'Gallery', icon: 'fa-image', order: 3 },
+    page: { label: 'Pages', icon: 'fa-file-lines', order: 4 }
+};
+const SEARCH_SUGGESTIONS = ['Medical imaging', 'Graph ML', 'Robotics', 'Privacy', 'Ensemble', 'Lottery ticket'];
+
+function slugify(text) {
+    return text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+}
+
+function cleanText(el) {
+    return el ? el.textContent.replace(/\s+/g, ' ').trim() : '';
+}
+
+function normalizeText(s) {
+    return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+function currentPageName() {
+    return location.pathname.split('/').pop() || 'index.html';
+}
+
+/* Gives searchable blocks stable ids. Runs on fetched pages and the live page alike, so links match. */
+function assignSearchAnchors(doc) {
+    doc.querySelectorAll('.event-card').forEach(card => {
+        const date = cleanText(card.querySelector('.event-date-badge'));
+        const topic = cleanText(card.querySelector('.event-topic'));
+        if (topic && !card.id) card.id = 'talk-' + slugify(`${date} ${topic}`);
+    });
+    doc.querySelectorAll('.member-card').forEach(card => {
+        const name = cleanText(card.querySelector('.member-name'));
+        if (name && !card.id) card.id = 'member-' + slugify(name);
+    });
+    doc.querySelectorAll('.gallery-item').forEach(item => {
+        const title = item.dataset.title || item.querySelector('img')?.alt || '';
+        if (title && !item.id) item.id = 'photo-' + slugify(title);
+    });
+    const about = doc.querySelector('.about-section');
+    if (about && !about.id) about.id = 'about';
+    const upcoming = doc.querySelector('main.container .featured-card')?.closest('section');
+    if (upcoming && !upcoming.id) upcoming.id = 'next-talk';
+    const form = doc.querySelector('iframe[src*="docs.google.com/forms"]')?.closest('section');
+    if (form && !form.id) form.id = 'propose';
+}
+
+/* Scrolls to #anchor targets (from search results), expanding talk cards and flashing a highlight */
+function revealHashTarget() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id) return;
+    const target = document.getElementById(id);
+    if (!target) return;
+
+    // Skip the scroll-reveal fade so the target is visible while it's highlighted
+    target.classList.remove('reveal', 'is-visible');
+
+    if (target.classList.contains('event-card') && !target.classList.contains('expanded')) {
+        target.classList.add('expanded');
+        target.querySelector('.event-summary')?.setAttribute('aria-expanded', 'true');
+    }
+    // Let layout (fonts, the expanding drawer) settle before scrolling
+    setTimeout(() => {
+        target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+        target.classList.remove('search-hit');
+        void target.offsetWidth; // restart the highlight if it already ran
+        target.classList.add('search-hit');
+        target.addEventListener('animationend', (e) => {
+            if (e.animationName === 'searchHit') target.classList.remove('search-hit');
+        });
+    }, 120);
+}
+
+function buildEntriesFromDoc(doc, page) {
+    const entries = [];
+    const add = (e) => entries.push({ ...e, url: e.url || page });
+
+    const pageTitle = cleanText(doc.querySelector('title')).replace(/\s*•.*$/, '');
+    add({
+        type: 'page',
+        title: page === 'index.html' ? 'Home' : pageTitle,
+        meta: page,
+        body: doc.querySelector('meta[name="description"]')?.content || ''
+    });
+
+    if (page === 'events.html') {
+        const upcoming = doc.querySelector('#next-talk .featured-card');
+        if (upcoming) {
+            add({
+                type: 'upcoming',
+                title: cleanText(upcoming.querySelector('.featured-title')),
+                speaker: cleanText(upcoming.querySelector('.presenter-name')).replace(/^Speaker:\s*/i, '').replace(/\s*Profile$/, ''),
+                meta: cleanText(upcoming.querySelector('.fa-calendar')?.parentElement),
+                body: cleanText(upcoming.querySelector('.abstract-box')).replace(/^Abstract\s*/i, ''),
+                url: `${page}#next-talk`,
+                boost: 3
+            });
+        }
+        doc.querySelectorAll('.event-card').forEach(card => {
+            const archived = !!card.closest('#archive-2024');
+            add({
+                type: 'talk',
+                title: cleanText(card.querySelector('.event-topic')),
+                speaker: cleanText(card.querySelector('.event-speaker')),
+                meta: cleanText(card.querySelector('.event-date-badge')) + (archived ? ' • PANDA archive' : ''),
+                body: cleanText(card.querySelector('.drawer-abstract')).replace(/^(Abstract|Background & Details):\s*/i, ''),
+                tags: card.dataset.category || '',
+                url: `${page}#${card.id}`
+            });
+        });
+    }
+
+    if (page === 'gallery.html') {
+        doc.querySelectorAll('.gallery-item').forEach(item => add({
+            type: 'photo',
+            title: item.dataset.title || item.querySelector('img')?.alt || 'Photo',
+            speaker: item.dataset.speaker || '',
+            meta: item.dataset.date || '',
+            body: item.dataset.venue || '',
+            url: `${page}#${item.id}`
+        }));
+    }
+
+    if (page === 'contact.html') {
+        doc.querySelectorAll('.member-card').forEach(card => add({
+            type: 'person',
+            title: cleanText(card.querySelector('.member-name')),
+            meta: cleanText(card.querySelector('.member-responsibility')),
+            body: cleanText(card.querySelector('.member-affiliation')),
+            tags: 'coordinator organizer contact email',
+            url: `${page}#${card.id}`
+        }));
+        if (doc.getElementById('propose')) {
+            add({
+                type: 'page',
+                title: 'Propose a Talk / Paper Idea',
+                meta: 'Speaker proposal form',
+                body: 'Submit your talk proposal or paper idea via the Google Form.',
+                tags: 'speaker present research submit',
+                url: `${page}#propose`,
+                boost: 2
+            });
+        }
+    }
+
+    if (page === 'index.html' && doc.getElementById('about')) {
+        add({
+            type: 'page',
+            title: 'About IdoAI & Venue',
+            meta: 'Tuesdays • 5:00 PM IST',
+            body: cleanText(doc.querySelector('#about .about-main')).replace(/^About IdoAI\s*/, ''),
+            tags: cleanText(doc.querySelector('#about .venue-box')),
+            url: `${page}#about`
+        });
+    }
+
+    return entries;
+}
+
+async function buildSearchIndex() {
+    const here = currentPageName();
+    const docs = await Promise.all(SEARCH_PAGES.map(async (page) => {
+        if (page === here) return [page, document];
+        try {
+            const res = await fetch(page);
+            if (!res.ok) return null;
+            const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+            assignSearchAnchors(doc);
+            return [page, doc];
+        } catch {
+            return null; // e.g. file:// previews block fetch
+        }
+    }));
+
+    return docs.filter(Boolean).flatMap(([page, doc]) => buildEntriesFromDoc(doc, page)).map(e => ({
+        ...e,
+        n: {
+            title: normalizeText(e.title),
+            speaker: normalizeText(e.speaker),
+            meta: normalizeText(`${e.meta} ${e.tags || ''}`),
+            body: normalizeText(e.body)
+        }
+    }));
+}
+
+function searchEntries(index, query) {
+    const tokens = normalizeText(query).split(/\s+/).filter(Boolean);
+    if (!tokens.length) return [];
+    const wordStart = (text, t) => text.startsWith(t) || text.includes(' ' + t);
+
+    const scored = index.map(entry => {
+        const { title, speaker, meta, body } = entry.n;
+        let score = 0;
+        for (const t of tokens) {
+            let s = 0;
+            if (title.includes(t)) s = wordStart(title, t) ? 12 : 8;
+            else if (speaker.includes(t)) s = wordStart(speaker, t) ? 10 : 6;
+            else if (meta.includes(t)) s = 5;
+            else if (body.includes(t)) s = wordStart(body, t) ? 3 : 1;
+            if (!s) return null; // every word must match somewhere
+            score += s;
+        }
+        return { entry, score: score + (entry.boost || 0) };
+    }).filter(Boolean);
+
+    // Results stay grouped by type, but the group holding the strongest match comes first
+    const groupBest = {};
+    scored.forEach(r => { groupBest[r.entry.type] = Math.max(groupBest[r.entry.type] || 0, r.score); });
+    return scored
+        .sort((a, b) => (groupBest[b.entry.type] - groupBest[a.entry.type])
+            || (SEARCH_TYPES[a.entry.type].order - SEARCH_TYPES[b.entry.type].order)
+            || (b.score - a.score))
+        .slice(0, 24)
+        .map(r => r.entry);
+}
+
+function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function highlightMatches(text, tokens) {
+    const html = escapeHtml(text);
+    if (!tokens.length) return html;
+    const pattern = tokens.map(t => escapeHtml(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+    return html.replace(new RegExp(`(${pattern})`, 'gi'), '<mark>$1</mark>');
+}
+
+/* A short excerpt of the body centred on the first matching word */
+function matchSnippet(text, tokens) {
+    if (!text) return '';
+    const lower = text.toLowerCase();
+    const hit = tokens.map(t => lower.indexOf(t)).filter(i => i >= 0).sort((a, b) => a - b)[0];
+    if (hit === undefined) return text.length > 140 ? text.slice(0, 140).trim() + '…' : text;
+    // Window around the hit, snapped to whole words
+    let start = Math.max(0, hit - 50);
+    let end = Math.min(text.length, hit + 90);
+    if (start > 0) { const sp = text.indexOf(' ', start); if (sp > -1 && sp < hit) start = sp + 1; }
+    if (end < text.length) { const sp = text.lastIndexOf(' ', end); if (sp > hit) end = sp; }
+    return (start > 0 ? '…' : '') + text.slice(start, end).trim() + (end < text.length ? '…' : '');
+}
+
+function initSiteSearch() {
+    const actions = document.querySelector('.nav-actions');
+    if (!actions) return;
+
+    const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+
+    // Header trigger: icon button on small screens, pill with a shortcut hint on wide ones
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'search-trigger';
+    trigger.setAttribute('aria-label', `Search the site (${isMac ? '⌘' : 'Ctrl'}+K)`);
+    trigger.setAttribute('aria-haspopup', 'dialog');
+    trigger.innerHTML = `<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <span class="search-trigger-label">Search</span><kbd class="search-trigger-kbd">${isMac ? '⌘K' : 'Ctrl K'}</kbd>`;
+    actions.insertBefore(trigger, actions.firstChild);
+
+    const modal = document.createElement('div');
+    modal.className = 'search-modal';
+    modal.innerHTML = `
+        <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search IdoAI">
+            <div class="search-field">
+                <span class="search-field-icon" aria-hidden="true">
+                    <i class="fa-solid fa-magnifying-glass"></i><span class="search-spinner"></span>
+                </span>
+                <input type="search" class="search-input-global" placeholder="Search talks, speakers, topics…"
+                    autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false"
+                    aria-controls="search-results" aria-autocomplete="list" aria-label="Search">
+                <button type="button" class="search-close" aria-label="Close search"><kbd>Esc</kbd><i
+                    class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+                <span class="search-progress" aria-hidden="true"></span>
+            </div>
+            <div class="search-body">
+                <div class="search-status" aria-live="polite"></div>
+                <ul id="search-results" class="search-results" role="listbox" aria-label="Search results"></ul>
+            </div>
+            <div class="search-footer" aria-hidden="true">
+                <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+                <span><kbd>Enter</kbd> open</span>
+                <span><kbd>Esc</kbd> close</span>
+            </div>
+        </div>`;
+    document.body.appendChild(modal);
+
+    const panel = modal.querySelector('.search-panel');
+    const input = modal.querySelector('.search-input-global');
+    const field = modal.querySelector('.search-field');
+    const status = modal.querySelector('.search-status');
+    const list = modal.querySelector('.search-results');
+    const closeBtn = modal.querySelector('.search-close');
+
+    let indexPromise = null;
+    let indexReady = false;
+    let results = [];
+    let active = -1;
+    let debounce = null;
+    let lastFocused = null;
+
+    const loadIndex = () => {
+        indexPromise ||= buildSearchIndex().then(index => { indexReady = true; return index; });
+        return indexPromise;
+    };
+
+    function openSearch() {
+        // Close the mobile menu first if it's open
+        if (document.getElementById('nav-menu')?.classList.contains('open')) {
+            document.getElementById('mobile-menu-toggle')?.click();
+        }
+        lastFocused = document.activeElement;
+        modal.classList.add('open');
+        document.body.classList.add('search-open');
+        input.value = '';
+        renderIdle();
+        setTimeout(() => input.focus(), 30);
+        loadIndex();
+    }
+
+    function closeSearch() {
+        modal.classList.remove('open');
+        document.body.classList.remove('search-open');
+        input.setAttribute('aria-expanded', 'false');
+        if (lastFocused) lastFocused.focus();
+    }
+
+    function setActive(i) {
+        const items = list.querySelectorAll('.search-result');
+        items.forEach(el => el.classList.remove('active'));
+        active = items.length ? (i + items.length) % items.length : -1;
+        if (active >= 0) {
+            items[active].classList.add('active');
+            input.setAttribute('aria-activedescendant', items[active].id);
+            items[active].scrollIntoView({ block: 'nearest' });
+        } else {
+            input.removeAttribute('aria-activedescendant');
+        }
+    }
+
+    function renderIdle() {
+        results = [];
+        active = -1;
+        field.classList.remove('is-searching');
+        status.textContent = '';
+        list.innerHTML = `
+            <li class="search-idle">
+                <div class="search-idle-title">Try searching for</div>
+                <div class="search-chips">
+                    ${SEARCH_SUGGESTIONS.map((s, i) => `<button type="button" class="search-chip" style="--i:${i}">${s}</button>`).join('')}
+                </div>
+                <div class="search-idle-title">Jump to</div>
+                <div class="search-chips">
+                    <a class="search-chip" style="--i:6" href="events.html#next-talk"><i class="fa-solid fa-bolt"></i> Upcoming talk</a>
+                    <a class="search-chip" style="--i:7" href="events.html#archive-2024"><i class="fa-solid fa-box-archive"></i> 2024 archive</a>
+                    <a class="search-chip" style="--i:8" href="contact.html#propose"><i class="fa-solid fa-paper-plane"></i> Propose a talk</a>
+                </div>
+            </li>`;
+        list.querySelectorAll('button.search-chip').forEach(chip => chip.addEventListener('click', () => {
+            input.value = chip.textContent;
+            runSearch();
+            input.focus();
+        }));
+    }
+
+    function renderSkeleton() {
+        list.innerHTML = Array.from({ length: 3 }, () => `
+            <li class="search-skeleton" aria-hidden="true">
+                <span class="sk sk-icon"></span>
+                <span class="sk-lines"><span class="sk sk-line"></span><span class="sk sk-line short"></span></span>
+            </li>`).join('');
+    }
+
+    function render(query) {
+        const tokens = normalizeText(query).split(/\s+/).filter(Boolean);
+        input.setAttribute('aria-expanded', String(results.length > 0));
+
+        if (!results.length) {
+            status.textContent = 'No results';
+            list.innerHTML = `
+                <li class="search-empty">
+                    <span class="search-empty-icon"><i class="fa-regular fa-face-meh-blank"></i></span>
+                    <div>No results for “<strong>${escapeHtml(query)}</strong>”</div>
+                    <p>Try a speaker name, a topic like “vision”, or a year.</p>
+                </li>`;
+            return;
+        }
+
+        status.textContent = `${results.length} result${results.length === 1 ? '' : 's'}`;
+        let html = '';
+        let lastType = null;
+        results.forEach((r, i) => {
+            if (r.type !== lastType) {
+                html += `<li class="search-group" role="presentation" style="--i:${i}">${SEARCH_TYPES[r.type].label}</li>`;
+                lastType = r.type;
+            }
+            const meta = [r.speaker, r.meta].filter(Boolean)
+                .map(m => highlightMatches(m, tokens)).join(' <span class="dot">•</span> ');
+            html += `
+                <li class="search-result type-${r.type}" id="search-opt-${i}" role="option" style="--i:${i}">
+                    <a href="${r.url}" tabindex="-1">
+                        <span class="search-result-icon"><i class="fa-solid ${SEARCH_TYPES[r.type].icon}"></i></span>
+                        <span class="search-result-text">
+                            <span class="search-result-title">${highlightMatches(r.title, tokens)}</span>
+                            ${meta ? `<span class="search-result-meta">${meta}</span>` : ''}
+                            ${r.body ? `<span class="search-result-snippet">${highlightMatches(matchSnippet(r.body, tokens), tokens)}</span>` : ''}
+                        </span>
+                        <i class="fa-solid fa-arrow-right search-result-go" aria-hidden="true"></i>
+                    </a>
+                </li>`;
+        });
+        list.innerHTML = html;
+        list.querySelectorAll('.search-result').forEach((el, i) => {
+            el.addEventListener('mousemove', () => { if (active !== i) setActive(i); });
+        });
+        setActive(0);
+    }
+
+    function runSearch() {
+        const query = input.value.trim();
+        clearTimeout(debounce);
+        if (!query) { renderIdle(); return; }
+
+        // Visible "searching" state: spinner in the field and a sweeping bar; skeleton rows while the index loads
+        field.classList.add('is-searching');
+        if (!indexReady) renderSkeleton();
+
+        debounce = setTimeout(async () => {
+            const index = await loadIndex();
+            if (input.value.trim() !== query) return; // a newer keystroke took over
+            results = searchEntries(index, query);
+            field.classList.remove('is-searching');
+            render(query);
+        }, prefersReducedMotion ? 0 : 220);
+    }
+
+    function go(link) {
+        const url = new URL(link.href, location.href);
+        const samePage = url.pathname === location.pathname
+            || (url.pathname.split('/').pop() === currentPageName());
+        closeSearch();
+        if (samePage && url.hash) {
+            if (location.hash === url.hash) revealHashTarget();
+            else location.hash = url.hash;
+        } else {
+            location.href = link.href;
+        }
+    }
+
+    trigger.addEventListener('click', openSearch);
+    trigger.addEventListener('mouseenter', loadIndex, { once: true }); // warm the index before the click
+    closeBtn.addEventListener('click', closeSearch);
+    modal.addEventListener('mousedown', (e) => { if (e.target === modal) closeSearch(); });
+    input.addEventListener('input', runSearch);
+
+    list.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        if (!link) return;
+        e.preventDefault();
+        go(link);
+    });
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }
+        else if (e.key === 'Enter') {
+            const link = list.querySelectorAll('.search-result')[active]?.querySelector('a');
+            if (link) { e.preventDefault(); go(link); }
+        }
+    });
+
+    // Keep Tab inside the dialog
+    panel.addEventListener('keydown', (e) => {
+        if (e.key !== 'Tab') return;
+        const focusables = [input, ...panel.querySelectorAll('.search-chip'), closeBtn];
+        const i = focusables.indexOf(document.activeElement);
+        e.preventDefault();
+        focusables[(i + (e.shiftKey ? -1 : 1) + focusables.length) % focusables.length].focus();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        const el = document.activeElement;
+        const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(el?.tagName) || el?.isContentEditable;
+        const isOpen = modal.classList.contains('open');
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            isOpen ? closeSearch() : openSearch();
+        } else if (e.key === '/' && !typing && !isOpen) {
+            e.preventDefault();
+            openSearch();
+        } else if (e.key === 'Escape' && isOpen) {
+            closeSearch();
+        }
+    });
 }
