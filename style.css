@@ -2,8 +2,6 @@
    IdoAI - Main Responsive Design System (Updated)
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
-
 :root {
     /* Dark Theme (Default) */
     --bg-main: #0a0d14;
@@ -39,6 +37,8 @@
 
     --transition-fast: 0.2s ease;
     --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --header-height: 76px;
 }
 
 [data-theme="light"] {
@@ -82,19 +82,34 @@
 
 html {
     scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--header-height) + 1rem);
     font-size: 16px;
 }
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: var(--bg-main);
-    background-image: var(--bg-gradient);
-    background-attachment: fixed;
     color: var(--text-main);
     min-height: 100vh;
     line-height: 1.6;
     overflow-x: hidden;
     transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+/* Fixed gradient backdrop on its own layer (background-attachment: fixed repaints on every scroll frame) */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image: var(--bg-gradient);
+    pointer-events: none;
+}
+
+:focus-visible {
+    outline: 2px solid var(--primary-light);
+    outline-offset: 3px;
+    border-radius: 4px;
 }
 
 /* Typography */
@@ -151,6 +166,24 @@ a:hover {
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--glass-border);
     transition: all var(--transition-normal);
+}
+
+.site-header.scrolled {
+    box-shadow: 0 8px 30px -12px rgba(0, 0, 0, 0.45);
+    border-bottom-color: var(--glass-border-hover);
+}
+
+/* Reading progress bar along the bottom edge of the header */
+.scroll-progress {
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 2px;
+    background: var(--primary-gradient);
+    transform: scaleX(0);
+    transform-origin: left center;
+    pointer-events: none;
 }
 
 .nav-container {
@@ -329,6 +362,52 @@ a:hover {
     font-weight: 800;
     margin-bottom: 1rem;
     letter-spacing: -0.03em;
+}
+
+/* Hero & page-header entrance: each child rises in with a short stagger */
+.hero-section .container > *,
+.page-header > * {
+    animation: fadeUp 0.9s var(--ease-out-expo) both;
+}
+
+.hero-section .container > :nth-child(2),
+.page-header > :nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.hero-section .container > :nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.hero-section .container > :nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+.hero-title .text-gradient {
+    background-size: 200% auto;
+    animation: gradientShift 6s ease-in-out infinite alternate;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes gradientShift {
+    from {
+        background-position: 0% center;
+    }
+
+    to {
+        background-position: 100% center;
+    }
 }
 
 .hero-description {
@@ -861,7 +940,7 @@ a:hover {
     align-items: center;
     justify-content: center;
     color: var(--text-dim);
-    transition: transform var(--transition-fast);
+    transition: transform 0.4s var(--ease-out-expo), color var(--transition-fast);
 }
 
 .event-card.expanded .expand-icon {
@@ -869,22 +948,39 @@ a:hover {
     color: var(--primary-light);
 }
 
+/* Grid-row trick animates to the content's real height (no max-height clipping or lag) */
 .event-details-drawer {
-    max-height: 0;
+    display: grid;
+    grid-template-rows: 0fr;
     overflow: hidden;
-    transition: max-height 0.35s cubic-bezier(0, 1, 0, 1);
+    transition: grid-template-rows 0.45s var(--ease-out-expo), border-color var(--transition-fast);
     background: var(--bg-card);
     border-top: 1px solid transparent;
 }
 
 .event-card.expanded .event-details-drawer {
-    max-height: 1000px;
+    grid-template-rows: 1fr;
     border-top-color: var(--glass-border);
-    transition: max-height 0.4s ease-in-out;
 }
 
 .drawer-content {
+    min-height: 0;
     padding: 1.5rem;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.3s ease, transform 0.45s var(--ease-out-expo), padding 0.45s var(--ease-out-expo);
+}
+
+/* Padding can't shrink inside a 0fr row, so collapse it too */
+.event-card:not(.expanded) .drawer-content {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.event-card.expanded .drawer-content {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.08s;
 }
 
 .drawer-abstract {
@@ -1205,6 +1301,80 @@ span.resource-btn:hover {
     color: var(--primary-light);
 }
 
+/* Connect links: tinted icon tiles that fill with their own accent on hover */
+.footer-connect {
+    gap: 0.5rem;
+}
+
+.footer-connect a {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* The tile carries the colour on hover, so the label just brightens */
+.footer-connect a:hover {
+    color: var(--text-main);
+}
+
+.footer-connect a::after {
+    content: '\f08e';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 0.65rem;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity var(--transition-fast), transform 0.3s var(--ease-out-expo);
+}
+
+.footer-connect a:hover::after,
+.footer-connect a:focus-visible::after {
+    opacity: 0.7;
+    transform: none;
+}
+
+.connect-icon {
+    --accent: var(--primary-light);
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    font-size: 0.85rem;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast),
+        box-shadow var(--transition-fast), transform 0.35s var(--ease-out-expo);
+}
+
+.connect-icon.is-linkedin {
+    --accent: #3b8fe0;
+}
+
+.connect-icon.is-map {
+    --accent: #f05252;
+}
+
+[data-theme="light"] .connect-icon.is-linkedin {
+    --accent: #0a66c2;
+}
+
+[data-theme="light"] .connect-icon.is-map {
+    --accent: #dc2626;
+}
+
+.footer-connect a:hover .connect-icon,
+.footer-connect a:focus-visible .connect-icon {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px -4px color-mix(in srgb, var(--accent) 65%, transparent);
+}
+
 .footer-bottom {
     text-align: center;
     padding-top: 2rem;
@@ -1334,6 +1504,8 @@ span.resource-btn:hover {
 .lightbox-modal.active {
     opacity: 1;
     visibility: visible;
+    /* Become visible instantly so the close button can take focus; fade-out still uses the base transition */
+    transition: opacity 0.3s ease, visibility 0s;
 }
 
 .lightbox-content {
@@ -1343,6 +1515,12 @@ span.resource-btn:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
+    transform: scale(0.94) translateY(12px);
+    transition: transform 0.4s var(--ease-out-expo);
+}
+
+.lightbox-modal.active .lightbox-content {
+    transform: none;
 }
 
 .lightbox-img {
@@ -1444,12 +1622,17 @@ span.resource-btn:hover {
         padding: 2rem;
         gap: 1.5rem;
         transform: translateY(-150%);
-        transition: transform var(--transition-normal);
+        opacity: 0;
+        visibility: hidden;
+        transition: transform 0.45s var(--ease-out-expo), opacity 0.3s ease, visibility 0.45s;
         border-bottom: 1px solid var(--glass-border);
+        box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
     }
 
     .nav-menu.open {
         transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
     }
 
     .mobile-menu-btn {
@@ -1717,10 +1900,6 @@ span.resource-btn:hover {
         text-align: left;
     }
 
-    .event-card.expanded .event-details-drawer {
-        max-height: 3000px;
-    }
-
     /* Resource Links & Buttons */
     .resource-links {
         display: flex;
@@ -1773,8 +1952,16 @@ span.resource-btn:hover {
         font-size: 0.65rem;
     }
 
+    :root {
+        --header-height: 66px;
+    }
+
     .nav-container {
         height: 66px;
+    }
+
+    .nav-menu {
+        top: 66px;
     }
 
     .brand-logo img {
@@ -1792,5 +1979,84 @@ span.resource-btn:hover {
 
     .category-pills button[data-filter="all"] {
         flex: 1 1 100%;
+    }
+}
+/* ==========================================================================
+   Scroll Animations & Floating Controls
+   ========================================================================== */
+
+/* Added by JS only, so content stays visible if scripts fail to load.
+   Classes are removed after the animation so hover transforms keep working. */
+.reveal {
+    opacity: 0;
+}
+
+.reveal.is-visible {
+    animation: fadeUp 0.8s var(--ease-out-expo) var(--reveal-delay, 0s) both;
+}
+
+.back-to-top {
+    position: fixed;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    z-index: 900;
+    width: 46px;
+    height: 46px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--glass-border);
+    background: var(--bg-surface);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--text-main);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--card-shadow);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(16px);
+    transition: opacity 0.3s ease, transform 0.4s var(--ease-out-expo), visibility 0.3s,
+        border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+}
+
+.back-to-top:hover {
+    border-color: var(--primary);
+    box-shadow: var(--card-shadow), var(--glow-shadow);
+    transform: translateY(-3px);
+}
+
+@media (max-width: 480px) {
+    .back-to-top {
+        right: 1rem;
+        bottom: 1rem;
+        width: 42px;
+        height: 42px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        animation-delay: 0s !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .reveal {
+        opacity: 1;
     }
 }

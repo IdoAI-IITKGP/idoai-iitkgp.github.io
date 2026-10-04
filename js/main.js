@@ -11,7 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initLightbox();
     initCountdown();
     initCounterAnimation();
+    initScrollEffects();
+    initRevealOnScroll();
 });
+
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ==========================================================================
    1. Theme Switcher (Dark & Light Mode)
@@ -57,16 +61,42 @@ function initMobileNav() {
     const mobileBtn = document.getElementById('mobile-menu-toggle');
     const navMenu = document.getElementById('nav-menu');
 
-    if (mobileBtn && navMenu) {
-        mobileBtn.addEventListener('click', () => {
-            navMenu.classList.toggle('open');
-            const icon = mobileBtn.querySelector('i');
-            if (icon) {
-                icon.classList.toggle('fa-bars');
-                icon.classList.toggle('fa-xmark');
-            }
-        });
+    if (!mobileBtn || !navMenu) return;
+
+    mobileBtn.setAttribute('aria-expanded', 'false');
+    mobileBtn.setAttribute('aria-controls', 'nav-menu');
+
+    function setMenuOpen(open) {
+        navMenu.classList.toggle('open', open);
+        mobileBtn.setAttribute('aria-expanded', String(open));
+        const icon = mobileBtn.querySelector('i');
+        if (icon) {
+            icon.classList.toggle('fa-bars', !open);
+            icon.classList.toggle('fa-xmark', open);
+        }
     }
+
+    mobileBtn.addEventListener('click', () => {
+        setMenuOpen(!navMenu.classList.contains('open'));
+    });
+
+    // Close on link tap, outside tap, or Escape
+    navMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => setMenuOpen(false));
+    });
+
+    document.addEventListener('click', (e) => {
+        if (navMenu.classList.contains('open') && !navMenu.contains(e.target) && !mobileBtn.contains(e.target)) {
+            setMenuOpen(false);
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && navMenu.classList.contains('open')) {
+            setMenuOpen(false);
+            mobileBtn.focus();
+        }
+    });
 }
 
 /* ==========================================================================
@@ -77,24 +107,33 @@ function initAccordions() {
     
     eventCards.forEach(card => {
         const summary = card.querySelector('.event-summary');
-        if (summary) {
-            summary.addEventListener('click', (e) => {
-                // If click originated from a link inside summary (like speaker profile), don't toggle accordion
-                if (e.target.closest('a')) {
-                    return;
-                }
-                const isExpanded = card.classList.contains('expanded');
-                
-                // Optionally close other expanded cards
-                // eventCards.forEach(c => c.classList.remove('expanded'));
-                
-                if (!isExpanded) {
-                    card.classList.add('expanded');
-                } else {
-                    card.classList.remove('expanded');
-                }
-            });
+        if (!summary) return;
+
+        // Make the summary row keyboard- and screen-reader-friendly
+        summary.setAttribute('role', 'button');
+        summary.setAttribute('tabindex', '0');
+        summary.setAttribute('aria-expanded', 'false');
+
+        function toggle() {
+            const isExpanded = card.classList.toggle('expanded');
+            summary.setAttribute('aria-expanded', String(isExpanded));
         }
+
+        summary.addEventListener('click', (e) => {
+            // If click originated from a link inside summary (like speaker profile), don't toggle accordion
+            if (e.target.closest('a')) {
+                return;
+            }
+            toggle();
+        });
+
+        summary.addEventListener('keydown', (e) => {
+            if (e.target !== summary) return;
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggle();
+            }
+        });
     });
 }
 
@@ -108,6 +147,15 @@ function initSearchAndFilter() {
 
     let currentCategory = 'all';
     let currentSearchQuery = '';
+
+    // Category pills aren't useful with only a few items; they reappear automatically once more are added
+    const MIN_ITEMS_FOR_FILTERS = 4;
+    const pillGroup = document.querySelector('.category-pills');
+    if (pillGroup && filterableItems.length < MIN_ITEMS_FOR_FILTERS) {
+        pillGroup.style.display = 'none';
+        const bar = pillGroup.closest('.controls-bar');
+        if (bar && !bar.querySelector('.search-input')) bar.style.display = 'none';
+    }
 
     function filterItems() {
         filterableItems.forEach(item => {
@@ -166,8 +214,31 @@ function initLightbox() {
         if (lightboxCaption) {
             lightboxCaption.innerHTML = captionHtml || '';
         }
+        lastFocused = document.activeElement;
         lightboxModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        if (closeBtn) closeBtn.focus();
     }
+
+    function closeLightbox() {
+        lightboxModal.classList.remove('active');
+        document.body.style.overflow = '';
+        if (lastFocused) lastFocused.focus();
+    }
+
+    let lastFocused = null;
+
+    // Let keyboard users open clickable photos/posters with Enter or Space
+    document.querySelectorAll('.gallery-item, .talk-poster-preview').forEach(el => {
+        el.setAttribute('role', 'button');
+        el.setAttribute('tabindex', '0');
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                el.click();
+            }
+        });
+    });
 
     galleryItems.forEach(item => {
         item.addEventListener('click', () => {
@@ -228,20 +299,18 @@ function initLightbox() {
     });
 
     if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            lightboxModal.classList.remove('active');
-        });
+        closeBtn.addEventListener('click', closeLightbox);
     }
 
     lightboxModal.addEventListener('click', (e) => {
         if (e.target === lightboxModal) {
-            lightboxModal.classList.remove('active');
+            closeLightbox();
         }
     });
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && lightboxModal.classList.contains('active')) {
-            lightboxModal.classList.remove('active');
+            closeLightbox();
         }
     });
 }
@@ -339,4 +408,93 @@ function animateValue(obj, start, end, duration) {
         }
     };
     window.requestAnimationFrame(step);
+}
+
+/* ==========================================================================
+   8. Scroll Effects: Header Shadow, Progress Bar & Back-to-Top
+   ========================================================================== */
+function initScrollEffects() {
+    const header = document.querySelector('.site-header');
+
+    const progressBar = document.createElement('div');
+    progressBar.className = 'scroll-progress';
+    if (header) header.appendChild(progressBar);
+
+    const topBtn = document.createElement('button');
+    topBtn.className = 'back-to-top';
+    topBtn.setAttribute('aria-label', 'Back to top');
+    topBtn.innerHTML = '<i class="fa-solid fa-arrow-up"></i>';
+    topBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+    });
+    document.body.appendChild(topBtn);
+
+    let ticking = false;
+
+    function update() {
+        const scrollY = window.scrollY;
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = maxScroll > 0 ? Math.min(scrollY / maxScroll, 1) : 0;
+
+        if (header) header.classList.toggle('scrolled', scrollY > 10);
+        progressBar.style.transform = `scaleX(${progress})`;
+        topBtn.classList.toggle('visible', scrollY > window.innerHeight * 0.6);
+        ticking = false;
+    }
+
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(update);
+            ticking = true;
+        }
+    }, { passive: true });
+    window.addEventListener('resize', update);
+
+    update();
+}
+
+/* ==========================================================================
+   9. Reveal-on-Scroll Animations
+   ========================================================================== */
+function initRevealOnScroll() {
+    if (prefersReducedMotion || !('IntersectionObserver' in window)) return;
+
+    const selectors = [
+        '.section-title',
+        '.section-subtitle',
+        '.featured-card',
+        '.event-card',
+        '.about-card',
+        '.controls-bar',
+        '.gallery-item',
+        '.member-card',
+        '.site-footer .footer-grid > *'
+    ];
+    const targets = document.querySelectorAll(selectors.join(','));
+
+    // Stagger siblings in the same list/grid (capped so long lists don't lag)
+    targets.forEach(el => {
+        const siblings = Array.from(el.parentElement.children).filter(c => c.matches(selectors.join(',')));
+        const index = siblings.indexOf(el);
+        el.style.setProperty('--reveal-delay', `${Math.min(index, 5) * 0.08}s`);
+        el.classList.add('reveal');
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            const el = entry.target;
+            el.classList.add('is-visible');
+            const cleanup = (e) => {
+                if (e.target !== el) return; // ignore bubbled child animations
+                el.classList.remove('reveal', 'is-visible');
+                el.style.removeProperty('--reveal-delay');
+                el.removeEventListener('animationend', cleanup);
+            };
+            el.addEventListener('animationend', cleanup);
+            observer.unobserve(el);
+        });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    targets.forEach(el => observer.observe(el));
 }
