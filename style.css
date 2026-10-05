@@ -2566,8 +2566,9 @@ span.resource-btn:hover {
     .lightbox-modal.has-series .lightbox-sidebar {
         display: flex;
         flex-direction: column;
-        flex: 0 0 300px;
-        width: 300px;
+        /* ~225px on a 1024px tablet in landscape, up to 300px on large screens */
+        flex: 0 0 clamp(220px, 22vw, 300px);
+        width: clamp(220px, 22vw, 300px);
         height: 100%;
         margin-left: 1rem;
         background: rgba(15, 23, 42, 0.72);
@@ -2689,6 +2690,34 @@ span.resource-btn:hover {
 /* Browser full screen: solid backdrop */
 .lightbox-modal.is-fullscreen {
     background: #05070c;
+}
+
+/* Touch screens: slightly larger viewer buttons */
+@media (pointer: coarse) {
+    /* extra .lightbox-modal so this beats the compact sizes set for small screens further down */
+    .lightbox-modal .lightbox-tool,
+    .lightbox-modal .lightbox-close {
+        width: 42px;
+        height: 42px;
+    }
+}
+
+/* Touch-only devices keep :hover "stuck" after a tap, which would leave a photo zoomed with its pill showing
+   once the viewer closes, so the gallery hover effects only apply where a real pointer can hover */
+@media (hover: none) {
+    .gallery-item:hover {
+        border-color: var(--glass-border);
+        box-shadow: var(--card-shadow);
+    }
+
+    .gallery-item:hover img {
+        transform: none;
+    }
+
+    .gallery-item:hover .gallery-overlay-btn {
+        opacity: 0;
+        transform: translateY(8px) scale(0.92);
+    }
 }
 
 /* Short landscape screens (phones on their side): caption moves beside the photo */

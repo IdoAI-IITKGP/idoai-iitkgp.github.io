@@ -509,8 +509,7 @@ function initLightbox() {
             const pic = document.createElement('img');
             pic.src = img.currentSrc || img.src;
             pic.alt = '';
-            pic.loading = 'lazy';
-            pic.decoding = 'async';
+            pic.decoding = 'async'; // loaded straight away: the set is small and lazy-loading inside the sidebar can lag
             thumb.appendChild(pic);
             thumb.addEventListener('click', () => {
                 showPhoto(i);
