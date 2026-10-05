@@ -1,6 +1,6 @@
 # IdoAI &bull; Dept. of Artificial Intelligence, IIT Kharagpur
 
-**IdoAI (Interdisciplinary Opportunities with AI)** is a weekly departmental seminar and paper discussion series hosted by the Department of Artificial Intelligence, IIT Kharagpur.
+**IdoAI (Interdisciplinary Opportunities with AI)** is a weekly departmental talk series hosted by the Department of Artificial Intelligence, IIT Kharagpur.
 
 ---
 

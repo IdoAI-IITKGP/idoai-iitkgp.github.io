@@ -152,6 +152,24 @@ function initAccordions() {
                 toggle();
             }
         });
+
+        // "Show less" at the bottom of long drawers, so readers needn't scroll back up to the summary to close it
+        const drawer = card.querySelector('.drawer-content');
+        if (!drawer) return;
+        const collapseBar = document.createElement('div');
+        collapseBar.className = 'drawer-collapse';
+        collapseBar.innerHTML = '<button type="button" class="collapse-btn"><i class="fa-solid fa-chevron-up" aria-hidden="true"></i> Show less</button>';
+        drawer.appendChild(collapseBar);
+
+        collapseBar.querySelector('button').addEventListener('click', () => {
+            toggle();
+            summary.focus({ preventScroll: true });
+            // If the card's top has scrolled off-screen, bring it back so the reader keeps their place
+            const headerOffset = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+            if (card.getBoundingClientRect().top < headerOffset) {
+                card.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+            }
+        });
     });
 }
 
@@ -185,7 +203,7 @@ function initSearchAndFilter() {
         resources: [...item.querySelectorAll('.resource-links > a, .resource-links > span')].map(el => ({ label: cleanText(el) }))
     });
     const searchable = searchInput ? [...filterableItems].map(toEntry) : [];
-    // Talks outside the filtered list (e.g. Recent Events 2026) stay put, but matches are linked above the results
+    // Talks outside the filtered list (Recent Events 2026, Inaugural 2025) stay put, but matches are linked above the results
     const otherTalks = searchInput
         ? [...document.querySelectorAll('.event-card:not(.filterable-item)')].map(card => ({ card, entry: toEntry(card) }))
         : [];
@@ -298,7 +316,7 @@ function initSearchAndFilter() {
             .sort((a, b) => (b.matched - a.matched) || (b.score - a.score));
         elsewhere.hidden = !othersShown.length;
         elsewhere.innerHTML = othersShown.length ? `
-            <span class="archive-elsewhere-label"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> Also in Recent Events:</span>
+            <span class="archive-elsewhere-label"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> Also on this page:</span>
             ${othersShown.map(o => `
                 <a class="archive-elsewhere-link" href="#${o.card.id}">
                     <span>${highlightMatches(o.entry.title, o.hits)}</span>
@@ -571,7 +589,7 @@ function initLightbox() {
 }
 
 /* ==========================================================================
-   6. Countdown Timer for Next Upcoming Seminar
+   6. Countdown Timer for Next Upcoming Talk
    ========================================================================== */
 function initCountdown() {
     const daysEl = document.getElementById('timer-days');
@@ -773,7 +791,7 @@ const SEARCH_TYPES = {
     photo: { label: 'Gallery', icon: 'fa-image', order: 3 },
     page: { label: 'Pages', icon: 'fa-file-lines', order: 4 }
 };
-const SEARCH_SUGGESTIONS = ['Medical imaging', 'Graph ML', 'Robotics', 'Privacy', 'Ensemble', 'Lottery ticket'];
+const SEARCH_SUGGESTIONS = ['Medical imaging', 'Graph ML', 'Robotics', 'Privacy', 'Ensemble'];
 
 function slugify(text) {
     return text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -1435,7 +1453,8 @@ function initSiteSearch() {
                 </div>
                 <div class="search-idle-title">Jump to</div>
                 <div class="search-chips">
-                    <a class="search-chip" style="--i:6" href="events.html#next-talk"><i class="fa-solid fa-bolt"></i> Upcoming talk</a>
+                    <a class="search-chip" style="--i:5" href="events.html#next-talk"><i class="fa-solid fa-bolt"></i> Upcoming talk</a>
+                    <a class="search-chip" style="--i:6" href="events.html#inaugural-2025"><i class="fa-solid fa-flag-checkered"></i> Inaugural event</a>
                     <a class="search-chip" style="--i:7" href="events.html#archive-2024"><i class="fa-solid fa-box-archive"></i> 2024 archive</a>
                     <a class="search-chip" style="--i:8" href="contact.html#propose"><i class="fa-solid fa-paper-plane"></i> Propose a talk</a>
                 </div>

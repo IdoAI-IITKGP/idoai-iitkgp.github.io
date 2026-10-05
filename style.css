@@ -912,6 +912,9 @@ a:hover {
 
 .about-action {
     margin-top: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
 }
 
 .venue-box {
@@ -1254,6 +1257,210 @@ mark.find-hit {
     color: #ffffff !important;
 }
 
+/* Speaker name without a profile link: same look as the link, no hover */
+.speaker-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.speaker-name i {
+    color: var(--primary-light);
+    font-size: 0.9em;
+}
+
+/* Home page link to the inaugural IdoAI event */
+.inaugural-callout {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-top: 1.75rem;
+    padding: 1.25rem 1.5rem;
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: var(--radius-md);
+    color: var(--text-main);
+    text-decoration: none;
+    transition: all var(--transition-normal);
+}
+
+.inaugural-callout:hover,
+.inaugural-callout:focus-visible {
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--card-shadow), var(--glow-shadow);
+    transform: translateY(-2px);
+}
+
+.inaugural-callout-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-gradient);
+    color: #ffffff;
+    font-size: 1.15rem;
+}
+
+.inaugural-callout-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.inaugural-callout-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.inaugural-callout-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.inaugural-callout-cta {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-light);
+}
+
+.inaugural-callout-cta i {
+    transition: transform var(--transition-fast);
+}
+
+.inaugural-callout:hover .inaugural-callout-cta i {
+    transform: translateX(4px);
+}
+
+@media (max-width: 600px) {
+    .inaugural-callout {
+        flex-wrap: wrap;
+        padding: 1.1rem;
+        gap: 1rem;
+    }
+
+    .inaugural-callout-cta {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+/* Day schedule (inaugural IdoAI event) */
+.schedule-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1.75rem;
+}
+
+.schedule-title {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+}
+
+.schedule-title i {
+    color: var(--primary-light);
+}
+
+.schedule-table-wrapper {
+    overflow-x: auto;
+}
+
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+}
+
+.schedule-table th {
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--primary-light);
+    padding: 0 1rem 0.75rem 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.schedule-table td {
+    padding: 0.8rem 1rem 0.8rem 0;
+    border-bottom: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    vertical-align: top;
+    line-height: 1.5;
+}
+
+.schedule-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.schedule-table td:first-child {
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.schedule-table td:nth-child(2) {
+    white-space: nowrap;
+}
+
+.schedule-table td strong {
+    color: var(--text-main);
+}
+
+@media (max-width: 600px) {
+    .schedule-card {
+        padding: 1.1rem;
+    }
+
+    .schedule-table {
+        font-size: 0.85rem;
+    }
+
+    /* Stack each row: time + venue on one line, the event underneath */
+    .schedule-table thead {
+        display: none;
+    }
+
+    .schedule-table tr {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        column-gap: 0.75rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .schedule-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .schedule-table td,
+    .schedule-table tbody tr:last-child td {
+        padding: 0;
+        border-bottom: none;
+    }
+
+    .schedule-table td:nth-child(2) {
+        color: var(--primary-light);
+    }
+
+    .schedule-table td:nth-child(3) {
+        grid-column: 1 / -1;
+        margin-top: 0.3rem;
+    }
+}
+
 .event-topic {
     font-weight: 500;
     color: var(--text-main);
@@ -1320,6 +1527,20 @@ mark.find-hit {
     hyphens: auto;
 }
 
+.drawer-list {
+    margin: 0.75rem 0 1rem;
+    padding-left: 1.4rem;
+    text-align: left;
+}
+
+.drawer-list li {
+    margin-bottom: 0.4rem;
+}
+
+.drawer-list li::marker {
+    color: var(--primary-light);
+}
+
 .resource-links {
     display: flex;
     align-items: center;
@@ -1343,6 +1564,42 @@ mark.find-hit {
 
 span.resource-btn {
     cursor: default;
+}
+
+/* "Show less" button closing an expanded talk card from the bottom */
+.drawer-collapse {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--glass-border);
+}
+
+.collapse-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 18px;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-full);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary-light);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.collapse-btn:hover,
+.collapse-btn:focus-visible {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+}
+
+.collapse-btn i {
+    font-size: 0.8em;
 }
 
 a.resource-btn:hover,
@@ -1628,6 +1885,87 @@ span.resource-btn:hover {
     color: var(--text-muted);
     margin-bottom: 1.5rem;
     line-height: 1.4;
+}
+
+/* Former coordinators: separated from the current team, current role shown under affiliation */
+.team-subsection {
+    margin-top: 4rem;
+}
+
+.team-subheading {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+
+.team-subheading i {
+    color: var(--primary-light);
+}
+
+.member-current {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    width: 100%;
+    margin-top: -0.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: var(--radius-md);
+}
+
+.member-current-icon {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-gradient);
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.member-current-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.35;
+    min-width: 0;
+}
+
+.member-current-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary-light);
+}
+
+.member-current-role {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.member-current-org {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color var(--transition-normal);
+}
+
+.member-current-org i {
+    font-size: 0.7rem;
+    margin-left: 2px;
+}
+
+.member-current-org:hover,
+.member-current-org:focus-visible {
+    color: var(--primary-light);
+    text-decoration: underline;
 }
 
 .member-actions {
