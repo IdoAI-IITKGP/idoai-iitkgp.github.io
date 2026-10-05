@@ -4509,6 +4509,262 @@ h3 {
 }
 
 /* ==========================================================================
+   404 Page
+   ========================================================================== */
+.not-found {
+    padding-top: 140px;
+    padding-bottom: 40px;
+    min-height: calc(100vh - 5rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.not-found-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+}
+
+.page-header.not-found-header > :nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.page-header.not-found-header > :nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+.page-header.not-found-header > :nth-child(5) {
+    animation-delay: 0.4s;
+}
+
+/* Big "4 0 4": the zero is a glowing ring holding a brain icon, with a dot orbiting it */
+.not-found-code {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.06em;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: clamp(6rem, 4rem + 10vw, 11rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    margin-bottom: 1.5rem;
+    user-select: none;
+}
+
+.not-found-code .text-gradient {
+    background-size: 200% auto;
+    animation: gradientShift 6s ease-in-out infinite alternate;
+}
+
+.not-found-orb {
+    position: relative;
+    width: 0.72em;
+    height: 0.72em;
+    margin: 0 0.04em;
+    padding: 0.075em;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    box-shadow: 0 0 40px var(--accent-glow), 0 12px 30px rgba(139, 92, 246, 0.3);
+    animation: notFoundFloat 4s ease-in-out infinite;
+}
+
+.not-found-orb i {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-main);
+    color: var(--primary-light);
+    font-size: 0.26em;
+}
+
+.not-found-orb::after {
+    content: '';
+    position: absolute;
+    inset: -0.12em;
+    border-radius: 50%;
+    border: 1px dashed var(--glass-border-hover);
+    animation: notFoundOrbit 14s linear infinite;
+}
+
+.not-found-orb::before {
+    content: '';
+    position: absolute;
+    top: -0.12em;
+    left: 50%;
+    width: 0.07em;
+    height: 0.07em;
+    margin: -0.035em 0 0 -0.035em;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+    transform-origin: 50% calc(0.36em + 0.12em + 0.035em);
+    animation: notFoundOrbit 6s linear infinite;
+    z-index: 1;
+}
+
+@keyframes notFoundFloat {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-0.06em);
+    }
+}
+
+@keyframes notFoundOrbit {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.not-found-title {
+    font-size: clamp(1.75rem, 1.4rem + 1.8vw, 2.75rem);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+}
+
+.not-found-text {
+    font-size: 1.1rem;
+    max-width: 36rem;
+    margin: 0 auto 1.5rem;
+}
+
+/* The address that wasn't found, in a small chip */
+.not-found-path {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 100%;
+    margin-bottom: 2rem;
+    padding: 6px 16px;
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+}
+
+.not-found-path[hidden] {
+    display: none;
+}
+
+.not-found-path i {
+    color: var(--primary-light);
+    flex-shrink: 0;
+}
+
+.not-found-path code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.not-found-actions {
+    margin-bottom: 0;
+}
+
+/* Popular pages: cards in the style of the home page's inaugural callout */
+.not-found-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+    gap: 1.25rem;
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
+    animation: fadeUp 0.9s var(--ease-out-expo) 0.5s both;
+}
+
+.not-found-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.25rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--text-main);
+    transition: all var(--transition-normal);
+}
+
+.not-found-link:hover,
+.not-found-link:focus-visible {
+    color: var(--text-main);
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--card-shadow), var(--glow-shadow);
+    transform: translateY(-3px);
+}
+
+.not-found-link-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-gradient);
+    color: #ffffff;
+    font-size: 1.05rem;
+}
+
+.not-found-link-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.not-found-link-title {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.not-found-link-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.not-found-link-arrow {
+    flex-shrink: 0;
+    color: var(--primary-light);
+    transition: transform var(--transition-fast);
+}
+
+.not-found-link:hover .not-found-link-arrow,
+.not-found-link:focus-visible .not-found-link-arrow {
+    transform: translateX(4px);
+}
+
+@media (max-width: 600px) {
+    .not-found {
+        padding-top: 120px;
+    }
+
+    .not-found-text {
+        font-size: 1rem;
+    }
+}
+
+/* No endlessly repainting animations on low-end devices */
+html.lite .not-found-code .text-gradient,
+html.lite .not-found-orb,
+html.lite .not-found-orb::before,
+html.lite .not-found-orb::after {
+    animation: none;
+}
+
+/* ==========================================================================
    Performance & Older Browsers
    ========================================================================== */
 

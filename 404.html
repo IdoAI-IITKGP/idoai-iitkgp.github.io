@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <script>
+        /* Runs before the page is drawn, so the theme and lite mode never flash */
+        (function () {
+            var root = document.documentElement;
+            // GitHub Pages serves this page for any missing URL (even /a/b/c), so relative links
+            // to style.css, js/ and the other pages must resolve from the site root, not the bad path
+            if (/\.github\.io$/.test(location.hostname)) {
+                var base = document.createElement('base');
+                base.href = '/';
+                document.head.appendChild(base);
+            }
+            var savedTheme = null;
+            try { savedTheme = localStorage.getItem('idoai-theme'); } catch (e) { /* storage blocked */ }
+            if (savedTheme) {
+                root.setAttribute('data-theme', savedTheme);
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                root.setAttribute('data-theme', 'light');
+            }
+            // Lighter build for low-end devices (few cores / little memory / Data Saver); ?lite previews it
+            var cores = navigator.hardwareConcurrency || 8;
+            var memory = navigator.deviceMemory;
+            var saveData = navigator.connection && navigator.connection.saveData;
+            if (/[?&]lite\b/.test(location.search) || saveData || cores <= 2
+                || (memory !== undefined && (memory <= 2 || (memory <= 4 && cores <= 4)))) {
+                root.classList.add('lite');
+            }
+        })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found &bull; IdoAI</title>
+    <meta name="description"
+        content="The page you were looking for could not be found on the IdoAI weekly talk series website, Department of AI, IIT Kharagpur.">
+    <meta name="robots" content="noindex">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Header Navigation -->
+    <header class="site-header">
+        <div class="container nav-container">
+            <a href="index.html" class="brand-logo">
+                <img src="iitlogo.png" alt="IIT Kharagpur Logo" class="logo-dark">
+                <img src="IITKgp_logo.svg" alt="IIT Kharagpur Logo" class="logo-light">
+                <div>
+                    <span class="brand-title text-gradient">IdoAI</span>
+                    <span class="brand-subtitle"><span class="subtitle-long">Dept. of Artificial Intelligence</span><span
+                            class="subtitle-short">Dept. of AI</span> &bull; IIT Kharagpur</span>
+                </div>
+            </a>
+
+            <nav>
+                <ul class="nav-menu" id="nav-menu">
+                    <li><a href="index.html" class="nav-link"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Home</span></a></li>
+                    <li><a href="events.html" class="nav-link"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i><span>Events</span></a></li>
+                    <li><a href="gallery.html" class="nav-link"><i class="fa-solid fa-images" aria-hidden="true"></i><span>Gallery</span></a></li>
+                    <li><a href="contact.html" class="nav-link"><i class="fa-solid fa-address-card" aria-hidden="true"></i><span>Contact</span></a></li>
+                    <li class="nav-cta"><a href="https://forms.gle/89a4wQrrdy2YnLNX6" target="_blank"
+                            rel="noopener noreferrer" class="btn btn-primary"><i class="fa-solid fa-paper-plane"
+                                aria-hidden="true"></i> Propose a Talk</a></li>
+                </ul>
+            </nav>
+
+            <div class="nav-actions">
+                <button type="button" class="search-trigger" aria-label="Search the site (Ctrl+K)" aria-haspopup="dialog">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    <span class="search-trigger-label">Search</span><kbd class="search-trigger-kbd">Ctrl K</kbd>
+                </button>
+                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+                    <i class="fa-solid fa-sun theme-icon-sun" aria-hidden="true"></i>
+                    <i class="fa-solid fa-moon theme-icon-moon" aria-hidden="true"></i>
+                </button>
+                <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Open menu">
+                    <span class="hamburger" aria-hidden="true"><span></span><span></span><span></span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container not-found">
+
+        <div class="page-header not-found-header">
+            <div class="not-found-code" aria-hidden="true">
+                <span class="text-gradient">4</span>
+                <span class="not-found-orb"><i class="fa-solid fa-brain"></i></span>
+                <span class="text-gradient">4</span>
+            </div>
+            <h1 class="not-found-title">This page <span class="text-gradient">wandered off</span></h1>
+            <p class="not-found-text">
+                The link may be broken, or the page may have moved. Our model searched every layer
+                and still couldn't find it.
+            </p>
+            <p class="not-found-path" id="not-found-path" hidden>
+                <i class="fa-solid fa-link-slash" aria-hidden="true"></i>
+                <code></code>
+            </p>
+            <div class="hero-buttons not-found-actions">
+                <a href="index.html" class="btn btn-primary"><i class="fa-solid fa-house" aria-hidden="true"></i> Back to Home</a>
+                <button type="button" class="btn btn-secondary" id="not-found-search"><i
+                        class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Search the Site</button>
+            </div>
+        </div>
+
+        <!-- Where readers most likely meant to go -->
+        <section class="not-found-links" aria-label="Popular pages">
+            <a href="events.html" class="not-found-link">
+                <span class="not-found-link-icon"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i></span>
+                <span class="not-found-link-text">
+                    <span class="not-found-link-title">Events</span>
+                    <span class="not-found-link-desc">Upcoming talks and the full archive</span>
+                </span>
+                <i class="fa-solid fa-arrow-right not-found-link-arrow" aria-hidden="true"></i>
+            </a>
+            <a href="gallery.html" class="not-found-link">
+                <span class="not-found-link-icon"><i class="fa-solid fa-images" aria-hidden="true"></i></span>
+                <span class="not-found-link-text">
+                    <span class="not-found-link-title">Gallery</span>
+                    <span class="not-found-link-desc">Photos and posters from past sessions</span>
+                </span>
+                <i class="fa-solid fa-arrow-right not-found-link-arrow" aria-hidden="true"></i>
+            </a>
+            <a href="contact.html" class="not-found-link">
+                <span class="not-found-link-icon"><i class="fa-solid fa-address-card" aria-hidden="true"></i></span>
+                <span class="not-found-link-text">
+                    <span class="not-found-link-title">Contact</span>
+                    <span class="not-found-link-desc">Reach the coordinators or propose a talk</span>
+                </span>
+                <i class="fa-solid fa-arrow-right not-found-link-arrow" aria-hidden="true"></i>
+            </a>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="brand-logo">
+                        <img src="iitlogo.png" alt="IIT Kharagpur Logo" class="logo-dark">
+                        <img src="IITKgp_logo.svg" alt="IIT Kharagpur Logo" class="logo-light">
+                        <span class="brand-title text-gradient">IdoAI</span>
+                    </a>
+                    <p>
+                        <b>Interdisciplinary Opportunities with AI</b> <br>
+                        Weekly Talk Series at
+                        Department of Artificial Intelligence,
+                        Indian Institute of Technology Kharagpur.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="events.html">Event Details</a></li>
+                        <li><a href="events.html#archive-2024">Event Archive</a></li>
+                        <li><a href="gallery.html">Photo Gallery</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-heading">Connect</h4>
+                    <ul class="footer-links footer-connect">
+                        <li><a href="https://www.linkedin.com/company/ai-iitkgp/" target="_blank" rel="noopener noreferrer">
+                                <span class="connect-icon is-linkedin" aria-hidden="true"><i class="fa-brands fa-linkedin-in"></i></span>
+                                LinkedIn Page</a></li>
+                        <li><a href="https://ai.iitkgp.ac.in" target="_blank" rel="noopener noreferrer">
+                                <span class="connect-icon is-web" aria-hidden="true"><i class="fa-solid fa-globe"></i></span>
+                                Department Webpage</a></li>
+                        <li><a href="https://maps.app.goo.gl/JtVYZDqB4DAPf4AH8" target="_blank" rel="noopener noreferrer">
+                                <span class="connect-icon is-map" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
+                                CRR Building, IIT KGP</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 IdoAI - Department of Artificial Intelligence, IIT Kharagpur. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+    <script>
+        /* Shows the address that wasn't found, and lets the button open the header's site search */
+        (function () {
+            var path = document.getElementById('not-found-path');
+            var shown = location.pathname + location.search;
+            try { shown = decodeURIComponent(shown); } catch (e) { /* malformed %-escape: show it raw */ }
+            if (!/\/404(\.html)?$/.test(location.pathname)) {
+                path.querySelector('code').textContent = shown;
+                path.hidden = false;
+            }
+            document.getElementById('not-found-search').addEventListener('click', function () {
+                var trigger = document.querySelector('.search-trigger');
+                if (trigger) trigger.click();
+            });
+        })();
+    </script>
+</body>
+
+</html>
