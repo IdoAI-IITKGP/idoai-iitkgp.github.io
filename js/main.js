@@ -457,7 +457,9 @@ function initLightbox() {
     function closeLightbox() {
         setPlaying(false);
         if (fullscreenElement() === lightboxModal) exitFullscreen();
-        lightboxModal.classList.remove('active', 'has-series', 'is-poster');
+        // Only 'active' goes here: the viewer fades out, and dropping 'is-poster' / 'has-series' now would flash
+        // the full screen / slideshow buttons during the fade. Each open sets them afresh instead.
+        lightboxModal.classList.remove('active');
         document.body.style.overflow = '';
         series = [];
         current = -1;
@@ -574,7 +576,8 @@ function initLightbox() {
         progress.classList.remove('run');
         lightboxModal.classList.toggle('is-playing', playing);
         playBtn.setAttribute('aria-pressed', String(playing));
-        playBtn.innerHTML = `<i class="fa-solid fa-${playing ? 'pause' : 'play'}" aria-hidden="true"></i>`;
+        // Swap the icon in place: replacing it would detach the clicked <i>, and the viewer would read that as a click outside
+        playBtn.querySelector('i').className = `fa-solid fa-${playing ? 'pause' : 'play'}`;
         setLabel(playBtn, `${playing ? 'Pause' : 'Play'} slideshow (P)`);
         if (playing) scheduleNext();
     }
@@ -597,7 +600,7 @@ function initLightbox() {
     function syncFullscreen() {
         const on = fullscreenElement() === lightboxModal;
         lightboxModal.classList.toggle('is-fullscreen', on);
-        fsBtn.innerHTML = `<i class="fa-solid fa-${on ? 'compress' : 'expand'}" aria-hidden="true"></i>`;
+        fsBtn.querySelector('i').className = `fa-solid fa-${on ? 'compress' : 'expand'}`;
         setLabel(fsBtn, on ? 'Exit full screen (F)' : 'Full screen (F)');
     }
     if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) fsBtn.hidden = true;
@@ -688,6 +691,7 @@ function initLightbox() {
             series = [...galleryItems].filter(el => el.querySelector('img') && el.style.display !== 'none');
             if (!series.includes(item)) series = [item];
             current = series.indexOf(item);
+            lightboxModal.classList.remove('is-poster');
             lightboxModal.classList.toggle('has-series', series.length > 1);
             counter.textContent = `${current + 1} / ${series.length}`;
             buildThumbs();
@@ -710,6 +714,7 @@ function initLightbox() {
                 if (trigger.tagName === 'A') {
                     e.preventDefault();
                 }
+                lightboxModal.classList.remove('has-series');
                 lightboxModal.classList.add('is-poster'); // posters: no browser full screen
                 openLightbox(
                     src,
@@ -724,11 +729,12 @@ function initLightbox() {
         closeBtn.addEventListener('click', closeLightbox);
     }
 
-    // Tapping anywhere outside the photo and its caption closes the viewer
+    // Tapping anywhere outside the photo and its caption closes the viewer.
+    // composedPath() is fixed when the click starts, so it still holds the toolbar etc. even if a handler changed the DOM.
+    const keepOpen = '.lightbox-img, .lightbox-caption > *, .lightbox-toolbar, .lightbox-nav, .lightbox-counter, .lightbox-sidebar';
     lightboxModal.addEventListener('click', (e) => {
-        if (!e.target.closest('.lightbox-img, .lightbox-caption > *, .lightbox-toolbar, .lightbox-nav, .lightbox-counter, .lightbox-sidebar')) {
-            closeLightbox();
-        }
+        const insideControls = e.composedPath().some(el => el instanceof Element && el.matches(keepOpen));
+        if (!insideControls) closeLightbox();
     });
 
     document.addEventListener('keydown', (e) => {

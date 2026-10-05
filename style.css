@@ -1527,6 +1527,31 @@ mark.find-hit {
     hyphens: auto;
 }
 
+/* Portrait poster beside the abstract: floats right and the text wraps around it */
+.drawer-with-poster {
+    display: flow-root; /* contains the float, so the links row below starts under the poster */
+    margin-bottom: 1.25rem;
+}
+
+.drawer-with-poster .drawer-abstract {
+    margin-bottom: 0;
+}
+
+.talk-poster-container.talk-poster-side {
+    float: right;
+    width: min(360px, 40%);
+    margin: 0.25rem 0 1rem 1.75rem;
+}
+
+@media (max-width: 700px) {
+    .talk-poster-container.talk-poster-side {
+        float: none;
+        width: 100%;
+        max-width: 360px;
+        margin: 0 auto 1.25rem;
+    }
+}
+
 .drawer-list {
     margin: 0.75rem 0 1rem;
     padding-left: 1.4rem;
