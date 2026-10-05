@@ -174,16 +174,22 @@ function initSearchAndFilter() {
     }
 
     // Same matching as the site search (word families, related terms, typos), built from each card's text
-    const searchable = searchInput ? [...filterableItems].map(item => prepareSearchEntry({
+    const toEntry = item => prepareSearchEntry({
         title: cleanText(item.querySelector('.event-topic')) || item.dataset.title || '',
         speaker: cleanText(item.querySelector('.event-speaker')) || item.dataset.speaker || '',
         meta: cleanText(item.querySelector('.event-date-badge')) || item.dataset.date || '',
-        tags: item.dataset.category || '',
+        tags: `${item.dataset.category || ''} ${item.dataset.keywords || ''}`,
         body: cleanText(item.querySelector('.drawer-abstract')) || item.dataset.venue || '',
         resources: [...item.querySelectorAll('.resource-links > a, .resource-links > span')].map(el => ({ label: cleanText(el) }))
-    })) : [];
+    });
+    const searchable = searchInput ? [...filterableItems].map(toEntry) : [];
+    // Talks outside the filtered list (e.g. Recent Events 2026) stay put, but matches are linked above the results
+    const otherTalks = searchInput
+        ? [...document.querySelectorAll('.event-card:not(.filterable-item)')].map(card => ({ card, entry: toEntry(card) }))
+        : [];
 
     let status = null;
+    let elsewhere = null;
     let empty = null;
     let wrapper = null;
     if (searchInput) {
@@ -203,6 +209,16 @@ function initSearchAndFilter() {
         status.className = 'archive-status';
         status.setAttribute('aria-live', 'polite');
         searchInput.closest('.controls-bar').after(status);
+
+        elsewhere = document.createElement('div');
+        elsewhere.className = 'archive-elsewhere';
+        elsewhere.hidden = true;
+        status.after(elsewhere);
+        elsewhere.addEventListener('click', (e) => {
+            // Re-clicking the talk already in the URL doesn't fire hashchange, so reveal it directly
+            const link = e.target.closest('a[href^="#"]');
+            if (link && link.getAttribute('href') === location.hash) revealHashTarget();
+        });
 
         empty = document.createElement('div');
         empty.className = 'archive-empty';
@@ -264,16 +280,39 @@ function initSearchAndFilter() {
         });
 
         if (!status) return;
+
+        // Matching talks from outside the list: every-word matches, or the closest ones when nothing matches fully
+        const others = otherTalks.map(o => {
+            const found = tokens.map(tok => matchTokenInEntry(o.entry, tok)).filter(Boolean);
+            return {
+                ...o,
+                matched: found.length,
+                score: found.reduce((sum, m) => sum + m.score, 0),
+                hits: [...new Set(found.flatMap(m => m.hits))]
+            };
+        }).filter(o => o.matched);
+        const othersFull = others.filter(o => o.matched === tokens.length);
+        const othersShown = (othersFull.length ? othersFull : full.length ? [] : others)
+            .sort((a, b) => (b.matched - a.matched) || (b.score - a.score));
+        elsewhere.hidden = !othersShown.length;
+        elsewhere.innerHTML = othersShown.length ? `
+            <span class="archive-elsewhere-label"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> Also in Recent Events:</span>
+            ${othersShown.map(o => `
+                <a class="archive-elsewhere-link" href="#${o.card.id}">
+                    <span>${highlightMatches(o.entry.title, o.hits)}</span>
+                    ${o.entry.speaker ? `<span class="archive-elsewhere-speaker">${highlightMatches(o.entry.speaker, o.hits)}</span>` : ''}
+                </a>`).join('')}` : '';
+
         const total = inScope.length;
         if (!tokens.length) status.textContent = '';
-        else if (partial) status.textContent = `No talk has every word. Showing the closest ${shown} of ${total}.`;
+        else if (partial) status.textContent = `No archive talk has every word. Showing the closest ${shown} of ${total}.`;
         else status.textContent = `Showing ${shown} of ${total} talk${total === 1 ? '' : 's'}`;
 
         empty.hidden = shown > 0;
         if (!shown) {
             empty.innerHTML = `
                 <span class="search-empty-icon"><i class="fa-regular fa-face-meh-blank"></i></span>
-                <div>No talks match “<strong>${escapeHtml(currentSearchQuery.trim())}</strong>”</div>
+                <div>No ${othersShown.length ? 'archive ' : ''}talks match “<strong>${escapeHtml(currentSearchQuery.trim())}</strong>”</div>
                 <p>Try a speaker name or a topic like “graph”, or clear the search.</p>`;
         }
     }
@@ -683,7 +722,7 @@ function assignSearchAnchors(doc) {
     });
     const about = doc.querySelector('.about-section');
     if (about && !about.id) about.id = 'about';
-    const upcoming = doc.querySelector('main.container .featured-card')?.closest('section');
+    const upcoming = doc.querySelector('main .featured-card')?.closest('section');
     if (upcoming && !upcoming.id) upcoming.id = 'next-talk';
     const form = doc.querySelector('iframe[src*="docs.google.com/forms"]')?.closest('section');
     if (form && !form.id) form.id = 'propose';
@@ -783,7 +822,7 @@ function buildEntriesFromDoc(doc, page) {
                 speaker: cleanText(card.querySelector('.event-speaker')),
                 meta: cleanText(card.querySelector('.event-date-badge')) + (archived ? ' • PANDA archive' : ''),
                 body: cleanText(card.querySelector('.drawer-abstract')).replace(/^(Abstract|Background & Details):\s*/i, ''),
-                tags: card.dataset.category || '',
+                tags: `${card.dataset.category || ''} ${card.dataset.keywords || ''}`, // keywords: extra search terms
                 resources: resourcesOf(card, page),
                 url: `${page}#${card.id}`
             });
@@ -797,6 +836,7 @@ function buildEntriesFromDoc(doc, page) {
             speaker: item.dataset.speaker || '',
             meta: item.dataset.date || '',
             body: item.dataset.venue || '',
+            tags: item.dataset.keywords || '',
             url: `${page}#${item.id}`
         }));
     }
@@ -852,7 +892,16 @@ async function buildSearchIndex() {
         }
     }));
 
-    return docs.filter(Boolean).flatMap(([page, doc]) => buildEntriesFromDoc(doc, page)).map(prepareSearchEntry);
+    return docs.filter(Boolean).flatMap(([page, doc]) => buildEntriesFromDoc(doc, page))
+        .map(e => markCurrentPage(e, here)).map(prepareSearchEntry);
+}
+
+/* Results on the page being viewed are listed first. A talk also shown here (e.g. on Home) links to this copy. */
+function markCurrentPage(e, here) {
+    const [page, anchor] = e.url.split('#');
+    if (page === here) return { ...e, here: true };
+    if (anchor && document.getElementById(anchor)) return { ...e, here: true, url: `${here}#${anchor}` };
+    return e;
 }
 
 /* Adds the normalized text, words and word stems the matcher works on */
@@ -1056,11 +1105,12 @@ function searchEntries(index, query) {
     const partial = !pool.length && scored.length > 0;
     if (partial) pool = scored.map(r => ({ ...r, score: r.score * (r.matched / tokens.length) }));
 
-    // Results stay grouped by type, but the group holding the strongest match comes first
+    // Matches on the current page come first; the rest stay grouped by type, strongest group first
     const groupBest = {};
     pool.forEach(r => { groupBest[r.entry.type] = Math.max(groupBest[r.entry.type] || 0, r.score); });
     const items = pool
-        .sort((a, b) => (groupBest[b.entry.type] - groupBest[a.entry.type])
+        .sort((a, b) => (!!b.entry.here - !!a.entry.here)
+            || (groupBest[b.entry.type] - groupBest[a.entry.type])
             || (SEARCH_TYPES[a.entry.type].order - SEARCH_TYPES[b.entry.type].order)
             || (b.score - a.score))
         .slice(0, 24)
@@ -1275,13 +1325,13 @@ function initSiteSearch() {
             item.remove();
             if (section && !section.querySelector('.search-history-item')) section.remove();
             setActive(-1);
-        }, prefersReducedMotion ? 0 : 280);
+        }, prefersReducedMotion ? 0 : 250);
     }
 
     function clearHistory(section) {
         saveSearchHistory([]);
         section.classList.add('clearing');
-        setTimeout(() => { section.remove(); setActive(-1); }, prefersReducedMotion ? 0 : 420);
+        setTimeout(() => { section.remove(); setActive(-1); }, prefersReducedMotion ? 0 : 200);
     }
 
     function renderIdle() {
@@ -1340,9 +1390,10 @@ function initSiteSearch() {
         let lastType = null;
         results.forEach((r, i) => {
             const tokens = r.hits;
-            if (r.type !== lastType) {
-                html += `<li class="search-group" role="presentation" style="--i:${i}">${SEARCH_TYPES[r.type].label}</li>`;
-                lastType = r.type;
+            const group = r.here ? 'here' : r.type;
+            if (group !== lastType) {
+                html += `<li class="search-group" role="presentation" style="--i:${i}">${r.here ? 'On this page' : SEARCH_TYPES[r.type].label}</li>`;
+                lastType = group;
             }
             const meta = [r.speaker, r.meta].filter(Boolean)
                 .map(m => highlightMatches(m, tokens)).join(' <span class="dot">•</span> ');

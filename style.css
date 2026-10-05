@@ -958,20 +958,18 @@ a:hover {
     cursor: pointer;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-50%) scale(0.7);
-    transition: opacity 0.2s ease, transform 0.25s var(--ease-out-expo), visibility 0.2s,
-        background var(--transition-fast), color var(--transition-fast);
+    transform: translateY(-50%);
+    transition: opacity 0.2s ease, visibility 0.2s, color var(--transition-fast);
 }
 
 .search-input-wrapper.has-value .archive-clear {
     opacity: 1;
     visibility: visible;
-    transform: translateY(-50%);
 }
 
-.archive-clear:hover {
-    background: rgba(239, 68, 68, 0.12);
-    color: #ef4444;
+.archive-clear:hover,
+.archive-clear:focus-visible {
+    color: var(--text-main);
 }
 
 .search-input-wrapper .archive-progress {
@@ -997,6 +995,60 @@ a:hover {
 
 .archive-status:empty {
     display: none;
+}
+
+/* Matches from talks outside the archive (Recent Events), linked above the filtered list */
+.archive-elsewhere[hidden] {
+    display: none;
+}
+
+.archive-elsewhere {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 1.25rem;
+    animation: searchItemIn 0.4s var(--ease-out-expo) backwards;
+}
+
+.archive-elsewhere-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-dim);
+}
+
+.archive-elsewhere-link {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+    max-width: 100%;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--primary) 35%, transparent);
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    color: var(--text-main);
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.archive-elsewhere-link:hover,
+.archive-elsewhere-link:focus-visible {
+    background: color-mix(in srgb, var(--primary) 18%, transparent);
+    border-color: var(--primary);
+}
+
+.archive-elsewhere-speaker {
+    color: var(--text-dim);
+    font-size: 0.8rem;
+}
+
+.archive-elsewhere mark {
+    background: color-mix(in srgb, var(--primary) 28%, transparent);
+    color: inherit;
+    border-radius: 3px;
+    padding: 0 2px;
 }
 
 .archive-empty[hidden] {
@@ -2726,6 +2778,12 @@ body.search-open {
     color: var(--text-muted);
     display: inline-flex;
     align-items: center;
+    transition: color var(--transition-fast);
+}
+
+.search-close:hover,
+.search-close:focus-visible {
+    color: var(--text-main);
 }
 
 .search-close i {
@@ -3108,9 +3166,9 @@ body.search-open {
     transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-.search-history-clear:hover {
-    background: rgba(239, 68, 68, 0.12);
-    color: #ef4444;
+.search-history-clear:hover,
+.search-history-clear:focus-visible {
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
 }
 
 .search-history-list {
@@ -3128,8 +3186,7 @@ body.search-open {
     border-radius: var(--radius-md);
     animation: searchItemIn 0.4s var(--ease-out-expo) backwards;
     animation-delay: calc(var(--i) * 35ms);
-    transition: background var(--transition-fast), opacity 0.25s ease, transform 0.3s var(--ease-out-expo),
-        max-height 0.3s var(--ease-out-expo);
+    transition: background var(--transition-fast), opacity 0.2s ease, max-height 0.25s ease;
 }
 
 .search-history-item.active {
@@ -3179,32 +3236,24 @@ body.search-open {
     background: none;
     color: var(--text-dim);
     cursor: pointer;
-    transition: background var(--transition-fast), color var(--transition-fast), transform 0.2s ease;
+    transition: color var(--transition-fast);
 }
 
-.search-history-remove:hover {
-    background: rgba(239, 68, 68, 0.12);
-    color: #ef4444;
-    transform: rotate(90deg);
+.search-history-remove:hover,
+.search-history-remove:focus-visible {
+    color: var(--text-main);
 }
 
-/* Removing one entry: it slides right and the list closes the gap */
+/* Removing one entry: it fades and the list closes the gap */
 .search-history-item.removing {
     opacity: 0;
-    transform: translateX(24px);
     max-height: 0;
 }
 
-/* Clear all: entries slide out one after another, then the section fades */
-.search-history.clearing .search-history-item {
-    opacity: 0;
-    transform: translateX(24px);
-    transition-delay: calc(var(--i) * 45ms);
-}
-
+/* Clear all: the section fades out */
 .search-history.clearing {
     opacity: 0;
-    transition-delay: 0.25s;
+    transition: opacity 0.2s ease;
 }
 
 /* No results */
