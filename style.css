@@ -374,6 +374,49 @@ a:hover {
     transform: rotate(-20deg);
 }
 
+/* Hover popup under the theme toggle; its text comes from data-tooltip (set in js/main.js).
+   Right-aligned to the button so it never runs off the edge of the screen.
+   z-index lifts it above the header's scroll progress bar, which is appended later in the header */
+.theme-toggle-btn {
+    position: relative;
+    z-index: 2;
+}
+
+.theme-toggle-btn[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--text-main);
+    color: var(--bg-main);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+/* Only real hover devices get the popup (a tap on a phone would leave it stuck open) */
+@media (hover: hover) {
+    .theme-toggle-btn:hover::after {
+        opacity: 1;
+        transform: translateY(0);
+        transition-delay: 0.25s;
+    }
+}
+
+.theme-toggle-btn:focus-visible::after {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 /* Menu button matches the theme toggle; three bars morph into an X */
 .mobile-menu-btn {
     display: none;
@@ -1487,7 +1530,10 @@ span.resource-btn:hover {
 /* Member Card Grid & Card Template */
 .members-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr));
+    /* auto-fit + capped track width + centering keeps the cards grouped in the
+       middle on wide screens instead of leaving empty columns on the right */
+    grid-template-columns: repeat(auto-fit, minmax(min(270px, 100%), 360px));
+    justify-content: center;
     gap: 2rem;
 }
 
@@ -1783,7 +1829,7 @@ span.resource-btn:hover {
     background: var(--bg-card);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
-    padding: 1rem;
+    padding: 0.35rem;
     position: relative;
     transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
@@ -1882,7 +1928,7 @@ span.resource-btn:hover {
 /* Wide (3:1) animated talk flyer: spans the card and is never cropped or letterboxed */
 .talk-poster-container.talk-banner {
     margin: 0 0 1.5rem;
-    padding: 0.6rem;
+    padding: 0.3rem;
 }
 
 /* Display-only: no zoom cursor or hover scale */
@@ -1905,7 +1951,7 @@ span.resource-btn:hover {
 
 @media (max-width: 768px) {
     .talk-poster-container.talk-banner {
-        padding: 0.35rem;
+        padding: 0.2rem;
         margin-bottom: 1rem;
     }
 
@@ -2456,7 +2502,7 @@ span.resource-btn:hover {
 
     .talk-poster-container {
         margin: 1rem 0;
-        padding: 0.5rem;
+        padding: 0.25rem;
     }
 
     .talk-poster-img {
@@ -3755,13 +3801,9 @@ h3 {
     }
 }
 
-/* Large and ultra-wide screens: wider content and proportionally larger type/spacing
-   (sizes are in rem, so raising the root size scales the whole layout evenly) */
+/* Large and ultra-wide screens: wider content with only a gentle bump in type/spacing
+   (sizes are in rem, so the root size scales the whole layout evenly) */
 @media (min-width: 1680px) {
-    html {
-        font-size: 17px;
-    }
-
     .container {
         max-width: 1320px;
     }
@@ -3769,7 +3811,7 @@ h3 {
 
 @media (min-width: 2200px) {
     html {
-        font-size: 19px;
+        font-size: 17px;
     }
 
     .container {
@@ -3779,7 +3821,7 @@ h3 {
 
 @media (min-width: 3200px) {
     html {
-        font-size: 22px;
+        font-size: 18px;
     }
 
     .container {

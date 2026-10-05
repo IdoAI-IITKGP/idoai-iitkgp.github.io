@@ -55,11 +55,13 @@ function initThemeToggle() {
     });
 }
 
-/* The sun/moon icon itself is switched by CSS from data-theme; this keeps the tooltip in step */
+/* The sun/moon icon itself is switched by CSS from data-theme; this keeps the hover popup in step */
 function updateThemeIcon(theme) {
     const themeBtn = document.getElementById('theme-toggle');
     if (!themeBtn) return;
-    themeBtn.setAttribute('title', theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+    const label = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+    themeBtn.setAttribute('data-tooltip', label);
+    themeBtn.setAttribute('aria-label', label);
 }
 
 /* ==========================================================================
