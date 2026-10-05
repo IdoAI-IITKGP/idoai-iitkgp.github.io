@@ -402,6 +402,36 @@ function initLightbox() {
     const prevBtn = lightboxContent.querySelector('.lightbox-prev');
     const nextBtn = lightboxContent.querySelector('.lightbox-next');
 
+    // Toolbar (top-right): slideshow, thumbnail sidebar, browser full screen (gallery photos only), close
+    lightboxContent.insertAdjacentHTML('beforeend', `
+        <div class="lightbox-toolbar">
+            <button type="button" class="lightbox-tool lightbox-play"><i class="fa-solid fa-play" aria-hidden="true"></i></button>
+            <button type="button" class="lightbox-tool lightbox-thumbs-toggle"><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i></button>
+            <button type="button" class="lightbox-tool lightbox-fullscreen"><i class="fa-solid fa-expand" aria-hidden="true"></i></button>
+        </div>`);
+    const toolbar = lightboxContent.querySelector('.lightbox-toolbar');
+    const playBtn = toolbar.querySelector('.lightbox-play');
+    const thumbsBtn = toolbar.querySelector('.lightbox-thumbs-toggle');
+    const fsBtn = toolbar.querySelector('.lightbox-fullscreen');
+    if (closeBtn) toolbar.appendChild(closeBtn);
+
+    // Wide screens: every photo of the current set as thumbnails in a right-hand sidebar; slideshow progress bar on top
+    lightboxModal.insertAdjacentHTML('beforeend', `
+        <aside class="lightbox-sidebar" aria-label="All photos">
+            <div class="lightbox-sidebar-head"><span>All photos</span><span class="lightbox-sidebar-count"></span></div>
+            <div class="lightbox-thumbs"></div>
+        </aside>
+        <div class="lightbox-progress" aria-hidden="true"></div>`);
+    const sidebar = lightboxModal.querySelector('.lightbox-sidebar');
+    const sidebarCount = sidebar.querySelector('.lightbox-sidebar-count');
+    const thumbsList = sidebar.querySelector('.lightbox-thumbs');
+    const progress = lightboxModal.querySelector('.lightbox-progress');
+
+    function setLabel(btn, label) {
+        btn.setAttribute('aria-label', label);
+        btn.title = label;
+    }
+
     let series = [];   // gallery photos currently shown (respects the category filter)
     let current = -1;
     let switchTimer = null;
@@ -425,7 +455,9 @@ function initLightbox() {
     }
 
     function closeLightbox() {
-        lightboxModal.classList.remove('active', 'has-series');
+        setPlaying(false);
+        if (fullscreenElement() === lightboxModal) exitFullscreen();
+        lightboxModal.classList.remove('active', 'has-series', 'is-poster');
         document.body.style.overflow = '';
         series = [];
         current = -1;
@@ -466,10 +498,125 @@ function initLightbox() {
         });
     }
 
+    function buildThumbs() {
+        thumbsList.innerHTML = '';
+        series.forEach((item, i) => {
+            const img = item.querySelector('img');
+            const thumb = document.createElement('button');
+            thumb.type = 'button';
+            thumb.className = 'lightbox-thumb';
+            thumb.setAttribute('aria-label', `Photo ${i + 1}: ${item.dataset.title || img.alt}`);
+            const pic = document.createElement('img');
+            pic.src = img.currentSrc || img.src;
+            pic.alt = '';
+            pic.loading = 'lazy';
+            pic.decoding = 'async';
+            thumb.appendChild(pic);
+            thumb.addEventListener('click', () => {
+                showPhoto(i);
+                restartSlideshow();
+            });
+            thumbsList.appendChild(thumb);
+        });
+        sidebarCount.textContent = `${series.length} photo${series.length === 1 ? '' : 's'}`;
+    }
+
+    function markThumb() {
+        [...thumbsList.children].forEach((thumb, i) => {
+            const on = i === current;
+            thumb.classList.toggle('is-active', on);
+            if (on) {
+                thumb.setAttribute('aria-current', 'true');
+                thumb.scrollIntoView({ block: 'nearest', behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+            } else {
+                thumb.removeAttribute('aria-current');
+            }
+        });
+    }
+
+    // Sidebar shown / hidden: remembered for this viewer (browser storage may be unavailable, so it's optional)
+    const THUMBS_KEY = 'idoai-lightbox-thumbs';
+    let thumbsHidden = false;
+    try { thumbsHidden = localStorage.getItem(THUMBS_KEY) === 'hidden'; } catch (e) { /* storage blocked */ }
+
+    function applyThumbs() {
+        lightboxModal.classList.toggle('thumbs-hidden', thumbsHidden);
+        thumbsBtn.setAttribute('aria-pressed', String(!thumbsHidden));
+        setLabel(thumbsBtn, `${thumbsHidden ? 'Show' : 'Hide'} thumbnails (T)`);
+        sidebar.toggleAttribute('inert', thumbsHidden);
+    }
+
+    function toggleThumbs() {
+        thumbsHidden = !thumbsHidden;
+        applyThumbs();
+        try { localStorage.setItem(THUMBS_KEY, thumbsHidden ? 'hidden' : 'shown'); } catch (e) { /* storage blocked */ }
+    }
+
+    // Slideshow: next photo every few seconds, with a thin progress bar along the top
+    const SLIDE_MS = 4000;
+    let playing = false;
+    let slideTimer = null;
+    progress.style.animationDuration = `${SLIDE_MS}ms`;
+
+    function scheduleNext() {
+        clearTimeout(slideTimer);
+        progress.classList.remove('run');
+        void progress.offsetWidth; // restart the bar's animation
+        progress.classList.add('run');
+        slideTimer = setTimeout(() => {
+            showPhoto(current + 1);
+            scheduleNext();
+        }, SLIDE_MS);
+    }
+
+    function setPlaying(on) {
+        playing = on && series.length > 1;
+        clearTimeout(slideTimer);
+        progress.classList.remove('run');
+        lightboxModal.classList.toggle('is-playing', playing);
+        playBtn.setAttribute('aria-pressed', String(playing));
+        playBtn.innerHTML = `<i class="fa-solid fa-${playing ? 'pause' : 'play'}" aria-hidden="true"></i>`;
+        setLabel(playBtn, `${playing ? 'Pause' : 'Play'} slideshow (P)`);
+        if (playing) scheduleNext();
+    }
+
+    function restartSlideshow() {
+        if (playing) scheduleNext();
+    }
+
+    // Browser full screen for the viewer (with the older WebKit prefix for Safari)
+    const fullscreenElement = () => document.fullscreenElement || document.webkitFullscreenElement;
+    function exitFullscreen() {
+        const exit = document.exitFullscreen || document.webkitExitFullscreen;
+        if (exit) Promise.resolve(exit.call(document)).catch(() => {});
+    }
+    function toggleFullscreen() {
+        if (fullscreenElement()) return exitFullscreen();
+        const request = lightboxModal.requestFullscreen || lightboxModal.webkitRequestFullscreen;
+        if (request) Promise.resolve(request.call(lightboxModal)).catch(() => {});
+    }
+    function syncFullscreen() {
+        const on = fullscreenElement() === lightboxModal;
+        lightboxModal.classList.toggle('is-fullscreen', on);
+        fsBtn.innerHTML = `<i class="fa-solid fa-${on ? 'compress' : 'expand'}" aria-hidden="true"></i>`;
+        setLabel(fsBtn, on ? 'Exit full screen (F)' : 'Full screen (F)');
+    }
+    if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) fsBtn.hidden = true;
+    document.addEventListener('fullscreenchange', syncFullscreen);
+    document.addEventListener('webkitfullscreenchange', syncFullscreen);
+
+    playBtn.addEventListener('click', () => setPlaying(!playing));
+    thumbsBtn.addEventListener('click', toggleThumbs);
+    fsBtn.addEventListener('click', toggleFullscreen);
+    applyThumbs();
+    setPlaying(false);
+    syncFullscreen();
+
     function showPhoto(i) {
         current = (i + series.length) % series.length;
         const item = series[current];
         counter.textContent = `${current + 1} / ${series.length}`;
+        markThumb();
         // Quick fade between photos
         clearTimeout(switchTimer);
         lightboxImg.classList.add('is-switching');
@@ -484,7 +631,9 @@ function initLightbox() {
     }
 
     function step(delta) {
-        if (series.length > 1) showPhoto(current + delta);
+        if (series.length < 2) return;
+        showPhoto(current + delta);
+        restartSlideshow();
     }
 
     prevBtn.addEventListener('click', () => step(-1));
@@ -542,7 +691,9 @@ function initLightbox() {
             current = series.indexOf(item);
             lightboxModal.classList.toggle('has-series', series.length > 1);
             counter.textContent = `${current + 1} / ${series.length}`;
+            buildThumbs();
             openLightbox(...photoArgs(item));
+            markThumb();
             preloadAround(current);
         });
     });
@@ -560,6 +711,7 @@ function initLightbox() {
                 if (trigger.tagName === 'A') {
                     e.preventDefault();
                 }
+                lightboxModal.classList.add('is-poster'); // posters: no browser full screen
                 openLightbox(
                     src,
                     img?.alt || caption,
@@ -575,16 +727,21 @@ function initLightbox() {
 
     // Tapping anywhere outside the photo and its caption closes the viewer
     lightboxModal.addEventListener('click', (e) => {
-        if (!e.target.closest('.lightbox-img, .lightbox-caption > *, .lightbox-close, .lightbox-nav, .lightbox-counter')) {
+        if (!e.target.closest('.lightbox-img, .lightbox-caption > *, .lightbox-toolbar, .lightbox-nav, .lightbox-counter, .lightbox-sidebar')) {
             closeLightbox();
         }
     });
 
     document.addEventListener('keydown', (e) => {
         if (!lightboxModal.classList.contains('active')) return;
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        const key = e.key.toLowerCase();
         if (e.key === 'Escape') closeLightbox();
         else if (e.key === 'ArrowLeft') step(-1);
         else if (e.key === 'ArrowRight') step(1);
+        else if (key === 'f' && !lightboxModal.classList.contains('is-poster')) toggleFullscreen();
+        else if (key === 't' && series.length > 1) toggleThumbs();
+        else if (key === 'p' && series.length > 1) setPlaying(!playing);
     });
 }
 
