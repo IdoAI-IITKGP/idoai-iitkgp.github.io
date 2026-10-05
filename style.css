@@ -661,7 +661,8 @@ a:hover {
     font-size: 1rem;
     color: var(--text-dim);
     margin-bottom: 2rem;
-    text-align: left;
+    text-align: justify;
+    hyphens: auto;
 }
 
 .featured-card {
@@ -761,6 +762,7 @@ a:hover {
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     text-align: justify;
+    hyphens: auto;
 }
 
 .abstract-title {
@@ -1272,6 +1274,7 @@ mark.find-hit {
     line-height: 1.7;
     margin-bottom: 1.25rem;
     text-align: justify;
+    hyphens: auto;
 }
 
 .resource-links {
@@ -1343,36 +1346,69 @@ span.resource-btn:hover {
 }
 
 .gallery-item img {
+    position: relative;
+    z-index: 1;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center 30%; /* keeps faces and the slide screen in frame for portrait photos */
     display: block;
-    transition: transform var(--transition-normal);
+    transition: transform 0.5s var(--ease-out-expo), filter 0.3s ease, opacity 0.4s ease;
 }
 
-.gallery-item:hover img {
+/* Alt text shown in the photo's place only while it loads (or if it fails); the photo fades in over it */
+.gallery-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    text-align: center;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    background: linear-gradient(100deg, var(--bg-surface) 30%, var(--bg-card) 50%, var(--bg-surface) 70%);
+    background-size: 200% 100%;
+    animation: searchShimmer 1.6s linear infinite;
+}
+
+.gallery-item.is-loading img {
+    opacity: 0;
+}
+
+.gallery-item:not(.is-loading) .gallery-placeholder {
+    visibility: hidden;
+    animation: none;
+}
+
+/* Failed photo: keep the alt text, without the loading shimmer */
+.gallery-item.is-broken .gallery-placeholder {
+    animation: none;
+}
+
+/* Hover / keyboard focus: a light blur behind the "View Fullscreen" button */
+.gallery-item:hover img,
+.gallery-item:focus-visible img {
+    filter: blur(2px) brightness(0.85);
     transform: scale(1.04);
 }
 
-/* Subtle clean hover overlay without text covering image by default */
 .gallery-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(10, 15, 26, 0.6);
-    backdrop-filter: blur(3px);
+    background: rgba(10, 15, 26, 0.2);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px;
     opacity: 0;
-    transition: opacity var(--transition-fast);
+    transition: opacity 0.3s ease;
     z-index: 2;
     padding: 1.25rem;
-    text-align: center;
 }
 
-.gallery-item:hover .gallery-overlay {
+.gallery-item:hover .gallery-overlay,
+.gallery-item:focus-visible .gallery-overlay {
     opacity: 1;
 }
 
@@ -1396,7 +1432,8 @@ span.resource-btn:hover {
     color: var(--primary-light);
 }
 
-.gallery-item:hover .gallery-overlay-btn {
+.gallery-item:hover .gallery-overlay-btn,
+.gallery-item:focus-visible .gallery-overlay-btn {
     transform: translateY(0);
 }
 
@@ -1405,7 +1442,7 @@ span.resource-btn:hover {
     position: absolute;
     bottom: 0.75rem;
     left: 0.75rem;
-    z-index: 1;
+    z-index: 2;
     padding: 5px 10px;
     background: rgba(10, 15, 26, 0.75);
     backdrop-filter: blur(8px);
@@ -1441,7 +1478,8 @@ span.resource-btn:hover {
     font-size: 0.65rem;
 }
 
-.gallery-item:hover .gallery-corner-tag {
+.gallery-item:hover .gallery-corner-tag,
+.gallery-item:focus-visible .gallery-corner-tag {
     opacity: 0;
     transform: translateY(4px);
 }
@@ -1596,6 +1634,65 @@ span.resource-btn:hover {
 
 .footer-links a:hover {
     color: var(--primary-light);
+}
+
+/* Quick links: an accent underline sweeps in under the label and a small arrow fades in after it */
+.footer-links:not(.footer-connect) a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding-bottom: 2px;
+}
+
+.footer-links:not(.footer-connect) a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 18px; /* stops under the label, not the arrow */
+    bottom: -2px;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    transform: scaleX(0);
+    transform-origin: right center;
+    transition: transform 0.4s var(--ease-out-expo);
+}
+
+.footer-links:not(.footer-connect) a::after {
+    content: '061';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 0.7rem;
+    width: 12px;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.25s ease, transform 0.4s var(--ease-out-expo);
+}
+
+.footer-links:not(.footer-connect) a:hover,
+.footer-links:not(.footer-connect) a:focus-visible {
+    color: var(--text-main);
+}
+
+.footer-links:not(.footer-connect) a:hover::before,
+.footer-links:not(.footer-connect) a:focus-visible::before {
+    transform: scaleX(1);
+    transform-origin: left center;
+}
+
+.footer-links:not(.footer-connect) a:hover::after,
+.footer-links:not(.footer-connect) a:focus-visible::after {
+    opacity: 1;
+    color: var(--primary-light);
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .footer-links:not(.footer-connect) a::before,
+    .footer-links:not(.footer-connect) a::after {
+        transition: opacity 0.2s ease;
+    }
 }
 
 /* Connect links: tinted icon tiles that fill with their own accent on hover */
@@ -1956,6 +2053,68 @@ span.resource-btn:hover {
     transform: scale(1.1);
 }
 
+/* Stepping through gallery photos: arrows at the sides, counter top-left, quick fade between photos */
+.lightbox-img {
+    transition: opacity 0.15s ease;
+}
+
+.lightbox-img.is-switching {
+    opacity: 0;
+}
+
+.lightbox-counter {
+    grid-row: 1;
+    grid-column: 1; /* shares the close button's row, left side */
+    justify-self: start;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e2e8f0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(15, 23, 42, 0.6);
+    color: #fff;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.lightbox-prev {
+    left: 0.5rem;
+}
+
+.lightbox-next {
+    right: 0.5rem;
+}
+
+.lightbox-nav:hover,
+.lightbox-nav:focus-visible {
+    background: rgba(15, 23, 42, 0.85);
+    border-color: var(--primary-light);
+}
+
+/* Only when there's more than one photo to step through (never for posters) */
+.lightbox-modal:not(.has-series) .lightbox-nav,
+.lightbox-modal:not(.has-series) .lightbox-counter {
+    display: none;
+}
+
 /* Short landscape screens (phones on their side): caption moves beside the photo */
 @media (max-height: 520px) and (orientation: landscape) {
     .lightbox-content {
@@ -1965,12 +2124,18 @@ span.resource-btn:hover {
         row-gap: 0.5rem;
     }
 
-    .lightbox-close {
+    .lightbox-close,
+    .lightbox-counter {
         grid-column: 1 / -1;
     }
 
     .lightbox-img {
         grid-column: 1;
+    }
+
+    /* keep the right arrow on the photo, not over the caption column */
+    .lightbox-modal .lightbox-next {
+        right: calc(max(200px, 32%) + 1.5rem);
     }
 
     .lightbox-caption {
@@ -2246,7 +2411,6 @@ span.resource-btn:hover {
     .abstract-box {
         padding: 1rem;
         margin-bottom: 1rem;
-        text-align: left;
         font-size: 0.875rem;
         line-height: 1.6;
         border-radius: var(--radius-sm);
@@ -2390,7 +2554,6 @@ span.resource-btn:hover {
         font-size: 0.875rem;
         line-height: 1.65;
         margin-bottom: 1rem;
-        text-align: left;
     }
 
     /* Resource Links & Buttons */
@@ -2447,6 +2610,20 @@ span.resource-btn:hover {
         width: 36px;
         height: 36px;
         font-size: 1.2rem;
+    }
+
+    .lightbox-nav {
+        width: 38px;
+        height: 38px;
+        font-size: 0.9rem;
+    }
+
+    .lightbox-prev {
+        left: 0.25rem;
+    }
+
+    .lightbox-next {
+        right: 0.25rem;
     }
 }
 
@@ -3455,13 +3632,6 @@ h3 {
     overflow-wrap: break-word;
 }
 
-/* Comfortable reading width (~60–85 characters per line) on wide screens */
-.drawer-abstract,
-.abstract-box p {
-    max-width: 85ch;
-}
-
-.section-subtitle,
 .about-text {
     max-width: 70ch;
 }
@@ -3652,6 +3822,17 @@ html.lite .nav-backdrop {
 
 html.lite .gallery-overlay {
     background: rgba(10, 15, 26, 0.75);
+}
+
+/* Blurring the photo is also expensive: just dim it */
+html.lite .gallery-item:hover img,
+html.lite .gallery-item:focus-visible img {
+    filter: brightness(0.7);
+    transform: none;
+}
+
+html.lite .gallery-placeholder {
+    animation: none;
 }
 
 /* No endlessly repainting animations */

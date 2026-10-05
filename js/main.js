@@ -372,7 +372,21 @@ function initLightbox() {
     const lightboxCaption = lightboxModal.querySelector('.lightbox-caption');
     const closeBtn = lightboxModal.querySelector('.lightbox-close');
 
-    function openLightbox(src, alt, captionHtml) {
+    // Previous / next arrows and a counter for stepping through the gallery (hidden for posters and single photos)
+    const lightboxContent = lightboxModal.querySelector('.lightbox-content');
+    lightboxContent.insertAdjacentHTML('beforeend', `
+        <span class="lightbox-counter" aria-live="polite"></span>
+        <button type="button" class="lightbox-nav lightbox-prev" aria-label="Previous photo"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+        <button type="button" class="lightbox-nav lightbox-next" aria-label="Next photo"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>`);
+    const counter = lightboxContent.querySelector('.lightbox-counter');
+    const prevBtn = lightboxContent.querySelector('.lightbox-prev');
+    const nextBtn = lightboxContent.querySelector('.lightbox-next');
+
+    let series = [];   // gallery photos currently shown (respects the category filter)
+    let current = -1;
+    let switchTimer = null;
+
+    function setImage(src, alt, captionHtml) {
         if (lightboxImg) {
             lightboxImg.src = src;
             lightboxImg.alt = alt || '';
@@ -380,6 +394,10 @@ function initLightbox() {
         if (lightboxCaption) {
             lightboxCaption.innerHTML = captionHtml || '';
         }
+    }
+
+    function openLightbox(src, alt, captionHtml) {
+        setImage(src, alt, captionHtml);
         lastFocused = document.activeElement;
         lightboxModal.classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -387,12 +405,86 @@ function initLightbox() {
     }
 
     function closeLightbox() {
-        lightboxModal.classList.remove('active');
+        lightboxModal.classList.remove('active', 'has-series');
         document.body.style.overflow = '';
+        series = [];
+        current = -1;
         if (lastFocused) lastFocused.focus();
     }
 
     let lastFocused = null;
+
+    function photoCaption(item) {
+        const { speaker, title, date, venue } = item.dataset;
+        if (speaker || title || date || venue) {
+            return `
+                <div class="lightbox-info">
+                    ${title ? `<div class="lightbox-title">${title}</div>` : ''}
+                    <div class="lightbox-meta">
+                        ${speaker ? `<span class="lightbox-speaker"><i class="fa-solid fa-circle-user"></i> ${speaker}</span>` : ''}
+                        ${date ? `<span class="lightbox-date"><i class="fa-regular fa-calendar"></i> ${date}</span>` : ''}
+                        ${venue ? `<span class="lightbox-venue"><i class="fa-solid fa-location-dot"></i> ${venue}</span>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+        const caption = item.querySelector('.gallery-caption')?.textContent || '';
+        const sub = item.querySelector('.gallery-sub')?.textContent || '';
+        return `<strong>${caption}</strong><br><span style="font-size:0.85rem; color: #94a3b8;">${sub}</span>`;
+    }
+
+    function photoArgs(item) {
+        const img = item.querySelector('img');
+        return [img.currentSrc || img.src, img.alt || item.dataset.title || item.dataset.speaker || 'Photo View', photoCaption(item)];
+    }
+
+    /* Warm up the neighbouring photos so stepping feels instant */
+    function preloadAround(i) {
+        [i - 1, i + 1].forEach(n => {
+            const img = series[(n + series.length) % series.length]?.querySelector('img');
+            if (img) new Image().src = img.currentSrc || img.src;
+        });
+    }
+
+    function showPhoto(i) {
+        current = (i + series.length) % series.length;
+        const item = series[current];
+        counter.textContent = `${current + 1} / ${series.length}`;
+        // Quick fade between photos
+        clearTimeout(switchTimer);
+        lightboxImg.classList.add('is-switching');
+        switchTimer = setTimeout(() => {
+            const reveal = () => lightboxImg.classList.remove('is-switching');
+            lightboxImg.addEventListener('load', reveal, { once: true });
+            lightboxImg.addEventListener('error', reveal, { once: true });
+            setImage(...photoArgs(item));
+            if (lightboxImg.complete) reveal();
+        }, prefersReducedMotion ? 0 : 150);
+        preloadAround(current);
+    }
+
+    function step(delta) {
+        if (series.length > 1) showPhoto(current + delta);
+    }
+
+    prevBtn.addEventListener('click', () => step(-1));
+    nextBtn.addEventListener('click', () => step(1));
+
+    // Swipe left / right on touch screens
+    let touchX = null;
+    let touchY = null;
+    lightboxModal.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 1) return;
+        touchX = e.touches[0].clientX;
+        touchY = e.touches[0].clientY;
+    }, { passive: true });
+    lightboxModal.addEventListener('touchend', (e) => {
+        if (touchX === null) return;
+        const dx = e.changedTouches[0].clientX - touchX;
+        const dy = e.changedTouches[0].clientY - touchY;
+        touchX = touchY = null;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
+    });
 
     // Let keyboard users open clickable photos/posters with Enter or Space
     document.querySelectorAll('.gallery-item, .lightbox-trigger, #talk-poster-trigger').forEach(el => {
@@ -407,39 +499,31 @@ function initLightbox() {
     });
 
     galleryItems.forEach(item => {
-        item.addEventListener('click', () => {
-            const img = item.querySelector('img');
-            if (!img) return;
-
-            // Check if structured data attributes exist
-            const speaker = item.dataset.speaker;
-            const title = item.dataset.title;
-            const date = item.dataset.date;
-            const venue = item.dataset.venue;
-
-            let captionHtml = '';
-            if (speaker || title || date || venue) {
-                captionHtml = `
-                    <div class="lightbox-info">
-                        ${title ? `<div class="lightbox-title">${title}</div>` : ''}
-                        <div class="lightbox-meta">
-                            ${speaker ? `<span class="lightbox-speaker"><i class="fa-solid fa-circle-user"></i> ${speaker}</span>` : ''}
-                            ${date ? `<span class="lightbox-date"><i class="fa-regular fa-calendar"></i> ${date}</span>` : ''}
-                            ${venue ? `<span class="lightbox-venue"><i class="fa-solid fa-location-dot"></i> ${venue}</span>` : ''}
-                        </div>
-                    </div>
-                `;
-            } else {
-                const caption = item.querySelector('.gallery-caption')?.textContent || '';
-                const sub = item.querySelector('.gallery-sub')?.textContent || '';
-                captionHtml = `<strong>${caption}</strong><br><span style="font-size:0.85rem; color: #94a3b8;">${sub}</span>`;
+        // While a photo loads (or if it fails), its alt text is shown in its place; the photo fades in once ready
+        const photo = item.querySelector('img');
+        if (photo && photo.alt) {
+            const placeholder = document.createElement('span');
+            placeholder.className = 'gallery-placeholder';
+            placeholder.setAttribute('aria-hidden', 'true'); // screen readers already read the img alt
+            placeholder.textContent = photo.alt;
+            item.prepend(placeholder);
+            if (!(photo.complete && photo.naturalWidth)) {
+                item.classList.add('is-loading');
+                photo.addEventListener('load', () => item.classList.remove('is-loading'), { once: true });
+                photo.addEventListener('error', () => item.classList.add('is-broken'), { once: true });
             }
+        }
 
-            openLightbox(
-                img.src,
-                img.alt || title || speaker || 'Photo View',
-                captionHtml
-            );
+        item.addEventListener('click', () => {
+            if (!item.querySelector('img')) return;
+            // Step through the photos currently shown (hidden by a category filter = skipped)
+            series = [...galleryItems].filter(el => el.querySelector('img') && el.style.display !== 'none');
+            if (!series.includes(item)) series = [item];
+            current = series.indexOf(item);
+            lightboxModal.classList.toggle('has-series', series.length > 1);
+            counter.textContent = `${current + 1} / ${series.length}`;
+            openLightbox(...photoArgs(item));
+            preloadAround(current);
         });
     });
 
@@ -471,15 +555,16 @@ function initLightbox() {
 
     // Tapping anywhere outside the photo and its caption closes the viewer
     lightboxModal.addEventListener('click', (e) => {
-        if (!e.target.closest('.lightbox-img, .lightbox-caption > *, .lightbox-close')) {
+        if (!e.target.closest('.lightbox-img, .lightbox-caption > *, .lightbox-close, .lightbox-nav, .lightbox-counter')) {
             closeLightbox();
         }
     });
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && lightboxModal.classList.contains('active')) {
-            closeLightbox();
-        }
+        if (!lightboxModal.classList.contains('active')) return;
+        if (e.key === 'Escape') closeLightbox();
+        else if (e.key === 'ArrowLeft') step(-1);
+        else if (e.key === 'ArrowRight') step(1);
     });
 }
 
