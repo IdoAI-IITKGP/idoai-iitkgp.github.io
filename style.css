@@ -3801,6 +3801,91 @@ h3 {
     }
 }
 
+/* Contact page: talk-proposal card with the embedded Google Form */
+.form-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+}
+
+.form-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.form-card-title {
+    font-size: 1.5rem;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.form-card-text {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.form-card-btn {
+    white-space: nowrap;
+}
+
+.form-embed {
+    width: 100%;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid var(--glass-border);
+    margin-top: 1rem;
+}
+
+.form-embed iframe {
+    display: block;
+    width: 100%;
+    height: 620px;
+    border: none;
+}
+
+/* Phones: thin card padding so the form gets the full width, a full-width button,
+   and a frame sized to the screen so it scrolls on its own without trapping the page */
+@media (max-width: 600px) {
+    .form-card {
+        padding: 1.25rem 0.75rem 0.75rem;
+        border-radius: var(--radius-md);
+    }
+
+    .form-card-head {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.85rem;
+        margin-bottom: 0.75rem;
+        padding: 0 0.25rem;
+    }
+
+    .form-card-title {
+        font-size: 1.2rem;
+    }
+
+    .form-card-btn {
+        justify-content: center;
+        white-space: normal;
+    }
+
+    .form-embed {
+        margin-top: 0.5rem;
+        border-radius: var(--radius-sm);
+    }
+
+    .form-embed iframe {
+        height: 80vh;
+        height: 80svh;
+        min-height: 480px;
+    }
+}
+
 /* Large and ultra-wide screens: wider content with only a gentle bump in type/spacing
    (sizes are in rem, so the root size scales the whole layout evenly) */
 @media (min-width: 1680px) {
