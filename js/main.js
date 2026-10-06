@@ -1273,7 +1273,7 @@ const SEARCH_RELATED = [
     ['nlp', 'language model', 'natural language'],
     ['robot', 'robotic', 'robotics', 'manipulator', 'ros'],
     ['privacy', 'eavesdropping', 'adversaries', 'security', 'encryption'],
-    ['finance', 'financial', 'esg', 'investing', 'portfolio', 'asset'],
+    ['finance', 'financial', 'fintech', 'esg', 'investing', 'investment', 'portfolio', 'asset', 'stock', 'stocks', 'market', 'markets', 'trading'],
     ['fairness', 'bias', 'biasness'],
     ['pruning', 'sparse', 'sparsity', 'lottery ticket', 'subnetworks'],
     ['behaviour', 'behavior', 'gesture', 'gaze', 'social'],
