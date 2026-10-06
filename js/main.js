@@ -199,15 +199,42 @@ function initAccordions() {
         drawer.appendChild(collapseBar);
 
         collapseBar.querySelector('button').addEventListener('click', () => {
+            const headerOffset = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+            const topHidden = card.getBoundingClientRect().top < headerOffset;
             toggle();
             summary.focus({ preventScroll: true });
-            // If the card's top has scrolled off-screen, bring it back so the reader keeps their place
-            const headerOffset = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
-            if (card.getBoundingClientRect().top < headerOffset) {
-                card.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
-            }
+            // Card's top is off-screen: close it in place instead of scrolling back up to it
+            if (topHidden) collapseInPlace(card.querySelector('.event-details-drawer'));
         });
     });
+}
+
+/* While a drawer shrinks, scroll up by exactly the height it has lost each frame. The "Show less"
+   spot stays under the reader's finger, the text slides away beneath it and the card's title comes
+   down to meet it, ending as a closed card where they tapped. (A separate smooth scroll racing the
+   collapse, plus the browser's scroll anchoring, made the page lurch, worst on phones.) */
+function collapseInPlace(drawer) {
+    if (!drawer) return;
+    const root = document.documentElement;
+    const startY = window.scrollY;
+    const startH = drawer.getBoundingClientRect().height;
+    const started = performance.now();
+
+    // Instant per-frame scrolling, and no browser anchoring adjustments fighting it
+    root.style.scrollBehavior = 'auto';
+    root.style.overflowAnchor = 'none';
+
+    function frame(now) {
+        const lost = startH - drawer.getBoundingClientRect().height;
+        window.scrollTo(0, Math.max(0, startY - lost));
+        if (now - started < 650) { // a little past the 0.45s collapse transition
+            requestAnimationFrame(frame);
+        } else {
+            root.style.scrollBehavior = '';
+            root.style.overflowAnchor = '';
+        }
+    }
+    requestAnimationFrame(frame);
 }
 
 /* ==========================================================================
