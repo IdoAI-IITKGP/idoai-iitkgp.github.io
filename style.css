@@ -3,36 +3,50 @@
    ========================================================================== */
 
 :root {
-    /* Dark Theme (Default) */
-    --bg-main: #0a0d14;
-    --bg-gradient: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(41, 25, 115, 0.45) 0%, transparent 70%);
-    --bg-surface: rgba(18, 24, 38, 0.7);
-    --bg-surface-hover: rgba(28, 36, 56, 0.8);
-    --bg-card: rgba(23, 31, 50, 0.6);
-    --bg-card-hover: rgba(33, 44, 70, 0.8);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-border-hover: rgba(var(--primary-rgb), 0.45);
+    /* Palette from the Dept. of AI Foundation Day flyer: cream paper, burnt orange, royal indigo.
+       Dark theme (default) is the flyer "after dusk": indigo night with cream text and amber accents. */
+    --bg-main: #0b0919;
+    --bg-gradient: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(59, 50, 196, 0.38) 0%, transparent 70%);
+    --bg-surface: rgba(32, 27, 70, 0.62);
+    --bg-surface-hover: rgba(42, 36, 88, 0.8);
+    --bg-card: rgba(34, 29, 74, 0.55);
+    --bg-card-hover: rgba(46, 39, 96, 0.78);
+    --glass-border: rgba(255, 236, 200, 0.1);
+    --glass-border-hover: rgba(var(--primary-rgb), 0.5);
 
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --text-dim: #64748b;
+    --text-main: #fbf3e1;
+    --text-muted: #bcb2c8;
+    --text-dim: #8a80a0;
 
-    /* Brand: IIT Kharagpur palette (iitkgp.ac.in): saffron #db5903 for actions, indigo #291973 for branding.
-       The "gradient" is two close shades of the same saffron. */
-    --primary: #db5903;
-    --primary-rgb: 219, 89, 3;
-    --primary-light: #ff8a3d;
-    --brand-text: #ff8a3d;
-    --brand-indigo: #291973;
-    --primary-gradient: linear-gradient(135deg, #c95000 0%, #e2650d 100%);
-    --secondary: #ffb066;
-    --accent: #ffa057;
-    --accent-glow: rgba(var(--primary-rgb), 0.25);
+    /* Brand: burnt orange for actions, royal indigo for branding (light) / amber on the dark theme.
+       Buttons are flat; --primary-gradient keeps its name but is one solid colour. */
+    --primary: #c0531a;
+    --primary-rgb: 192, 83, 26;
+    --primary-light: #f5a65b;
+    --brand-text: #f5a65b;
+    --brand-indigo: #3b32c4;
+    --primary-gradient: #c0531a;
+    --secondary: #a8a2ff;
+    --accent: #f5a65b;
+    --accent-glow: rgba(var(--primary-rgb), 0.28);
 
-    --nav-bg: rgba(10, 13, 20, 0.8);
-    --nav-solid: #0d111b;
-    --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-    --glow-shadow: 0 0 25px rgba(var(--primary-rgb), 0.18);
+    /* The flyer's signature orange → plum → indigo blend ("FOUNDATION DAY").
+       Reserved for a few accents: hero highlight, reading-progress bar, spotlight card edge. */
+    --sig-1: #e07b2c;
+    --sig-2: #b05a8a;
+    --sig-3: #7d74ff;
+    --signature-gradient: linear-gradient(100deg, var(--sig-1) 0%, var(--sig-2) 50%, var(--sig-3) 100%);
+    /* Deep indigo band, like the flyer's footer strip */
+    --band-bg: #221c6e;
+    --band-text: #fbf3e1;
+    /* Selected text: royal indigo (the flyer's "DAY" colour) with cream text */
+    --selection-bg: #4b40d6;
+    --selection-text: #fff8ec;
+
+    --nav-bg: rgba(17, 14, 38, 0.82);
+    --nav-solid: #141030;
+    --card-shadow: 0 12px 32px -12px rgba(5, 3, 20, 0.6);
+    --glow-shadow: 0 0 25px rgba(var(--primary-rgb), 0.2);
 
     --radius-sm: 8px;
     --radius-md: 14px;
@@ -46,32 +60,41 @@
 }
 
 [data-theme="light"] {
-    --bg-main: #f8fafc;
-    --bg-gradient: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(41, 25, 115, 0.07) 0%, transparent 70%);
-    --bg-surface: rgba(255, 255, 255, 0.85);
-    --bg-surface-hover: rgba(255, 255, 255, 0.95);
-    --bg-card: #ffffff;
-    --bg-card-hover: #f1f5f9;
-    --glass-border: rgba(0, 0, 0, 0.08);
-    --glass-border-hover: rgba(var(--primary-rgb), 0.4);
+    /* The flyer itself: warm cream page, ivory cards, ink-indigo text */
+    --bg-main: #fdf8ec;
+    --bg-gradient: radial-gradient(ellipse 60% 45% at 12% -8%, rgba(200, 102, 26, 0.1) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 45% at 88% -8%, rgba(59, 50, 196, 0.08) 0%, transparent 70%);
+    --bg-surface: rgba(255, 253, 248, 0.9);
+    --bg-surface-hover: rgba(255, 253, 248, 0.98);
+    --bg-card: #fffdf8;
+    --bg-card-hover: #fff6e4;
+    --glass-border: rgba(110, 72, 30, 0.13);
+    --glass-border-hover: rgba(var(--primary-rgb), 0.45);
 
-    --text-main: #0f172a;
-    --text-muted: #475569;
-    --text-dim: #94a3b8;
+    --text-main: #241b3a;
+    --text-muted: #5b4f66;
+    --text-dim: #857888;
 
-    --primary: #db5903;
-    --primary-rgb: 219, 89, 3;
-    --primary-light: #b84a00;
-    --brand-text: #291973;
-    --brand-indigo: #291973;
-    --primary-gradient: linear-gradient(135deg, #c95000 0%, #e2650d 100%);
-    --secondary: #291973;
-    --accent: #db5903;
+    --primary: #c0531a;
+    --primary-rgb: 192, 83, 26;
+    --primary-light: #a8440f;
+    --brand-text: #3b30b5;
+    --brand-indigo: #3b30b5;
+    --primary-gradient: #c0531a;
+    --secondary: #3b30b5;
+    --accent: #c0531a;
     --accent-glow: rgba(var(--primary-rgb), 0.15);
 
-    --nav-bg: rgba(255, 255, 255, 0.85);
-    --nav-solid: #ffffff;
-    --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+    --sig-1: #c8661a;
+    --sig-2: #8a4a8c;
+    --sig-3: #3b32c4;
+    --band-bg: #241d7a;
+    --selection-bg: #f6d2b0;
+    --selection-text: #241b3a;
+
+    --nav-bg: rgba(250, 242, 223, 0.86);
+    --nav-solid: #faf2df;
+    --card-shadow: 0 12px 30px -12px rgba(90, 55, 20, 0.16);
     --glow-shadow: 0 0 25px rgba(var(--primary-rgb), 0.12);
 }
 
@@ -92,6 +115,15 @@ html {
     font-size: 16px;
 }
 
+/* Tablets and computers: the root size grows smoothly with the window, slightly under 16px on
+   ordinary laptop/desktop screens (about 14.75px at 1366px wide, 15.3px at 1920px, 16px at 2560px).
+   Every size is in rem, so text and spacing scale together. Phones keep 16px for comfortable reading. */
+@media (min-width: 769px) {
+    html {
+        font-size: clamp(14.5px, 13.32px + 0.105vw, 17.5px);
+    }
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: var(--bg-main);
@@ -110,6 +142,12 @@ body::before {
     z-index: -1;
     background-image: var(--bg-gradient);
     pointer-events: none;
+}
+
+/* Selected text in the site's own colours: peach in light mode, royal indigo in dark (also readable on the gradient "AI", whose own fill is transparent) */
+::selection {
+    background: var(--selection-bg);
+    color: var(--selection-text);
 }
 
 :focus-visible {
@@ -135,6 +173,17 @@ h6 {
 .text-gradient {
     color: var(--brand-text);
     display: inline-block;
+}
+
+/* Hero highlight: the one place headline text wears the flyer's orange → indigo blend */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .hero-title .text-gradient {
+        background: var(--signature-gradient);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        padding-right: 0.04em; /* keeps the last letter's edge inside the painted area */
+    }
 }
 
 p {
@@ -185,7 +234,7 @@ a:hover {
     bottom: -1px;
     width: 100%;
     height: 2px;
-    background: var(--primary-gradient);
+    background: var(--signature-gradient);
     transform: scaleX(0);
     transform-origin: left center;
     pointer-events: none;
@@ -315,7 +364,7 @@ a:hover {
     }
 }
 
-@media (min-width: 901px) {
+@media (min-width: 769px) {
     /* Hover: a soft background fades in on the tab itself */
     .nav-link:not(.active):hover {
         background: var(--glass-border);
@@ -324,6 +373,48 @@ a:hover {
     .nav-link.active > span:not(.nav-indicator) {
         color: var(--brand-text);
         font-weight: 600;
+    }
+}
+
+/* Small laptops and tablets: the same top header, just with tighter tab spacing
+   (below 769px the bottom bar takes over; there is no in-between hamburger header) */
+@media (min-width: 769px) and (max-width: 1000px) {
+    .nav-menu {
+        gap: 0.5rem;
+    }
+
+    .nav-actions {
+        gap: 0.6rem;
+    }
+}
+
+/* Crossing the phone breakpoint while resizing (class set briefly by js/main.js): no transitions
+   replay mid-swap, and the bar that appears just fades in, the bottom bar rising slightly */
+html.layout-swap .site-header,
+html.layout-swap .site-header *,
+html.layout-swap .bottom-nav,
+html.layout-swap .bottom-nav * {
+    transition: none !important;
+}
+
+html.layout-swap .nav-container {
+    animation: layoutSwapFade 0.3s ease;
+}
+
+html.layout-swap .bottom-nav {
+    animation: layoutSwapRise 0.35s var(--ease-out-expo);
+}
+
+@keyframes layoutSwapFade {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes layoutSwapRise {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
     }
 }
 
@@ -352,15 +443,15 @@ a:hover {
         transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
+/* Hover: the round frame stays in place (only its border and glow change); the icon inside does the moving */
 .theme-toggle-btn:hover {
     background: var(--bg-card-hover);
     border-color: var(--primary);
-    transform: translateY(-2px);
     box-shadow: var(--glow-shadow);
 }
 
 .theme-toggle-btn:active {
-    transform: translateY(0) scale(0.94);
+    transform: scale(0.94);
 }
 
 .theme-icon-sun,
@@ -774,7 +865,7 @@ html.theme-switching body {
     left: 0;
     width: 6px;
     height: 100%;
-    background: var(--primary-gradient);
+    background: linear-gradient(180deg, var(--sig-1), var(--sig-2), var(--sig-3));
 }
 
 .featured-header {
@@ -2084,8 +2175,9 @@ span.resource-btn:hover {
 .site-footer {
     background: var(--nav-bg);
     border-top: 1px solid var(--glass-border);
-    padding: 4rem 0 2rem;
+    padding: 4rem 0 0;
     margin-top: 5rem;
+    overflow: hidden; /* clips the full-width copyright band */
 }
 
 .footer-grid {
@@ -2254,12 +2346,15 @@ span.resource-btn:hover {
     box-shadow: 0 6px 16px -4px color-mix(in srgb, var(--accent) 65%, transparent);
 }
 
+/* Copyright line sits on a full-width deep indigo band, like the strip along the flyer's foot */
 .footer-bottom {
     text-align: center;
-    padding-top: 2rem;
-    border-top: 1px solid var(--glass-border);
+    padding: 1rem 0;
     font-size: 0.85rem;
-    color: var(--text-dim);
+    color: var(--band-text);
+    background: var(--band-bg);
+    box-shadow: 0 0 0 100vmax var(--band-bg);
+    clip-path: inset(0 -100vmax);
 }
 
 /* Talk Poster Block (Home Page Next Seminar Spotlight) */
@@ -2413,7 +2508,7 @@ span.resource-btn:hover {
     position: fixed;
     inset: 0;
     z-index: 1050;
-    background: rgba(10, 13, 20, 0.92);
+    background: rgba(12, 9, 30, 0.93);
     backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
@@ -2862,7 +2957,7 @@ span.resource-btn:hover {
 }
 
 /* Responsive Utilities */
-@media (max-width: 900px) {
+@media (max-width: 768px) {
     .nav-actions {
         gap: 0.6rem;
     }
@@ -2984,7 +3079,7 @@ span.resource-btn:hover {
         position: fixed;
         inset: 0;
         z-index: 999;
-        background: rgba(5, 8, 15, 0.5);
+        background: rgba(10, 7, 26, 0.5);
         backdrop-filter: blur(3px);
         -webkit-backdrop-filter: blur(3px);
         opacity: 0;
@@ -3561,7 +3656,7 @@ body.search-open {
     justify-content: center;
     align-items: flex-start;
     padding: 11vh 1rem 1rem;
-    background: rgba(5, 8, 15, 0.55);
+    background: rgba(10, 7, 26, 0.55);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     opacity: 0;
@@ -3876,12 +3971,12 @@ body.search-open {
 .type-upcoming .search-result-icon { --accent: #f59e0b; }
 .type-person .search-result-icon { --accent: #10b981; }
 .type-photo .search-result-icon { --accent: #2dd4bf; }
-.type-page .search-result-icon { --accent: #a5a1f0; }
+.type-page .search-result-icon { --accent: #a8a2ff; }
 
 [data-theme="light"] .type-upcoming .search-result-icon { --accent: #d97706; }
 [data-theme="light"] .type-person .search-result-icon { --accent: #059669; }
 [data-theme="light"] .type-photo .search-result-icon { --accent: #0d9488; }
-[data-theme="light"] .type-page .search-result-icon { --accent: #291973; }
+[data-theme="light"] .type-page .search-result-icon { --accent: #3b30b5; }
 
 .search-result-text {
     flex: 1;
@@ -4555,8 +4650,7 @@ h3 {
     }
 }
 
-/* Large and ultra-wide screens: wider content with only a gentle bump in type/spacing
-   (sizes are in rem, so the root size scales the whole layout evenly) */
+/* Large and ultra-wide screens: wider content (type grows gently via the fluid root size near the top of this file) */
 @media (min-width: 1680px) {
     .container {
         max-width: 1320px;
@@ -4564,20 +4658,12 @@ h3 {
 }
 
 @media (min-width: 2200px) {
-    html {
-        font-size: 17px;
-    }
-
     .container {
         max-width: 1480px;
     }
 }
 
 @media (min-width: 3200px) {
-    html {
-        font-size: 18px;
-    }
-
     .container {
         max-width: 1720px;
     }
@@ -4853,15 +4939,15 @@ html.lite .site-header {
 }
 
 html.lite .search-modal {
-    background: rgba(5, 8, 15, 0.82);
+    background: rgba(10, 7, 26, 0.82);
 }
 
 html.lite .lightbox-modal {
-    background: rgba(10, 13, 20, 0.97);
+    background: rgba(12, 9, 30, 0.97);
 }
 
 html.lite .nav-backdrop {
-    background: rgba(5, 8, 15, 0.65);
+    background: rgba(10, 7, 26, 0.65);
 }
 
 html.lite .gallery-item:hover img,
@@ -4902,7 +4988,7 @@ html.lite .gallery-placeholder {
         background: rgba(var(--primary-rgb), 0.12);
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 768px) {
         .nav-link.active {
             background: rgba(var(--primary-rgb), 0.14);
         }
@@ -4943,7 +5029,7 @@ html.lite .gallery-placeholder {
 }
 
 [data-theme="light"] {
-    --bnav-pill: rgba(41, 25, 115, 0.1);
+    --bnav-pill: rgba(59, 48, 181, 0.1);
 }
 
 @media (max-width: 768px) {
@@ -5062,7 +5148,16 @@ html.lite .gallery-placeholder {
     .bottom-nav-item.is-active .bottom-nav-pill {
         opacity: 1;
         transform: none;
-        view-transition-name: bottom-nav-pill;
+        animation: bottomNavPillIn 0.4s var(--ease-out-expo) backwards;
+    }
+
+    /* Tab that was current on the page just left: its pill and colour fade out where they are */
+    .bottom-nav-item.was-active {
+        animation: bottomNavColorOut 0.3s ease both;
+    }
+
+    .bottom-nav-item.was-active .bottom-nav-pill {
+        animation: bottomNavPillOut 0.3s ease both;
     }
 
     /* Current tab's icon gives a small pop when the page opens */
@@ -5142,23 +5237,40 @@ html.lite .gallery-placeholder {
         max-height: calc(100dvh - var(--bottom-nav-h) - env(safe-area-inset-bottom, 0px) - 1.5rem);
     }
 
-    /* Page change: the pill slides from the old tab to the new one instead of cross-fading */
-    ::view-transition-group(bottom-nav-pill) {
-        animation-duration: 0.45s;
-        animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        mix-blend-mode: screen;
-    }
-
-    :root[data-theme="light"]::view-transition-group(bottom-nav-pill) {
-        mix-blend-mode: multiply;
-    }
-
-    ::view-transition-old(bottom-nav-pill) {
+    /* Page change (WhatsApp-style): the bar and its pill stay put instead of sliding or cross-fading.
+       The new page's bar replaces the old one at once; its pill grows out from the tapped icon
+       while the previous tab's pill fades in place (.was-active, set by js/main.js) */
+    ::view-transition-old(bottom-nav) {
         display: none;
     }
 
-    ::view-transition-new(bottom-nav-pill) {
+    ::view-transition-new(bottom-nav) {
         animation: none;
+    }
+}
+
+@keyframes bottomNavPillIn {
+    from {
+        opacity: 0;
+        transform: scaleX(0.4);
+    }
+}
+
+@keyframes bottomNavPillOut {
+    from {
+        opacity: 1;
+        transform: none;
+    }
+
+    to {
+        opacity: 0;
+        transform: scaleX(0.6);
+    }
+}
+
+@keyframes bottomNavColorOut {
+    from {
+        color: var(--brand-text);
     }
 }
 
@@ -5183,7 +5295,10 @@ html.lite .bottom-nav {
     -webkit-backdrop-filter: none;
 }
 
-html.lite .bottom-nav-item.is-active .bottom-nav-icon i {
+html.lite .bottom-nav-item.is-active .bottom-nav-icon i,
+html.lite .bottom-nav-item.is-active .bottom-nav-pill,
+html.lite .bottom-nav-item.was-active,
+html.lite .bottom-nav-item.was-active .bottom-nav-pill {
     animation: none;
 }
 
@@ -5195,7 +5310,7 @@ html.lite .bottom-nav-item.is-active .bottom-nav-icon i {
 @media (max-width: 768px) {
     .site-footer {
         margin-top: 3rem;
-        padding: 2rem 0 1.25rem;
+        padding: 2rem 0 0;
         text-align: center;
     }
 

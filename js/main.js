@@ -122,16 +122,59 @@ function initMobileNav() {
     });
 
     // Don't leave the page scroll-locked if the screen grows to desktop width
-    window.matchMedia('(min-width: 901px)').addEventListener('change', (e) => {
+    window.matchMedia('(min-width: 769px)').addEventListener('change', (e) => {
         if (e.matches) setMenuOpen(false);
     });
 }
+
+/* Resizing across the phone breakpoint swaps the top header for the bottom bar (or back).
+   A short-lived class lets CSS fade the new bar in instead of replaying every transition. */
+(function smoothLayoutSwap() {
+    const root = document.documentElement;
+    let timer;
+    window.matchMedia('(max-width: 768px)').addEventListener('change', () => {
+        root.classList.remove('layout-swap');
+        void root.offsetWidth; // restart the fade if the edge is crossed again quickly
+        root.classList.add('layout-swap');
+        clearTimeout(timer);
+        timer = setTimeout(() => root.classList.remove('layout-swap'), 400);
+    });
+})();
+
+/* Phone bottom bar, WhatsApp-style tab switch: the tab being left is remembered on tap, and the
+   next page fades its pill out in place while the new tab's pill grows in (style.css).
+   Runs as soon as this script loads (the bar sits above it in the page), before the first paint,
+   so the old pill never flickers. */
+(function markPreviousBottomNavTab() {
+    let from = null;
+    try {
+        from = sessionStorage.getItem('bnav-from');
+        sessionStorage.removeItem('bnav-from');
+    } catch (e) { /* storage blocked: no fade-out, the new pill still grows in */ }
+    if (!from) return;
+    const item = Array.from(document.querySelectorAll('.bottom-nav a.bottom-nav-item'))
+        .find(a => a.getAttribute('href') === from && !a.classList.contains('is-active'));
+    if (!item) return;
+    item.classList.add('was-active');
+    item.addEventListener('animationend', (e) => {
+        if (e.target === item) item.classList.remove('was-active');
+    });
+})();
 
 /* Phone bottom bar: slides away while scrolling down to read, returns on any scroll up,
    and always shows near the top and bottom of the page */
 function initBottomNav() {
     const nav = document.querySelector('.bottom-nav');
     if (!nav) return;
+
+    nav.addEventListener('click', (e) => {
+        const target = e.target.closest('a.bottom-nav-item:not(.is-active)');
+        const current = nav.querySelector('a.bottom-nav-item.is-active');
+        if (!target || !current) return;
+        try {
+            sessionStorage.setItem('bnav-from', current.getAttribute('href'));
+        } catch (err) { /* storage blocked */ }
+    });
 
     let lastY = window.scrollY;
     let ticking = false;
