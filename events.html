@@ -65,8 +65,9 @@
 
     <!-- Installable app (PWA): manifest, icons and the browser bar colour (kept in step with the theme by js/main.js) -->
     <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/favicon.svg" type="image/svg+xml" sizes="any">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <meta name="theme-color" content="#faf2df" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#100d23" media="(prefers-color-scheme: dark)">
@@ -144,8 +145,7 @@
             <div
                 style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap;">
                 <div>
-                    <h2 class="section-title"><i class="fa-solid fa-bolt" style="color: var(--primary-light);"></i> Next
-                        Upcoming Event</h2>
+                    <h2 class="section-title"><i class="fa-solid fa-bullhorn" aria-hidden="true"></i> Upcoming Session</h2>
                     <!-- <p class="section-subtitle">Upcoming talk details</p> -->
                 </div>
                 <!-- <span class="event-tag"
@@ -155,13 +155,6 @@
             </div>
 
             <div class="featured-card" style="margin-bottom: 0;">
-                <div class="featured-header">
-                    <span class="event-tag">Upcoming Session</span>
-                    <!-- <div class="event-date">
-                        <i class="fa-regular fa-calendar-check"></i> 6 Oct 2026 &bull; 05:00 PM - 06:00 PM IST
-                    </div> -->
-                </div>
-
                 <h3 class="featured-title">
                     Medical Computer Vision for the Clinic: Gallbladder Cancer and Beyond
                 </h3>
@@ -186,6 +179,24 @@
                         <img src="gallery_image/IdoAI_Talk_Teams_Banner.gif"
                             alt="Talk flyer: Medical Computer Vision for the Clinic: Gallbladder Cancer and Beyond, by Dr. Soumen Basu, Tuesday 6 Oct 2026, 5:00 PM IST, CRR Classroom, 4th Floor"
                             class="talk-poster-img" width="1500" height="500">
+                    </div>
+                </div>
+
+                <!-- Photo from the session: opens full size on click; the link shows the rest in the gallery -->
+                <div class="session-photo">
+                    <div class="talk-poster-preview lightbox-trigger" data-caption="Dr. Soumen Basu presenting &bull; 6 Oct 2026">
+                        <img src="gallery_image/Souman_basu_1.jpeg" loading="lazy" decoding="async" width="1200" height="1600"
+                            alt="Dr. Soumen Basu presenting his talk &ldquo;Medical Computer Vision for the Clinic: Gallbladder Cancer and Beyond&rdquo; in the CRR Classroom, Department of Artificial Intelligence, IIT Kharagpur, on 6 Oct 2026"
+                            class="talk-poster-img">
+                        <div class="poster-overlay">
+                            <span><i class="fa-solid fa-magnifying-glass-plus"></i> Click to enlarge</span>
+                        </div>
+                    </div>
+                    <div class="session-photo-text">
+                        <span class="session-photo-label"><i class="fa-solid fa-camera" aria-hidden="true"></i> From the session</span>
+                        <p>Dr. Soumen Basu presenting <span class="nowrap">&bull; 6 Oct 2026</span></p>
+                        <a href="gallery.html?event=event-medcv-2026" class="session-photo-link">View in gallery <i
+                                class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
                     </div>
                 </div>
 
@@ -217,18 +228,22 @@
                     <span class="resource-btn"><i class="fa-solid fa-building"></i> CRR Building, IIT Kharagpur</span>
                     <span class="resource-btn"><i class="fa-regular fa-calendar"></i> Tuesday &bull; 6 Oct 2026 @ 5 PM
                         IST</span>
+                    <a href="content/soumen_ai_talk.pdf" target="_blank" class="resource-btn">
+                        <i class="fa-solid fa-file-pdf" style="color: #f59e0b;"></i>
+                        Download Slides (.pdf)
+                    </a>
                 </div>
             </div>
         </section>
 
         <!-- ==========================================================================
-             SECTION 2: RECENT EVENTS (2026)
+             SECTION 2: PAST TALKS (2026)
              ========================================================================== -->
         <section style="margin-bottom: 5rem;">
             <div style="margin-bottom: 2rem;">
                 <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"
-                        style="color: var(--primary-light);"></i> Recent Events (2026)</h2>
-                <p class="section-subtitle">Recent 2026 departmental talk sessions and full abstracts</p>
+                        style="color: var(--primary-light);"></i> Past Talks (2026)</h2>
+                <p class="section-subtitle">Talks held so far in 2026, with full abstracts and speaker details</p>
             </div>
 
             <div class="events-grid">

@@ -325,7 +325,7 @@ function initSearchAndFilter() {
         resources: [...item.querySelectorAll('.resource-links > a, .resource-links > span')].map(el => ({ label: cleanText(el) }))
     });
     const searchable = searchInput ? [...filterableItems].map(toEntry) : [];
-    // Talks outside the filtered list (Recent Events 2026, Inaugural 2025) stay put, but matches are linked above the results
+    // Talks outside the filtered list (Past Talks 2026, Inaugural 2025) stay put, but matches are linked above the results
     const otherTalks = searchInput
         ? [...document.querySelectorAll('.event-card:not(.filterable-item)')].map(card => ({ card, entry: toEntry(card) }))
         : [];

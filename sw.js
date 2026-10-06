@@ -4,7 +4,7 @@
    Images and fonts: served from the cache straight away and refreshed in the background.
    Bump CACHE_VERSION to drop everything cached by an older version.
    ========================================================================== */
-const CACHE_VERSION = 'idoai-v1';
+const CACHE_VERSION = 'idoai-v5';
 
 const CORE_FILES = [
     './',
@@ -18,6 +18,7 @@ const CORE_FILES = [
     'manifest.webmanifest',
     'icons/icon-192.png',
     'icons/icon-512.png',
+    'icons/favicon.svg',
     'icons/favicon-32.png',
     'IITKgp_logo.svg',
     'iitlogo.png'

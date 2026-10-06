@@ -833,6 +833,11 @@ html.theme-switching body {
     text-align: left;
 }
 
+/* Section headings lead with an icon in the accent colour (Next Talk, Past Talks, About, ...) */
+.section-title > i:first-child {
+    color: var(--primary-light);
+}
+
 /* Headings that lead with an icon get clear breathing room before the first letter */
 :is(h1, h2, h3, h4) > i:first-child {
     margin-right: 0.4em;
@@ -956,6 +961,13 @@ html.theme-switching body {
 }
 
 /* Featured Spotlight Footer & Countdown Alignment */
+/* Buttons at the foot of the Next Talk card (details, slides) */
+.featured-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
 .featured-footer {
     display: flex;
     justify-content: space-between;
@@ -2614,6 +2626,90 @@ span.resource-btn:hover {
     transform: none;
 }
 
+/* Session photo in the Next Talk card: a 4:3 photo (cropped from the portrait original) with a short
+   caption beside it; clicking the photo opens it in full. Phones show the full portrait photo only. */
+.session-photo {
+    display: grid;
+    grid-template-columns: minmax(0, 20rem) 1fr;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    margin: 0 0 1.5rem;
+    padding: 0.35rem;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+}
+
+.session-photo .talk-poster-img {
+    max-height: none;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    object-position: 50% 40%;
+}
+
+.session-photo-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    padding: 0.5rem 1rem 0.5rem 0;
+}
+
+.session-photo-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary-light);
+}
+
+.session-photo-text p {
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.session-photo-text .nowrap {
+    white-space: nowrap;
+}
+
+.session-photo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-light);
+    text-decoration: none;
+}
+
+.session-photo-link i {
+    font-size: 0.8em;
+    transition: transform var(--transition-fast);
+}
+
+.session-photo-link:hover i,
+.session-photo-link:focus-visible i {
+    transform: translateX(3px);
+}
+
+/* Phones: just the photo, uncropped in its own portrait shape (no caption) */
+@media (max-width: 600px) {
+    .session-photo {
+        grid-template-columns: 1fr;
+    }
+
+    .session-photo .talk-poster-img {
+        aspect-ratio: auto;
+        object-fit: contain;
+    }
+
+    .session-photo-text {
+        display: none;
+    }
+}
+
 /* Wide (3:1) animated talk flyer: spans the card and is never cropped or letterboxed */
 .talk-poster-container.talk-banner {
     margin: 0 0 1.5rem;
@@ -3377,6 +3473,10 @@ span.resource-btn:hover {
         align-items: stretch;
         gap: 1rem;
         margin-top: 1rem;
+    }
+
+    .featured-actions .btn {
+        flex: 1 1 100%;
     }
 
     .countdown-container {

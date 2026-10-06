@@ -65,8 +65,9 @@
 
     <!-- Installable app (PWA): manifest, icons and the browser bar colour (kept in step with the theme by js/main.js) -->
     <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/favicon.svg" type="image/svg+xml" sizes="any">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <meta name="theme-color" content="#faf2df" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#100d23" media="(prefers-color-scheme: dark)">
@@ -142,11 +143,32 @@
                 <button class="pill-btn active" data-filter="all">All Events</button>
                 <button class="pill-btn" data-filter="event-policing-2026">AI in Modern Policing &bull; 28 Aug 2026</button>
                 <button class="pill-btn" data-filter="event-esg-2026">ESG Geometry &bull; 15 Sep 2026</button>
+                <button class="pill-btn" data-filter="event-medcv-2026">Medical Computer Vision &bull; 6 Oct 2026</button>
             </div>
         </div>
 
         <!-- Gallery Grid -->
         <div class="gallery-grid">
+
+            <!-- Photo Card: Dr. Soumen Basu (6 Oct 2026) #1 -->
+            <div class="gallery-item filterable-item" id="photo-soumen-basu-1"
+                 data-category="event-medcv-2026 presentation keynote"
+                 data-speaker="Dr. Soumen Basu"
+                 data-keywords="medical imaging healthcare medicine clinical ultrasound radiology cancer gallbladder computer vision deep learning"
+                 data-title="Medical Computer Vision for the Clinic: Gallbladder Cancer and Beyond"
+                 data-date="6 Oct 2026"
+                 data-venue="CRR Classroom, Dept. of Artificial Intelligence, IIT Kharagpur">
+                <img src="gallery_image/Souman_basu_1.jpeg" alt="Dr. Soumen Basu presenting his talk &ldquo;Medical Computer Vision for the Clinic: Gallbladder Cancer and Beyond&rdquo; in the CRR Classroom, Department of Artificial Intelligence, IIT Kharagpur, on 6 Oct 2026" loading="lazy" decoding="async">
+                <div class="gallery-corner-tag">
+                    <span class="corner-name">Dr. Soumen Basu</span>
+                    <span class="corner-date"><i class="fa-regular fa-calendar"></i> 6 Oct 2026</span>
+                </div>
+                <div class="gallery-overlay">
+                    <span class="gallery-overlay-btn">
+                        <i class="fa-solid fa-expand"></i> View fullscreen
+                    </span>
+                </div>
+            </div>
 
             <!-- Photo Card: Dr. Mahesh Mohan M R Talk Session -->
             <div class="gallery-item filterable-item" 
