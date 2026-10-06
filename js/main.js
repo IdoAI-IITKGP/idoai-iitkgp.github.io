@@ -440,6 +440,11 @@ function initSearchAndFilter() {
             filterItems();
         });
     });
+
+    // gallery.html?event=event-esg-2026 opens with that event's pill selected (the "Event Photos" links on talk cards)
+    const requested = new URLSearchParams(location.search).get('event');
+    const requestedBtn = requested && [...categoryBtns].find(b => b.dataset.filter === requested);
+    if (requestedBtn) requestedBtn.click();
 }
 
 /* ==========================================================================
