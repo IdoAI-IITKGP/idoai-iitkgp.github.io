@@ -6,6 +6,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     initThemeToggle();
     initMobileNav();
+    initBottomNav();
     initAccordions();
     initSearchAndFilter();
     initLightbox();
@@ -45,17 +46,26 @@ function initThemeToggle() {
 
     if (!themeBtn) return;
 
+    let fadeTimer;
     themeBtn.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        const root = document.documentElement;
+        const currentTheme = root.getAttribute('data-theme') || 'dark';
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        
-        document.documentElement.setAttribute('data-theme', newTheme);
+
+        // Fade the page colours across (skipped for reduced motion and the lite build)
+        if (!prefersReducedMotion && !root.classList.contains('lite')) {
+            root.classList.add('theme-switching');
+            clearTimeout(fadeTimer);
+            fadeTimer = setTimeout(() => root.classList.remove('theme-switching'), 500);
+        }
+
+        root.setAttribute('data-theme', newTheme);
         try { localStorage.setItem('idoai-theme', newTheme); } catch { /* storage blocked: theme lasts this page only */ }
         updateThemeIcon(newTheme);
     });
 }
 
-/* The sun/moon icon itself is switched by CSS from data-theme; this keeps the hover popup in step */
+/* The sun/moon icons are swapped by CSS from data-theme; this keeps the label and hover popup in step */
 function updateThemeIcon(theme) {
     const themeBtn = document.getElementById('theme-toggle');
     if (!themeBtn) return;
@@ -115,6 +125,33 @@ function initMobileNav() {
     window.matchMedia('(min-width: 901px)').addEventListener('change', (e) => {
         if (e.matches) setMenuOpen(false);
     });
+}
+
+/* Phone bottom bar: slides away while scrolling down to read, returns on any scroll up,
+   and always shows near the top and bottom of the page */
+function initBottomNav() {
+    const nav = document.querySelector('.bottom-nav');
+    if (!nav) return;
+
+    let lastY = window.scrollY;
+    let ticking = false;
+
+    function update() {
+        ticking = false;
+        const y = window.scrollY;
+        const delta = y - lastY;
+        if (Math.abs(delta) < 8) return; // ignore jitter and tiny nudges
+        lastY = y;
+        const nearBottom = window.innerHeight + y >= document.documentElement.scrollHeight - 80;
+        nav.classList.toggle('is-hidden', delta > 0 && y > 120 && !nearBottom);
+    }
+
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            ticking = true;
+            requestAnimationFrame(update);
+        }
+    }, { passive: true });
 }
 
 /* ==========================================================================
@@ -1512,6 +1549,15 @@ function initSiteSearch() {
     let debounce = null;
     let lastFocused = null;
 
+    // Phone bottom bar: the middle Search tab opens and closes the same panel
+    const bottomNav = document.querySelector('.bottom-nav');
+    const searchTab = bottomNav?.querySelector('.bottom-nav-search');
+    function setTabOpen(open) {
+        if (!searchTab) return;
+        searchTab.classList.toggle('is-open', open);
+        searchTab.setAttribute('aria-expanded', String(open));
+    }
+
     const loadIndex = () => {
         if (!indexPromise) indexPromise = buildSearchIndex().then(index => { indexReady = true; return index; });
         return indexPromise;
@@ -1525,6 +1571,7 @@ function initSiteSearch() {
         lastFocused = document.activeElement;
         modal.classList.add('open');
         document.body.classList.add('search-open');
+        setTabOpen(true);
         input.value = '';
         renderIdle();
         setTimeout(() => input.focus(), 30);
@@ -1534,6 +1581,7 @@ function initSiteSearch() {
     function closeSearch() {
         modal.classList.remove('open');
         document.body.classList.remove('search-open');
+        setTabOpen(false);
         input.setAttribute('aria-expanded', 'false');
         if (lastFocused) lastFocused.focus();
     }
@@ -1731,6 +1779,17 @@ function initSiteSearch() {
 
     trigger.addEventListener('click', openSearch);
     trigger.addEventListener('mouseenter', loadIndex, { once: true }); // warm the index before the click
+    if (searchTab) {
+        searchTab.addEventListener('click', () => (modal.classList.contains('open') ? closeSearch() : openSearch()));
+        searchTab.addEventListener('touchstart', loadIndex, { once: true, passive: true });
+        // With search open, tapping the current page's tab just closes search (no reload)
+        bottomNav.addEventListener('click', (e) => {
+            if (modal.classList.contains('open') && e.target.closest('.bottom-nav-item.is-active')) {
+                e.preventDefault();
+                closeSearch();
+            }
+        });
+    }
     closeBtn.addEventListener('click', closeSearch);
     modal.addEventListener('mousedown', (e) => { if (e.target === modal) closeSearch(); });
     input.addEventListener('input', runSearch);

@@ -97,8 +97,15 @@
                     <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                     <span class="search-trigger-label">Search</span><kbd class="search-trigger-kbd">Ctrl K</kbd>
                 </button>
-                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
-                    <i class="fa-solid fa-sun theme-icon-sun" aria-hidden="true"></i>
+                <!-- Theme button: shows a moon in light mode and a sun in dark mode; the icons turn and cross-fade (CSS) -->
+                <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Switch to Dark Mode">
+                    <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4.2" />
+                        <g class="sun-rays">
+                            <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
+                        </g>
+                    </svg>
                     <i class="fa-solid fa-moon theme-icon-moon" aria-hidden="true"></i>
                 </button>
                 <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Open menu">
@@ -224,10 +231,13 @@
                 </a>
             </div>
 
+            <!-- Short versions of the latest talks: poster (if any) and links only.
+                 Full abstracts live on the events page; each "Full abstract & details" link opens that card there.
+                 ids here start with "recent-" so they never clash with the events-page card ids. -->
             <div class="events-grid">
 
                 <!-- 2026 Talk: Dr. Mahesh Mohan M R -->
-                <div class="event-card" data-keywords="healthcare health sustainability responsible investing">
+                <div class="event-card" id="recent-esg-geometry" data-keywords="healthcare health sustainability responsible investing">
                     <div class="event-summary">
                         <div class="event-date-badge"><i class="fa-regular fa-calendar"></i> 15 Sep 2026</div>
                         <div class="event-speaker">
@@ -254,39 +264,14 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="drawer-abstract">
-                                <p><strong>Abstract:</strong> Responsible investing aims to generate positive impact
-                                    across Environment (E), Society (S), and Governance (G), and rating companies along
-                                    these dimensions is now widespread,
-                                    making ESG scores highly popular. Current ESG solutions cannot model
-                                    high-dimensional,
-                                    multimodal time series capturing the joint evolution of ESG risks, financial
-                                    returns, news, and
-                                    sentiment, even though this domain requires jointly reasoning over distinct
-                                    numerical signals where both numerical proximity and semantic type must be
-                                    preserved. In this
-                                    talk, we discuss a novel domain-aware representation learning framework that learns
-                                    geometry-preserving representations for heterogeneous time series. The resulting
-                                    model jointly learns to forecast future values and to organize entities in a
-                                    representation space that reflects their temporal evolution. Trained on ESG,
-                                    returns, news, and
-                                    sentiment, the domain-aware LLM learns a representation space that enables
-                                    downstream applications
-                                    such as latent-space search for superior asset selection and portfolio rebalancing.
-                                </p>
-                            </div>
                             <div class="resource-links">
+                                <a href="events.html#talk-15-sep-2026-learning-the-esg-geometry-with-domain-aware-lang"
+                                    class="resource-btn resource-btn-primary">
+                                    Full abstract &amp; details <i class="fa-solid fa-arrow-right"></i>
+                                </a>
                                 <a href="content/MMMR_ICML_2026.pdf" target="_blank" class="resource-btn">
                                     <i class="fa-solid fa-file-pdf" style="color: #f59e0b;"></i>
                                     Download Slides (.pdf)
-                                </a>
-                                <span class="resource-btn"><i class="fa-solid fa-university"
-                                        style="color:var(--primary);"></i> Dept. of Artificial Intelligence, IIT
-                                    Kharagpur</span>
-                                <a href="https://maheshmohanmr.github.io/" target="_blank" rel="noopener noreferrer"
-                                    class="resource-btn">
-                                    <i class="fa-solid fa-circle-user" style="color:var(--primary);"></i> Speaker
-                                    Profile
                                 </a>
                             </div>
                         </div>
@@ -294,7 +279,7 @@
                 </div>
 
                 <!-- 2026 Talk: Shri Anil Kishore Yadav, IPS (IdoAI for Policing Applications outreach) -->
-                <div class="event-card"
+                <div class="event-card" id="recent-ai-modern-policing"
                     data-keywords="police policing law enforcement public safety criminal justice ethics privacy bias robotics surveillance governance policy outreach bprd capt">
                     <div class="event-summary">
                         <div class="event-date-badge"><i class="fa-regular fa-calendar"></i> 28 Aug 2026</div>
@@ -308,72 +293,35 @@
                     </div>
                     <div class="event-details-drawer">
                         <div class="drawer-content">
-                            <!-- Portrait poster floats right; the abstract wraps around it -->
-                            <div class="drawer-with-poster">
-                                <div class="talk-poster-container talk-poster-side">
-                                    <div class="talk-poster-preview lightbox-trigger"
-                                        data-caption="Talk Poster &bull; Shri Anil Kishore Yadav, IPS">
-                                        <img src="gallery_image/anil-yadav-Banner.jpg" loading="lazy" decoding="async"
-                                            alt="Talk Poster - AI Integration in Modern Policing: Needs, Gaps, and the Role of Academia"
-                                            class="talk-poster-img" width="1280" height="1810"
-                                            style="max-height: none; width: 100%; height: auto;">
-                                        <div class="poster-overlay">
-                                            <span><i class="fa-solid fa-magnifying-glass-plus"></i> Click to enlarge
-                                                poster</span>
-                                        </div>
+                            <!-- Portrait poster, centred (no abstract beside it on Home) -->
+                            <div class="talk-poster-container talk-poster-center">
+                                <div class="talk-poster-preview lightbox-trigger"
+                                    data-caption="Talk Poster &bull; Shri Anil Kishore Yadav, IPS">
+                                    <img src="gallery_image/anil-yadav-Banner.jpg" loading="lazy" decoding="async"
+                                        alt="Talk Poster - AI Integration in Modern Policing: Needs, Gaps, and the Role of Academia"
+                                        class="talk-poster-img" width="1280" height="1810"
+                                        style="max-height: none; width: 100%; height: auto;">
+                                    <div class="poster-overlay">
+                                        <span><i class="fa-solid fa-magnifying-glass-plus"></i> Click to enlarge
+                                            poster</span>
                                     </div>
-                                </div>
-                                <div class="drawer-abstract">
-                                    <p><strong>Abstract:</strong> Artificial Intelligence (AI) is reshaping modern policing
-                                        by enabling faster data analysis, improved investigation support, better resource
-                                        allocation, and more responsive public-safety operations. Emerging field
-                                        technologies at the intersection of AI and robotics demonstrate AI's potential to
-                                        support surveillance, hazardous-area inspection, and search-and-rescue tasks while
-                                        reducing risk to personnel.</p>
-                                    <br>
-                                    <p>However, adopting AI brings challenges such as algorithmic bias, privacy concerns,
-                                        cybersecurity risks, and safety assurances. There are also significant gaps in data
-                                        quality, interoperability, multilingual and multimodal processing, explainability,
-                                        validation, evidentiary reliability, and institutional capacity.</p>
-                                    <br>
-                                    <p>This talk examines the need for safe and responsible AI integration in policing and
-                                        identifies the technical, legal, and ethical gaps that require attention. It also
-                                        highlights academia's role in developing trustworthy, context-sensitive systems,
-                                        independently validating their performance, training personnel, and shaping policy.
-                                        The emphasis will be on a problem-first, pilot-before-scale approach. AI should
-                                        support (not replace) human judgment, constitutional values, and public trust in
-                                        policing. The talk will consider strengthening AI literacy among police personnel
-                                        and building sustained police&ndash;academia&ndash;technology partnerships.</p>
-                                    <br>
-                                    <p><em><strong>Speaker Bio:</strong> Anil Kishore Yadav is a senior IPS officer
-                                            presently serving as Director, Central Academy for Police Training, Bhopal,
-                                            BPR&amp;D under the Ministry of Home Affairs, Government of India. With a diverse
-                                            academic background including a diploma in Civil Engineering, an MA in English,
-                                            an MA in sociology, and an LLB, he has held many administrative roles, including
-                                            Superintendent of Police in Saharsa, Bettiah, Jehanabad, Gopalganj, Madhepura,
-                                            Katihar, Nawada, and Bhojpur districts; DIG Munger Range; IG, ADG CID (Weaker
-                                            Sections); and IG, ADG (Training), in Bihar. He plays an active role as a master
-                                            trainer on new criminal laws, training various pillars of the criminal justice
-                                            delivery system nationwide, including judges, prison and correctional services
-                                            officers, prosecutors, police officers, and forensic experts. He has delivered lectures in the National Judicial Academy India, Bhopal; various state judicial
-                                            academies; IIM; LBSNAA, Mussoorie; etc. He is also contributing to awareness of
-                                            new criminal laws through various platforms like Door Darshan.</em></p>
                                 </div>
                             </div>
                             <div class="resource-links">
-                                <span class="resource-btn"><i class="fa-regular fa-clock"
-                                        style="color:var(--primary);"></i> 2:45 &ndash; 3:45 PM &bull; NKN Seminar Room,
-                                    ECE</span>
-                                <span class="resource-btn"><i class="fa-solid fa-building-shield"
-                                        style="color:var(--primary);"></i> Central Academy for Police Training (CAPT),
-                                    BPR&amp;D, Bhopal</span>
+                                <a href="events.html#talk-28-aug-2026-ai-integration-in-modern-policing-needs-gaps-and"
+                                    class="resource-btn resource-btn-primary">
+                                    Full abstract &amp; details <i class="fa-solid fa-arrow-right"></i>
+                                </a>
+                                <a href="gallery.html" class="resource-btn">
+                                    <i class="fa-solid fa-images" style="color:var(--primary);"></i> Event Photos
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 2026 Talk: Dr. Shreya Ghosh -->
-                <div class="event-card">
+                <div class="event-card" id="recent-human-behaviour">
                     <div class="event-summary">
                         <div class="event-date-badge"><i class="fa-regular fa-calendar"></i> 28 Jul 2026</div>
                         <div class="event-speaker">
@@ -388,31 +336,11 @@
                     </div>
                     <div class="event-details-drawer">
                         <div class="drawer-content">
-                            <div class="drawer-abstract">
-                                <p><strong>Abstract:</strong> Understanding human behaviour is essential for effective
-                                    communication and social interaction. Gestural cues such as eye gaze, facial
-                                    expressions, and body movements offer deep insights into complex mental and
-                                    emotional states. Accurately capturing and modelling these cues in unconstrained
-                                    environments remains a significant challenge due to data annotation complexity,
-                                    variability in human behaviour, and computational limitations. My research focuses
-                                    on developing robust computational models that can automatically learn and interpret
-                                    non-verbal gestural cues in naturalistic, real-world scenarios, with minimal
-                                    supervision. These models aim to bridge the gap between human cognitive
-                                    understanding and machine perception, making AI systems more socially aware and
-                                    context-sensitive.</p>
-                                <br>
-                                <p>My work has wide-ranging applications in real-world settings, including monitoring
-                                    student engagement in classrooms, assessing group cohesion in collaborative
-                                    environments, detecting emergent leaders, identifying dominant individuals in
-                                    discussions, and analysing crowd behaviour. By advancing automatic behaviour
-                                    understanding 'in-the-wild', my research contributes to building more adaptive and
-                                    human-centric AI systems capable of functioning effectively in everyday social
-                                    environments.</p>
-                            </div>
                             <div class="resource-links">
-                                <span class="resource-btn"><i class="fa-solid fa-university"
-                                        style="color:var(--primary);"></i> Department of Artificial Intelligence, IIT
-                                    Kharagpur</span>
+                                <a href="events.html#talk-28-jul-2026-automatic-human-behaviour-understanding"
+                                    class="resource-btn resource-btn-primary">
+                                    Full abstract &amp; details <i class="fa-solid fa-arrow-right"></i>
+                                </a>
                                 <a href="https://sites.google.com/view/shreyaghosh/home" target="_blank"
                                     rel="noopener noreferrer" class="resource-btn">
                                     <i class="fa-solid fa-circle-user" style="color:var(--primary);"></i> Speaker
@@ -424,7 +352,7 @@
                 </div>
 
                 <!-- 2026 Talk: Prof. Dipankar Maity -->
-                <div class="event-card">
+                <div class="event-card" id="recent-system-level-privacy">
                     <div class="event-summary">
                         <div class="event-date-badge"><i class="fa-regular fa-calendar"></i> 16 Jul 2026</div>
                         <div class="event-speaker">
@@ -438,41 +366,13 @@
                     </div>
                     <div class="event-details-drawer">
                         <div class="drawer-content">
-                            <div class="drawer-abstract">
-                                <p><strong>Abstract:</strong> Obscuring sensitive data from adversarial eavesdropping in
-                                    distributed decision-making is a significant challenge across a range of
-                                    applications, including smart grids, autonomous vehicle coordination, and
-                                    multi-robot surveillance. Existing methods—such as encryption or differential
-                                    privacy—modify transmitted messages without considering the underlying dynamics of
-                                    the cyber-physical processes that generate the data, nor the capabilities of
-                                    potential adversaries. In our recent work, we demonstrate that every dynamical
-                                    system possesses an inherent system-level privacy that can be harnessed through the
-                                    design of intelligent inter-agent communication protocols.</p>
-                                <br>
-                                <p>In this talk, I will present our recent results on extracting system-level privacy in
-                                    the presence of eavesdropping adversaries. We derive analytical expressions that
-                                    quantify the level of protection as a function of both the adversary's capabilities
-                                    and the agent communication graph. Finally, I will show how these results can be
-                                    applied in the context of distributed optimization and federated learning.</p>
-                                <br>
-                                <p><em><strong>Speaker Bio:</strong> Dipankar Maity is an Assistant Professor in the
-                                        Department of Electrical and Computer Engineering at the University of North
-                                        Carolina at Charlotte. He earned his B.E. degree in Electronics and
-                                        Telecommunication Engineering from Jadavpur University, India, in 2013, and his
-                                        Ph.D. degree in Electrical Engineering from the University of Maryland at
-                                        College Park, in 2018. Following his doctoral studies, he was a Postdoctoral
-                                        Fellow at the Georgia Institute of Technology. He has been a visiting scholar at
-                                        the Technical University of Munich, Germany, and at the KTH Royal Institute of
-                                        Technology, Sweden. He is a member of the IEEE Control System Society Technical
-                                        Committee on Security and Privacy. He is an Associate Editor for the IEEE
-                                        Control Systems Letters journal.</em></p>
-                            </div>
                             <div class="resource-links">
-                                <span class="resource-btn"><i class="fa-solid fa-university"
-                                        style="color:var(--primary);"></i> Electrical and Computer Engineering,
-                                    University of North Carolina, Charlotte</span>
-                                <a href="https://dipankarmaity.github.io/" target="_blank" rel="noopener noreferrer"
-                                    class="resource-btn">
+                                <a href="events.html#talk-16-jul-2026-system-level-privacy-against-eavesdropping-adver"
+                                    class="resource-btn resource-btn-primary">
+                                    Full abstract &amp; details <i class="fa-solid fa-arrow-right"></i>
+                                </a>
+                                <a href="https://dipankarmaity.github.io/" target="_blank"
+                                    rel="noopener noreferrer" class="resource-btn">
                                     <i class="fa-solid fa-circle-user" style="color:var(--primary);"></i> Speaker
                                     Profile
                                 </a>
@@ -482,7 +382,7 @@
                 </div>
 
                 <!-- 2026 Talk: Prof. Kanad Basu -->
-                <div class="event-card"
+                <div class="event-card" id="recent-geometry-of-hallucination"
                     data-keywords="llm large language models generative ai genai hallucination business enterprise deployment alignment compliance risk">
                     <div class="event-summary">
                         <div class="event-date-badge"><i class="fa-regular fa-calendar"></i> 6 Jan 2026</div>
@@ -499,45 +399,11 @@
                     </div>
                     <div class="event-details-drawer">
                         <div class="drawer-content">
-                            <div class="drawer-abstract">
-                                <p><strong>Abstract:</strong> In December 2023, a Chevrolet dealership chatbot agreed to
-                                    sell a car for $1, even declaring it a &ldquo;legally binding offer.&rdquo; While the
-                                    dealership quickly corrected the error, the system was doing exactly what it was
-                                    designed to do: optimise a loss function over token sequences, without any concept
-                                    of margins, compliance, or risk.</p>
-                                <br>
-                                <p>This incident underscores a critical challenge for enterprises: the disconnect
-                                    between probabilistic AI models and deterministic business imperatives. Generative
-                                    AI does not &ldquo;think&rdquo; in terms of revenue, liability, or brand, it optimizes probabilities in a mathematical space and subjects them to the laws of
-                                    chance.</p>
-                                <br>
-                                <p>This talk demystifies the hype and exposes the engineering reality. We will explore
-                                    how Large Language Models rely on high-dimensional geometric transformations rather
-                                    than logical reasoning. When a model &ldquo;hallucinates,&rdquo; it is not malfunctioning, it is extrapolating into sparse regions of its training manifold
-                                    where patterns are unreliable. This is a structural property of the model, not a
-                                    coding flaw.</p>
-                                <br>
-                                <p>We will connect these principles to real-world deployment strategies through three
-                                    business-focused case studies:</p>
-                                <ul class="drawer-list">
-                                    <li><strong>The Alignment Problem:</strong> Why semantic similarity fails to enforce
-                                        business logic and compliance.</li>
-                                    <li><strong>The Architecture of Failure:</strong> Two examples where economic
-                                        incentives collide with optimisation dynamics, resulting in costly missteps.</li>
-                                    <li><strong>A New Deployment Framework:</strong> Practical methods to align
-                                        stochastic model behaviour with deterministic business goals.</li>
-                                </ul>
-                                <p>Our goal is to equip decision makers with a mental model grounded in both mathematics
-                                    and market reality. The organisations winning with GenAI are not those treating it
-                                    as magic, they are those engineering it to serve strategy, safeguard margins, and
-                                    scale responsibly.</p>
-                            </div>
                             <div class="resource-links">
-                                <span class="resource-btn"><i class="fa-regular fa-clock"
-                                        style="color:var(--primary);"></i> 4:00 PM &bull; Studio 1, CET, First Floor,
-                                    Takshashila Building</span>
-                                <span class="resource-btn"><i class="fa-solid fa-university"
-                                        style="color:var(--primary);"></i> University of Southern California, US</span>
+                                <a href="events.html#talk-6-jan-2026-the-geometry-of-hallucination-why-your-ai-will-co"
+                                    class="resource-btn resource-btn-primary">
+                                    Full abstract &amp; details <i class="fa-solid fa-arrow-right"></i>
+                                </a>
                                 <a href="https://onlineemba.gmu.edu/profiles/kbasu4" target="_blank"
                                     rel="noopener noreferrer" class="resource-btn">
                                     <i class="fa-solid fa-circle-user" style="color:var(--primary);"></i> Speaker
@@ -596,6 +462,37 @@
         </section>
     </main>
 
+    <!-- Mobile bottom navigation (phones only, <=768px; replaces the header menu and search button there).
+         The pill behind the active icon glides to the new tab on page change (view transition).
+         The middle Search tab opens the site search (wired up in js/main.js). -->
+    <nav class="bottom-nav" aria-label="Main">
+        <a href="index.html" class="bottom-nav-item is-active" aria-current="page">
+            <span class="bottom-nav-icon"><span class="bottom-nav-pill" aria-hidden="true"></span><i
+                    class="fa-solid fa-house" aria-hidden="true"></i></span>
+            <span class="bottom-nav-label">Home</span>
+        </a>
+        <a href="events.html" class="bottom-nav-item">
+            <span class="bottom-nav-icon"><span class="bottom-nav-pill" aria-hidden="true"></span><i
+                    class="fa-solid fa-calendar-days" aria-hidden="true"></i></span>
+            <span class="bottom-nav-label">Events</span>
+        </a>
+        <button type="button" class="bottom-nav-item bottom-nav-search" aria-haspopup="dialog" aria-expanded="false">
+            <span class="bottom-nav-icon"><span class="bottom-nav-pill" aria-hidden="true"></span><i
+                    class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+            <span class="bottom-nav-label">Search</span>
+        </button>
+        <a href="gallery.html" class="bottom-nav-item">
+            <span class="bottom-nav-icon"><span class="bottom-nav-pill" aria-hidden="true"></span><i
+                    class="fa-solid fa-images" aria-hidden="true"></i></span>
+            <span class="bottom-nav-label">Gallery</span>
+        </a>
+        <a href="contact.html" class="bottom-nav-item">
+            <span class="bottom-nav-icon"><span class="bottom-nav-pill" aria-hidden="true"></span><i
+                    class="fa-solid fa-address-card" aria-hidden="true"></i></span>
+            <span class="bottom-nav-label">Contact</span>
+        </a>
+    </nav>
+
     <!-- Footer -->
     <footer class="site-footer">
         <div class="container">
@@ -613,7 +510,7 @@
                         Indian Institute of Technology Kharagpur.
                     </p>
                 </div>
-                <div>
+                <div class="footer-col-quick">
                     <h4 class="footer-heading">Quick Links</h4>
                     <ul class="footer-links">
                         <li><a href="index.html">Home</a></li>
@@ -623,7 +520,7 @@
                         <li><a href="contact.html">Contact</a></li>
                     </ul>
                 </div>
-                <div>
+                <div class="footer-col-connect">
                     <h4 class="footer-heading">Connect</h4>
                     <ul class="footer-links footer-connect">
                         <li><a href="https://www.linkedin.com/company/ai-iitkgp/" target="_blank" rel="noopener noreferrer">

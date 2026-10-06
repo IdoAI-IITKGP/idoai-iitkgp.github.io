@@ -96,8 +96,15 @@
                     <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                     <span class="search-trigger-label">Search</span><kbd class="search-trigger-kbd">Ctrl K</kbd>
                 </button>
-                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
-                    <i class="fa-solid fa-sun theme-icon-sun" aria-hidden="true"></i>
+                <!-- Theme button: shows a moon in light mode and a sun in dark mode; the icons turn and cross-fade (CSS) -->
+                <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Switch to Dark Mode">
+                    <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4.2" />
+                        <g class="sun-rays">
+                            <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
+                        </g>
+                    </svg>
                     <i class="fa-solid fa-moon theme-icon-moon" aria-hidden="true"></i>
                 </button>
                 <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Open menu">
@@ -295,6 +302,37 @@
         </div>
     </main>
 
+    <!-- Mobile bottom navigation (phones only, <=768px; replaces the header menu and search button there).
+         The pill behind the active icon glides to the new tab on page change (view transition).
+         The middle Search tab opens the site search (wired up in js/main.js). -->
+    <nav class="bottom-nav" aria-label="Main">
+        <a href="index.html" class="bottom-nav-item">
+            <span class="bottom-nav-icon"><span class="bottom-nav-pill" aria-hidden="true"></span><i
+                    class="fa-solid fa-house" aria-hidden="true"></i></span>
+            <span class="bottom-nav-label">Home</span>
+        </a>
+        <a href="events.html" class="bottom-nav-item">
+            <span class="bottom-nav-icon"><span class="bottom-nav-pill" aria-hidden="true"></span><i
+                    class="fa-solid fa-calendar-days" aria-hidden="true"></i></span>
+            <span class="bottom-nav-label">Events</span>
+        </a>
+        <button type="button" class="bottom-nav-item bottom-nav-search" aria-haspopup="dialog" aria-expanded="false">
+            <span class="bottom-nav-icon"><span class="bottom-nav-pill" aria-hidden="true"></span><i
+                    class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+            <span class="bottom-nav-label">Search</span>
+        </button>
+        <a href="gallery.html" class="bottom-nav-item is-active" aria-current="page">
+            <span class="bottom-nav-icon"><span class="bottom-nav-pill" aria-hidden="true"></span><i
+                    class="fa-solid fa-images" aria-hidden="true"></i></span>
+            <span class="bottom-nav-label">Gallery</span>
+        </a>
+        <a href="contact.html" class="bottom-nav-item">
+            <span class="bottom-nav-icon"><span class="bottom-nav-pill" aria-hidden="true"></span><i
+                    class="fa-solid fa-address-card" aria-hidden="true"></i></span>
+            <span class="bottom-nav-label">Contact</span>
+        </a>
+    </nav>
+
     <!-- Footer -->
     <footer class="site-footer">
         <div class="container">
@@ -312,7 +350,7 @@
                         Indian Institute of Technology Kharagpur.
                     </p>
                 </div>
-                <div>
+                <div class="footer-col-quick">
                     <h4 class="footer-heading">Quick Links</h4>
                     <ul class="footer-links">
                         <li><a href="index.html">Home</a></li>
@@ -322,7 +360,7 @@
                         <li><a href="contact.html">Contact</a></li>
                     </ul>
                 </div>
-                <div>
+                <div class="footer-col-connect">
                     <h4 class="footer-heading">Connect</h4>
                     <ul class="footer-links footer-connect">
                         <li><a href="https://www.linkedin.com/company/ai-iitkgp/" target="_blank" rel="noopener noreferrer">

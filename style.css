@@ -5,31 +5,34 @@
 :root {
     /* Dark Theme (Default) */
     --bg-main: #0a0d14;
-    --bg-gradient: radial-gradient(circle at 20% 20%, #1e1b4b 0%, transparent 50%),
-        radial-gradient(circle at 80% 10%, #0f172a 0%, transparent 50%),
-        radial-gradient(circle at 50% 80%, #1e1b4b 0%, transparent 60%);
+    --bg-gradient: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(41, 25, 115, 0.45) 0%, transparent 70%);
     --bg-surface: rgba(18, 24, 38, 0.7);
     --bg-surface-hover: rgba(28, 36, 56, 0.8);
     --bg-card: rgba(23, 31, 50, 0.6);
     --bg-card-hover: rgba(33, 44, 70, 0.8);
     --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-border-hover: rgba(139, 92, 246, 0.4);
+    --glass-border-hover: rgba(var(--primary-rgb), 0.45);
 
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
     --text-dim: #64748b;
 
-    --primary: #8b5cf6;
-    --primary-light: #a78bfa;
-    --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
-    --secondary: #3b82f6;
-    --accent: #06b6d4;
-    --accent-glow: rgba(139, 92, 246, 0.25);
+    /* Brand: IIT Kharagpur palette (iitkgp.ac.in): saffron #db5903 for actions, indigo #291973 for branding.
+       The "gradient" is two close shades of the same saffron. */
+    --primary: #db5903;
+    --primary-rgb: 219, 89, 3;
+    --primary-light: #ff8a3d;
+    --brand-text: #ff8a3d;
+    --brand-indigo: #291973;
+    --primary-gradient: linear-gradient(135deg, #c95000 0%, #e2650d 100%);
+    --secondary: #ffb066;
+    --accent: #ffa057;
+    --accent-glow: rgba(var(--primary-rgb), 0.25);
 
     --nav-bg: rgba(10, 13, 20, 0.8);
     --nav-solid: #0d111b;
     --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-    --glow-shadow: 0 0 25px rgba(139, 92, 246, 0.2);
+    --glow-shadow: 0 0 25px rgba(var(--primary-rgb), 0.18);
 
     --radius-sm: 8px;
     --radius-md: 14px;
@@ -44,31 +47,32 @@
 
 [data-theme="light"] {
     --bg-main: #f8fafc;
-    --bg-gradient: radial-gradient(circle at 20% 20%, #e0e7ff 0%, transparent 60%),
-        radial-gradient(circle at 80% 10%, #f1f5f9 0%, transparent 50%),
-        radial-gradient(circle at 50% 80%, #fae8ff 0%, transparent 60%);
+    --bg-gradient: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(41, 25, 115, 0.07) 0%, transparent 70%);
     --bg-surface: rgba(255, 255, 255, 0.85);
     --bg-surface-hover: rgba(255, 255, 255, 0.95);
     --bg-card: #ffffff;
     --bg-card-hover: #f1f5f9;
     --glass-border: rgba(0, 0, 0, 0.08);
-    --glass-border-hover: rgba(124, 58, 237, 0.4);
+    --glass-border-hover: rgba(var(--primary-rgb), 0.4);
 
     --text-main: #0f172a;
     --text-muted: #475569;
     --text-dim: #94a3b8;
 
-    --primary: #7c3aed;
-    --primary-light: #8b5cf6;
-    --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%);
-    --secondary: #2563eb;
-    --accent: #0284c7;
-    --accent-glow: rgba(124, 58, 237, 0.15);
+    --primary: #db5903;
+    --primary-rgb: 219, 89, 3;
+    --primary-light: #b84a00;
+    --brand-text: #291973;
+    --brand-indigo: #291973;
+    --primary-gradient: linear-gradient(135deg, #c95000 0%, #e2650d 100%);
+    --secondary: #291973;
+    --accent: #db5903;
+    --accent-glow: rgba(var(--primary-rgb), 0.15);
 
     --nav-bg: rgba(255, 255, 255, 0.85);
     --nav-solid: #ffffff;
     --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
-    --glow-shadow: 0 0 25px rgba(124, 58, 237, 0.12);
+    --glow-shadow: 0 0 25px rgba(var(--primary-rgb), 0.12);
 }
 
 /* ==========================================================================
@@ -127,10 +131,9 @@ h6 {
     color: var(--text-main);
 }
 
+/* Brand-coloured text (kept the old class name so the HTML needn't change) */
 .text-gradient {
-    background: var(--primary-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--brand-text);
     display: inline-block;
 }
 
@@ -319,10 +322,7 @@ a:hover {
     }
 
     .nav-link.active > span:not(.nav-indicator) {
-        background: var(--primary-gradient);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
+        color: var(--brand-text);
         font-weight: 600;
     }
 }
@@ -333,8 +333,11 @@ a:hover {
     gap: 1rem;
 }
 
-/* Theme Toggle Button */
+/* Theme button: one round button. Light mode shows a moon (go dark), dark mode shows a sun (go light).
+   Both icons are in the HTML and stacked; the theme turns one in and the other out, before the first paint. */
 .theme-toggle-btn {
+    position: relative;
+    flex-shrink: 0;
     background: var(--bg-card);
     border: 1px solid var(--glass-border);
     color: var(--text-main);
@@ -345,8 +348,8 @@ a:hover {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all var(--transition-fast);
-    font-size: 1.2rem;
+    transition: background-color 0.4s ease, border-color var(--transition-fast),
+        transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .theme-toggle-btn:hover {
@@ -356,22 +359,81 @@ a:hover {
     box-shadow: var(--glow-shadow);
 }
 
-.theme-toggle-btn i {
-    transition: transform 0.5s var(--ease-out-expo);
+.theme-toggle-btn:active {
+    transform: translateY(0) scale(0.94);
 }
 
-/* Both icons are in the HTML; the theme picks one before the first paint (no icon flicker) */
-.theme-icon-moon,
+.theme-icon-sun,
+.theme-icon-moon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1.2rem;
+    height: 1.2rem;
+    margin: -0.6rem 0 0 -0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.34, 1.4, 0.64, 1), color 0.4s ease;
+}
+
+/* Sun: warm saffron, shown in dark mode */
+.theme-icon-sun {
+    color: #ffb347;
+    opacity: 1;
+    transform: rotate(0) scale(1);
+}
+
+.theme-icon-sun .sun-rays {
+    transform-origin: 12px 12px;
+    transition: transform 0.6s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.4s ease;
+}
+
+/* Moon: IIT KGP indigo, shown in light mode */
+.theme-icon-moon {
+    color: var(--brand-indigo);
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.3) translateY(0.6rem);
+}
+
 [data-theme="light"] .theme-icon-sun {
-    display: none;
+    opacity: 0;
+    transform: rotate(90deg) scale(0.3);
+}
+
+/* As the sun leaves, its rays pull in, so it reads as setting rather than just shrinking */
+[data-theme="light"] .theme-icon-sun .sun-rays {
+    transform: scale(0.4) rotate(45deg);
+    opacity: 0;
 }
 
 [data-theme="light"] .theme-icon-moon {
-    display: inline-block;
+    opacity: 1;
+    transform: rotate(0) scale(1) translateY(0);
 }
 
-.theme-toggle-btn:hover i {
-    transform: rotate(-20deg);
+/* Hover: the sun's rays slowly turn, the moon tilts */
+.theme-toggle-btn:hover .theme-icon-sun .sun-rays {
+    transform: rotate(45deg);
+}
+
+[data-theme="light"] .theme-toggle-btn:hover .theme-icon-moon {
+    transform: rotate(-18deg) scale(1);
+}
+
+/* While the theme changes, colours fade instead of snapping (class added for ~0.5s by js/main.js).
+   The theme button is left out so its icons keep their own turn-and-fade timing. */
+html.theme-switching *:not(.theme-toggle-btn, .theme-toggle-btn *),
+html.theme-switching *:not(.theme-toggle-btn, .theme-toggle-btn *)::before,
+html.theme-switching *:not(.theme-toggle-btn, .theme-toggle-btn *)::after {
+    transition-property: background-color, color, border-color, box-shadow, fill, stroke !important;
+    transition-duration: 0.45s !important;
+    transition-timing-function: ease !important;
+}
+
+html.theme-switching body {
+    transition: background-color 0.45s ease, color 0.45s ease !important;
 }
 
 /* Hover popup under the theme toggle; its text comes from data-tooltip (set in js/main.js).
@@ -501,8 +563,8 @@ a:hover {
     align-items: center;
     gap: 8px;
     padding: 6px 16px;
-    background: rgba(139, 92, 246, 0.12);
-    border: 1px solid rgba(139, 92, 246, 0.3);
+    background: rgba(var(--primary-rgb), 0.12);
+    border: 1px solid rgba(var(--primary-rgb), 0.3);
     border-radius: var(--radius-full);
     font-size: 0.875rem;
     font-weight: 600;
@@ -562,11 +624,6 @@ a:hover {
     animation-delay: 0.3s;
 }
 
-.hero-title .text-gradient {
-    background-size: 200% auto;
-    animation: gradientShift 6s ease-in-out infinite alternate;
-}
-
 @keyframes fadeUp {
     from {
         opacity: 0;
@@ -576,16 +633,6 @@ a:hover {
     to {
         opacity: 1;
         transform: none;
-    }
-}
-
-@keyframes gradientShift {
-    from {
-        background-position: 0% center;
-    }
-
-    to {
-        background-position: 100% center;
     }
 }
 
@@ -623,12 +670,12 @@ a:hover {
 .btn-primary {
     background: var(--primary-gradient);
     color: #ffffff;
-    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.35);
+    box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.35);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
+    box-shadow: 0 8px 25px rgba(var(--primary-rgb), 0.5);
     color: #ffffff;
 }
 
@@ -742,9 +789,9 @@ a:hover {
 .event-tag {
     display: inline-block;
     padding: 4px 12px;
-    background: rgba(59, 130, 246, 0.15);
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    color: #60a5fa;
+    background: rgba(var(--primary-rgb), 0.12);
+    border: 1px solid rgba(var(--primary-rgb), 0.3);
+    color: var(--primary-light);
     border-radius: var(--radius-full);
     font-size: 0.8rem;
     font-weight: 600;
@@ -869,9 +916,7 @@ a:hover {
     font-weight: 800;
     font-family: 'Outfit', sans-serif;
     line-height: 1;
-    background: var(--primary-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--brand-text);
 }
 
 .timer-lbl {
@@ -1152,7 +1197,7 @@ mark.find-hit {
     background: var(--primary);
     color: #ffffff;
     border-color: var(--primary);
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.3);
 }
 
 /* Events Grid & Accordion Cards */
@@ -1238,8 +1283,8 @@ mark.find-hit {
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--primary-light);
-    background: rgba(139, 92, 246, 0.12);
-    border: 1px solid rgba(139, 92, 246, 0.3);
+    background: rgba(var(--primary-rgb), 0.12);
+    border: 1px solid rgba(var(--primary-rgb), 0.3);
     border-radius: var(--radius-full);
     text-decoration: none;
     vertical-align: middle;
@@ -1250,7 +1295,7 @@ mark.find-hit {
     background: var(--primary);
     color: #ffffff;
     border-color: var(--primary);
-    box-shadow: 0 2px 10px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 2px 10px rgba(var(--primary-rgb), 0.3);
 }
 
 .speaker-profile-badge:hover i {
@@ -1276,8 +1321,8 @@ mark.find-hit {
     gap: 1.25rem;
     margin-top: 1.75rem;
     padding: 1.25rem 1.5rem;
-    background: rgba(139, 92, 246, 0.08);
-    border: 1px solid rgba(139, 92, 246, 0.25);
+    background: rgba(var(--primary-rgb), 0.08);
+    border: 1px solid rgba(var(--primary-rgb), 0.25);
     border-radius: var(--radius-md);
     color: var(--text-main);
     text-decoration: none;
@@ -1552,6 +1597,40 @@ mark.find-hit {
     }
 }
 
+/* Portrait poster on its own (Home page cards, no abstract beside it) */
+.talk-poster-container.talk-poster-center {
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto 1.25rem;
+}
+
+/* "Full abstract & details" link on Home cards: the one filled button in the row */
+a.resource-btn.resource-btn-primary {
+    background: var(--primary-gradient);
+    border-color: transparent;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+a.resource-btn.resource-btn-primary i {
+    transition: transform var(--transition-fast);
+}
+
+a.resource-btn.resource-btn-primary:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+a.resource-btn.resource-btn-primary:hover i {
+    transform: translateX(3px);
+}
+
+/* Home cards without a poster are just one row of links: no need for a "Show less" bar */
+.highlights-section .drawer-content:not(:has(.talk-poster-container)) > .drawer-collapse {
+    display: none;
+}
+
 .drawer-list {
     margin: 0.75rem 0 1rem;
     padding-left: 1.4rem;
@@ -1666,7 +1745,7 @@ span.resource-btn:hover {
 
 /* The frame stays put on hover; only the photo inside zooms */
 .gallery-item:hover {
-    border-color: rgba(139, 92, 246, 0.5);
+    border-color: rgba(var(--primary-rgb), 0.5);
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35), var(--glow-shadow);
 }
 
@@ -1844,7 +1923,7 @@ span.resource-btn:hover {
     position: relative;
     padding: 3px;
     background: var(--primary-gradient);
-    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 8px 20px rgba(var(--primary-rgb), 0.3);
 }
 
 .member-avatar {
@@ -1876,7 +1955,7 @@ span.resource-btn:hover {
 
 .member-avatar-wrapper:hover {
     transform: scale(1.05);
-    box-shadow: 0 10px 28px rgba(139, 92, 246, 0.5);
+    box-shadow: 0 10px 28px rgba(var(--primary-rgb), 0.5);
 }
 
 .member-avatar-wrapper:hover img {
@@ -1893,8 +1972,8 @@ span.resource-btn:hover {
 .member-responsibility {
     display: inline-block;
     padding: 4px 14px;
-    background: rgba(139, 92, 246, 0.15);
-    border: 1px solid rgba(139, 92, 246, 0.3);
+    background: rgba(var(--primary-rgb), 0.15);
+    border: 1px solid rgba(var(--primary-rgb), 0.3);
     color: var(--primary-light);
     border-radius: var(--radius-full);
     font-size: 0.8rem;
@@ -1933,8 +2012,8 @@ span.resource-btn:hover {
     margin-bottom: 1.5rem;
     padding: 0.75rem 1rem;
     text-align: left;
-    background: rgba(139, 92, 246, 0.08);
-    border: 1px solid rgba(139, 92, 246, 0.25);
+    background: rgba(var(--primary-rgb), 0.08);
+    border: 1px solid rgba(var(--primary-rgb), 0.25);
     border-radius: var(--radius-md);
 }
 
@@ -2195,7 +2274,7 @@ span.resource-btn:hover {
 }
 
 .talk-poster-container:hover {
-    border-color: rgba(139, 92, 246, 0.4);
+    border-color: rgba(var(--primary-rgb), 0.4);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
@@ -2439,7 +2518,7 @@ span.resource-btn:hover {
 }
 
 .lightbox-speaker {
-    color: #c4b5fd;
+    color: #ffb37a;
     font-weight: 600;
 }
 
@@ -2566,7 +2645,7 @@ span.resource-btn:hover {
 }
 
 .lightbox-tool[aria-pressed="true"] {
-    background: rgba(139, 92, 246, 0.35);
+    background: rgba(var(--primary-rgb), 0.35);
     border-color: var(--primary-light);
 }
 
@@ -2686,7 +2765,7 @@ span.resource-btn:hover {
 .lightbox-thumb.is-active {
     opacity: 1;
     border-color: var(--primary-light);
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.35);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.35);
 }
 
 /* Slideshow progress bar along the top edge */
@@ -3311,10 +3390,6 @@ span.resource-btn:hover {
         height: 40px;
     }
 
-    .theme-toggle-btn {
-        font-size: 1.05rem;
-    }
-
     main.container {
         padding-top: 90px !important;
     }
@@ -3358,7 +3433,7 @@ span.resource-btn:hover {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 8px 24px -6px rgba(139, 92, 246, 0.65), 0 2px 6px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 8px 24px -6px rgba(var(--primary-rgb), 0.65), 0 2px 6px rgba(0, 0, 0, 0.25);
     opacity: 0;
     visibility: hidden;
     transform: translateY(16px);
@@ -3378,7 +3453,7 @@ span.resource-btn:hover {
 }
 
 .back-to-top:hover {
-    box-shadow: 0 12px 30px -6px rgba(139, 92, 246, 0.8), 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 12px 30px -6px rgba(var(--primary-rgb), 0.8), 0 2px 8px rgba(0, 0, 0, 0.3);
     transform: translateY(-3px);
 }
 
@@ -3800,13 +3875,13 @@ body.search-open {
 
 .type-upcoming .search-result-icon { --accent: #f59e0b; }
 .type-person .search-result-icon { --accent: #10b981; }
-.type-photo .search-result-icon { --accent: #ec4899; }
-.type-page .search-result-icon { --accent: #60a5fa; }
+.type-photo .search-result-icon { --accent: #2dd4bf; }
+.type-page .search-result-icon { --accent: #a5a1f0; }
 
 [data-theme="light"] .type-upcoming .search-result-icon { --accent: #d97706; }
 [data-theme="light"] .type-person .search-result-icon { --accent: #059669; }
-[data-theme="light"] .type-photo .search-result-icon { --accent: #db2777; }
-[data-theme="light"] .type-page .search-result-icon { --accent: #2563eb; }
+[data-theme="light"] .type-photo .search-result-icon { --accent: #0d9488; }
+[data-theme="light"] .type-page .search-result-icon { --accent: #291973; }
 
 .search-result-text {
     flex: 1;
@@ -4552,11 +4627,6 @@ h3 {
     user-select: none;
 }
 
-.not-found-code .text-gradient {
-    background-size: 200% auto;
-    animation: gradientShift 6s ease-in-out infinite alternate;
-}
-
 .not-found-orb {
     position: relative;
     width: 0.72em;
@@ -4565,7 +4635,7 @@ h3 {
     padding: 0.075em;
     border-radius: 50%;
     background: var(--primary-gradient);
-    box-shadow: 0 0 40px var(--accent-glow), 0 12px 30px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 0 40px var(--accent-glow), 0 12px 30px rgba(var(--primary-rgb), 0.3);
     animation: notFoundFloat 4s ease-in-out infinite;
 }
 
@@ -4643,8 +4713,8 @@ h3 {
     max-width: 100%;
     margin-bottom: 2rem;
     padding: 6px 16px;
-    background: rgba(139, 92, 246, 0.08);
-    border: 1px solid rgba(139, 92, 246, 0.25);
+    background: rgba(var(--primary-rgb), 0.08);
+    border: 1px solid rgba(var(--primary-rgb), 0.25);
     border-radius: var(--radius-full);
     font-size: 0.85rem;
     color: var(--text-dim);
@@ -4757,7 +4827,6 @@ h3 {
 }
 
 /* No endlessly repainting animations on low-end devices */
-html.lite .not-found-code .text-gradient,
 html.lite .not-found-orb,
 html.lite .not-found-orb::before,
 html.lite .not-found-orb::after {
@@ -4804,11 +4873,6 @@ html.lite .gallery-placeholder {
     animation: none;
 }
 
-/* No endlessly repainting animations */
-html.lite .hero-title .text-gradient {
-    animation: none;
-}
-
 /* Browsers without backdrop blur would show page text through the translucent header */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .site-header {
@@ -4820,27 +4884,27 @@ html.lite .hero-title .text-gradient {
 @supports not (color: color-mix(in srgb, red 50%, blue)) {
     .search-results mark,
     mark.find-hit {
-        background: rgba(139, 92, 246, 0.3);
+        background: rgba(var(--primary-rgb), 0.3);
     }
 
     .search-result.active,
     .search-history-item.active {
-        background: rgba(139, 92, 246, 0.14);
+        background: rgba(var(--primary-rgb), 0.14);
     }
 
     .search-result-icon,
     .connect-icon {
-        background: rgba(139, 92, 246, 0.14);
-        border-color: rgba(139, 92, 246, 0.3);
+        background: rgba(var(--primary-rgb), 0.14);
+        border-color: rgba(var(--primary-rgb), 0.3);
     }
 
     .search-empty-icon {
-        background: rgba(139, 92, 246, 0.12);
+        background: rgba(var(--primary-rgb), 0.12);
     }
 
     @media (max-width: 900px) {
         .nav-link.active {
-            background: rgba(139, 92, 246, 0.14);
+            background: rgba(var(--primary-rgb), 0.14);
         }
     }
 }
@@ -4861,5 +4925,340 @@ html.lite .hero-title .text-gradient {
 
     .reveal {
         opacity: 1;
+    }
+}
+
+/* ==========================================================================
+   Mobile Bottom Navigation (phones, <=768px)
+   App-style tab bar: Home, Events, Search, Gallery, Contact.
+   It replaces the header's menu and search buttons there; the header keeps the logo and theme button.
+   ========================================================================== */
+.bottom-nav {
+    display: none;
+}
+
+:root {
+    --bottom-nav-h: 4rem;
+    --bnav-pill: rgba(var(--primary-rgb), 0.2);
+}
+
+[data-theme="light"] {
+    --bnav-pill: rgba(41, 25, 115, 0.1);
+}
+
+@media (max-width: 768px) {
+    /* Header: no menu button, drop-down panel or search button on phones (search lives in the bar) */
+    .mobile-menu-btn,
+    .nav-menu,
+    .nav-backdrop,
+    .nav-actions .search-trigger {
+        display: none !important;
+    }
+
+    /* Room at the bottom of every page so the bar never covers the footer */
+    body {
+        padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px));
+    }
+
+    html {
+        scroll-padding-bottom: calc(var(--bottom-nav-h) + 1rem);
+    }
+
+    .back-to-top {
+        bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px) + 1rem);
+    }
+
+    .bottom-nav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 950;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        align-items: stretch;
+        height: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px));
+        padding: 0 max(0.25rem, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(0.25rem, env(safe-area-inset-left, 0px));
+        background: var(--nav-bg);
+        backdrop-filter: blur(18px) saturate(1.4);
+        -webkit-backdrop-filter: blur(18px) saturate(1.4);
+        border-top: 1px solid var(--glass-border);
+        box-shadow: 0 -10px 30px -18px rgba(0, 0, 0, 0.45);
+        transition: transform 0.4s var(--ease-out-expo);
+        /* Stays put while the page underneath changes */
+        view-transition-name: bottom-nav;
+    }
+
+    /* Tucked away while scrolling down to read; back on scrolling up (js/main.js) */
+    .bottom-nav.is-hidden {
+        transform: translateY(calc(100% + 1.5rem));
+    }
+
+    .bottom-nav-item {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        min-width: 0;
+        color: var(--text-muted);
+        text-decoration: none;
+        background: none;
+        border: 0;
+        padding: 0;
+        font: inherit;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        transition: color 0.25s ease;
+    }
+
+    .bottom-nav-icon {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 3.5rem;
+        height: 1.875rem;
+        font-size: 1.1rem;
+        transition: transform 0.2s ease;
+    }
+
+    .bottom-nav-icon i {
+        position: relative;
+        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* The pill behind the icon: full on the current tab, a quick flash when another tab is pressed */
+    .bottom-nav-pill {
+        position: absolute;
+        inset: 0;
+        border-radius: var(--radius-full);
+        background: var(--bnav-pill);
+        opacity: 0;
+        transform: scaleX(0.5);
+        transition: opacity 0.2s ease, transform 0.3s var(--ease-out-expo);
+    }
+
+    .bottom-nav-label {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        line-height: 1;
+    }
+
+    .bottom-nav-item.is-active {
+        color: var(--brand-text);
+    }
+
+    .bottom-nav-item.is-active .bottom-nav-label {
+        font-weight: 700;
+    }
+
+    .bottom-nav-item.is-active .bottom-nav-pill {
+        opacity: 1;
+        transform: none;
+        view-transition-name: bottom-nav-pill;
+    }
+
+    /* Current tab's icon gives a small pop when the page opens */
+    .bottom-nav-item.is-active .bottom-nav-icon i {
+        animation: bottomNavPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+    }
+
+    .bottom-nav-item:active .bottom-nav-icon {
+        transform: scale(0.88);
+    }
+
+    .bottom-nav-item:not(.is-active):active .bottom-nav-pill {
+        opacity: 0.6;
+        transform: scaleX(0.85);
+    }
+
+    .bottom-nav-item:focus-visible {
+        outline: none;
+    }
+
+    .bottom-nav-item:focus-visible .bottom-nav-icon {
+        outline: 2px solid var(--primary-light);
+        outline-offset: 2px;
+        border-radius: var(--radius-full);
+    }
+
+    @media (hover: hover) {
+        .bottom-nav-item:not(.is-active):hover {
+            color: var(--text-main);
+        }
+    }
+
+    /* Search tab: while the search panel is open the bar sits above it, the pill moves to Search
+       and the current page's tab steps back */
+    body.search-open .bottom-nav {
+        z-index: 1150;
+        transform: none;
+    }
+
+    .bottom-nav-search.is-open {
+        color: var(--brand-text);
+    }
+
+    .bottom-nav-search.is-open .bottom-nav-label {
+        font-weight: 700;
+    }
+
+    .bottom-nav-search.is-open .bottom-nav-pill {
+        opacity: 1;
+        transform: none;
+    }
+
+    .bottom-nav-search.is-open .bottom-nav-icon i {
+        animation: bottomNavPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    body.search-open .bottom-nav-item.is-active {
+        color: var(--text-muted);
+    }
+
+    body.search-open .bottom-nav-item.is-active .bottom-nav-label {
+        font-weight: 500;
+    }
+
+    body.search-open .bottom-nav-item.is-active .bottom-nav-pill {
+        opacity: 0;
+        transform: scaleX(0.5);
+    }
+
+    /* Search panel stops above the bar */
+    .search-modal {
+        padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px) + 0.75rem);
+    }
+
+    .search-panel {
+        max-height: calc(100vh - var(--bottom-nav-h) - 1.5rem);
+        max-height: calc(100dvh - var(--bottom-nav-h) - env(safe-area-inset-bottom, 0px) - 1.5rem);
+    }
+
+    /* Page change: the pill slides from the old tab to the new one instead of cross-fading */
+    ::view-transition-group(bottom-nav-pill) {
+        animation-duration: 0.45s;
+        animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        mix-blend-mode: screen;
+    }
+
+    :root[data-theme="light"]::view-transition-group(bottom-nav-pill) {
+        mix-blend-mode: multiply;
+    }
+
+    ::view-transition-old(bottom-nav-pill) {
+        display: none;
+    }
+
+    ::view-transition-new(bottom-nav-pill) {
+        animation: none;
+    }
+}
+
+@keyframes bottomNavPop {
+    0% {
+        transform: scale(0.7);
+    }
+
+    60% {
+        transform: scale(1.15);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Low-end devices: solid bar (no blur) and no pop */
+html.lite .bottom-nav {
+    background: var(--nav-solid);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+html.lite .bottom-nav-item.is-active .bottom-nav-icon i {
+    animation: none;
+}
+
+/* ==========================================================================
+   Compact Footer on Phones (<=768px)
+   The bottom bar already links every page, so the Quick Links column is dropped;
+   what's left (brand, Connect links, copyright) is centred and tightened.
+   ========================================================================== */
+@media (max-width: 768px) {
+    .site-footer {
+        margin-top: 3rem;
+        padding: 2rem 0 1.25rem;
+        text-align: center;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .footer-col-quick,
+    .footer-col-connect .footer-heading {
+        display: none;
+    }
+
+    .footer-brand .brand-logo {
+        justify-content: center;
+    }
+
+    .footer-brand p {
+        margin: 0.6rem auto 0;
+        max-width: 22rem;
+        font-size: 0.85rem;
+        line-height: 1.55;
+    }
+
+    /* Connect links become a centred row of tappable chips */
+    .footer-connect {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .footer-connect a {
+        gap: 8px;
+        padding: 5px 14px 5px 5px;
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-full);
+        background: var(--bg-card);
+        font-size: 0.8rem;
+        color: var(--text-main);
+        transition: border-color var(--transition-fast), background var(--transition-fast), transform 0.2s ease;
+    }
+
+    .footer-connect a:active {
+        transform: scale(0.96);
+    }
+
+    /* No external-link arrow fading in on touch screens */
+    .footer-connect a::after {
+        display: none;
+    }
+
+    .footer-connect .connect-icon {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        font-size: 0.75rem;
+    }
+
+    .footer-bottom {
+        padding-top: 1rem;
+        font-size: 0.75rem;
+        line-height: 1.5;
     }
 }

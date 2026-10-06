@@ -96,8 +96,15 @@
                     <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                     <span class="search-trigger-label">Search</span><kbd class="search-trigger-kbd">Ctrl K</kbd>
                 </button>
-                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
-                    <i class="fa-solid fa-sun theme-icon-sun" aria-hidden="true"></i>
+                <!-- Theme button: shows a moon in light mode and a sun in dark mode; the icons turn and cross-fade (CSS) -->
+                <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Switch to Dark Mode">
+                    <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4.2" />
+                        <g class="sun-rays">
+                            <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
+                        </g>
+                    </svg>
                     <i class="fa-solid fa-moon theme-icon-moon" aria-hidden="true"></i>
                 </button>
                 <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Open menu">
@@ -216,7 +223,7 @@
 
                 <!-- 2026 Talk: Dr. Mahesh Mohan M R -->
                 <!-- data-keywords: extra search terms not in the visible text -->
-                <div class="event-card" data-keywords="healthcare health sustainability responsible investing">
+                <div class="event-card" id="talk-15-sep-2026-learning-the-esg-geometry-with-domain-aware-lang" data-keywords="healthcare health sustainability responsible investing">
                     <div class="event-summary">
                         <div class="event-date-badge"><i class="fa-regular fa-calendar"></i> 15 Sep 2026</div>
                         <div class="event-speaker">
@@ -283,7 +290,7 @@
                 </div>
 
                 <!-- 2026 Talk: Shri Anil Kishore Yadav, IPS (IdoAI for Policing Applications outreach) -->
-                <div class="event-card"
+                <div class="event-card" id="talk-28-aug-2026-ai-integration-in-modern-policing-needs-gaps-and"
                     data-keywords="police policing law enforcement public safety criminal justice ethics privacy bias robotics surveillance governance policy outreach bprd capt">
                     <div class="event-summary">
                         <div class="event-date-badge"><i class="fa-regular fa-calendar"></i> 28 Aug 2026</div>
@@ -362,7 +369,7 @@
                 </div>
 
                 <!-- 2026 Talk: Dr. Shreya Ghosh -->
-                <div class="event-card">
+                <div class="event-card" id="talk-28-jul-2026-automatic-human-behaviour-understanding">
                     <div class="event-summary">
                         <div class="event-date-badge"><i class="fa-regular fa-calendar"></i> 28 Jul 2026</div>
                         <div class="event-speaker">
@@ -413,7 +420,7 @@
                 </div>
 
                 <!-- 2026 Talk: Prof. Dipankar Maity -->
-                <div class="event-card">
+                <div class="event-card" id="talk-16-jul-2026-system-level-privacy-against-eavesdropping-adver">
                     <div class="event-summary">
                         <div class="event-date-badge"><i class="fa-regular fa-calendar"></i> 16 Jul 2026</div>
                         <div class="event-speaker">
@@ -471,7 +478,7 @@
                 </div>
 
                 <!-- 2026 Talk: Prof. Kanad Basu -->
-                <div class="event-card"
+                <div class="event-card" id="talk-6-jan-2026-the-geometry-of-hallucination-why-your-ai-will-co"
                     data-keywords="llm large language models generative ai genai hallucination business enterprise deployment alignment compliance risk">
                     <div class="event-summary">
                         <div class="event-date-badge"><i class="fa-regular fa-calendar"></i> 6 Jan 2026</div>
@@ -1271,6 +1278,37 @@
 
     </main>
 
+    <!-- Mobile bottom navigation (phones only, <=768px; replaces the header menu and search button there).
+         The pill behind the active icon glides to the new tab on page change (view transition).
+         The middle Search tab opens the site search (wired up in js/main.js). -->
+    <nav class="bottom-nav" aria-label="Main">
+        <a href="index.html" class="bottom-nav-item">
+            <span class="bottom-nav-icon"><span class="bottom-nav-pill" aria-hidden="true"></span><i
+                    class="fa-solid fa-house" aria-hidden="true"></i></span>
+            <span class="bottom-nav-label">Home</span>
+        </a>
+        <a href="events.html" class="bottom-nav-item is-active" aria-current="page">
+            <span class="bottom-nav-icon"><span class="bottom-nav-pill" aria-hidden="true"></span><i
+                    class="fa-solid fa-calendar-days" aria-hidden="true"></i></span>
+            <span class="bottom-nav-label">Events</span>
+        </a>
+        <button type="button" class="bottom-nav-item bottom-nav-search" aria-haspopup="dialog" aria-expanded="false">
+            <span class="bottom-nav-icon"><span class="bottom-nav-pill" aria-hidden="true"></span><i
+                    class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+            <span class="bottom-nav-label">Search</span>
+        </button>
+        <a href="gallery.html" class="bottom-nav-item">
+            <span class="bottom-nav-icon"><span class="bottom-nav-pill" aria-hidden="true"></span><i
+                    class="fa-solid fa-images" aria-hidden="true"></i></span>
+            <span class="bottom-nav-label">Gallery</span>
+        </a>
+        <a href="contact.html" class="bottom-nav-item">
+            <span class="bottom-nav-icon"><span class="bottom-nav-pill" aria-hidden="true"></span><i
+                    class="fa-solid fa-address-card" aria-hidden="true"></i></span>
+            <span class="bottom-nav-label">Contact</span>
+        </a>
+    </nav>
+
     <!-- Footer -->
     <footer class="site-footer">
         <div class="container">
@@ -1288,7 +1326,7 @@
                         Indian Institute of Technology Kharagpur.
                     </p>
                 </div>
-                <div>
+                <div class="footer-col-quick">
                     <h4 class="footer-heading">Quick Links</h4>
                     <ul class="footer-links">
                         <li><a href="index.html">Home</a></li>
@@ -1298,7 +1336,7 @@
                         <li><a href="contact.html">Contact</a></li>
                     </ul>
                 </div>
-                <div>
+                <div class="footer-col-connect">
                     <h4 class="footer-heading">Connect</h4>
                     <ul class="footer-links footer-connect">
                         <li><a href="https://www.linkedin.com/company/ai-iitkgp/" target="_blank" rel="noopener noreferrer">
