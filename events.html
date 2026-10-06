@@ -62,6 +62,18 @@
 
     <!-- Stylesheet -->
     <link rel="stylesheet" href="style.css">
+
+    <!-- Installable app (PWA): manifest, icons and the browser bar colour (kept in step with the theme by js/main.js) -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <meta name="theme-color" content="#faf2df" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#100d23" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="IdoAI">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 
 <body>
@@ -558,8 +570,8 @@
              ========================================================================== -->
         <section id="inaugural-2025" style="margin-bottom: 5rem;">
             <div style="margin-bottom: 2rem;">
-                <h2 class="section-title"><i class="fa-solid fa-flag-checkered"
-                        style="color: var(--primary-light);"></i> Inaugural IdoAI Event (21 July 2025)</h2>
+                <h2 class="section-title title-with-date"><i class="fa-solid fa-flag-checkered"
+                        style="color: var(--primary-light);"></i> <span>Inaugural IdoAI Event <span class="title-date">21 July 2025</span></span></h2>
                 <p class="section-subtitle">The Department of Artificial Intelligence launched the event series
                     <strong style="color: var(--primary-light);">Interdisciplinary Opportunities with AI (IdoAI)</strong>
                     to explore how AI is transforming diverse domains such as healthcare, law, climate science,
@@ -583,35 +595,58 @@
                             <tr>
                                 <td>9:30 AM</td>
                                 <td>CRR 501</td>
-                                <td>A Spatially Explicit Agent-Based Modeling Approach to Evaluating Routing Strategies
-                                    for Emergency Evacuation by <strong>Dr. Rebecca Vandewalle</strong></td>
+                                <td>
+                                    <span class="schedule-event">A Spatially Explicit Agent-Based Modeling Approach to Evaluating Routing Strategies for Emergency Evacuation</span>
+                                    <span class="schedule-speaker"><i class="fa-solid fa-circle-user" aria-hidden="true"></i>
+                                        <a href="https://www.usf.edu/arts-sciences/departments/information/people/rebecca-vandewalle.aspx" target="_blank" rel="noopener noreferrer"
+                                            title="View Profile of Dr. Rebecca Vandewalle">Dr. Rebecca Vandewalle<i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></span>
+                                </td>
                             </tr>
                             <tr>
                                 <td>10:30 AM</td>
                                 <td>CRR 501</td>
-                                <td>Modeling, estimation, and control strategies for an octopus-inspired soft arm by
-                                    <strong>Prof. Udit Halder</strong></td>
+                                <td>
+                                    <span class="schedule-event">Modeling, estimation, and control strategies for an octopus-inspired soft arm</span>
+                                    <span class="schedule-speaker"><i class="fa-solid fa-circle-user" aria-hidden="true"></i>
+                                        <a href="https://sites.google.com/view/udithalder/" target="_blank" rel="noopener noreferrer"
+                                            title="View Profile of Prof. Udit Halder">Prof. Udit Halder<i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></span>
+                                </td>
                             </tr>
                             <tr>
                                 <td>11:30 AM &ndash; 12:30 PM</td>
                                 <td>CRR 501</td>
-                                <td>Artificial Intelligence for Insect Biodiversity: Friends, Foes, and Futures by
-                                    <strong>Dr. Debika Bhunia</strong></td>
+                                <td>
+                                    <span class="schedule-event">Artificial Intelligence for Insect Biodiversity: Friends, Foes, and Futures</span>
+                                    <span class="schedule-speaker"><i class="fa-solid fa-circle-user" aria-hidden="true"></i>
+                                        Dr. Debika Bhunia</span>
+                                </td>
                             </tr>
                             <tr>
                                 <td>2:30 &ndash; 4:30 PM</td>
                                 <td>AI Board Room</td>
-                                <td>Group meeting with <strong>Mr. Mohammad Saif</strong></td>
+                                <td>
+                                    <span class="schedule-event">Group meeting</span>
+                                    <span class="schedule-speaker"><i class="fa-solid fa-circle-user" aria-hidden="true"></i>
+                                        Mr. Mohammad Saif</span>
+                                </td>
                             </tr>
                             <tr>
                                 <td>7:00 PM</td>
                                 <td>Online</td>
-                                <td>&ldquo;AI as Normal Technology&rdquo; by <strong>Mr. Sayash Kapoor</strong></td>
+                                <td>
+                                    <span class="schedule-event">&ldquo;AI as Normal Technology&rdquo;</span>
+                                    <span class="schedule-speaker"><i class="fa-solid fa-circle-user" aria-hidden="true"></i>
+                                        <a href="https://www.cs.princeton.edu/~sayashk/" target="_blank" rel="noopener noreferrer"
+                                            title="View Profile of Mr. Sayash Kapoor">Mr. Sayash Kapoor<i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></span>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
+
+            <h3 class="subsection-heading"><i class="fa-solid fa-microphone-lines" aria-hidden="true"></i> Talks &amp; Sessions
+                <span class="subsection-hint">Open a talk for its abstract and speaker bio</span></h3>
 
             <div class="events-grid">
 

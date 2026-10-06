@@ -1313,7 +1313,7 @@ mark.find-hit {
 
 .event-summary {
     display: grid;
-    grid-template-columns: 130px 200px 1fr auto;
+    grid-template-columns: 130px 14.5rem 1fr auto; /* speaker column fits the longest name ("Shri Anil Kishore Yadav, IPS") on one line */
     align-items: center;
     gap: 1.5rem;
     padding: 1.25rem 1.5rem;
@@ -1453,6 +1453,11 @@ mark.find-hit {
     font-weight: 700;
 }
 
+/* Wide screens: "Inaugural IdoAI Event • 21 July 2025" on one line */
+.inaugural-callout-date::before {
+    content: '\2022\00a0';
+}
+
 .inaugural-callout-desc {
     font-size: 0.9rem;
     color: var(--text-muted);
@@ -1476,16 +1481,117 @@ mark.find-hit {
     transform: translateX(4px);
 }
 
+/* Phones: event name on one line, the date on its own line below; the text and the
+   "View details" link share one left edge beside the icon */
 @media (max-width: 600px) {
     .inaugural-callout {
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: start;
+        column-gap: 0.9rem;
+        row-gap: 0.6rem;
         padding: 1.1rem;
-        gap: 1rem;
+    }
+
+    .inaugural-callout-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .inaugural-callout-name {
+        white-space: nowrap;
+    }
+
+    .inaugural-callout-date {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--primary-light);
+    }
+
+    .inaugural-callout-date::before {
+        content: none;
+    }
+
+    .inaugural-callout-desc {
+        margin-top: 4px;
     }
 
     .inaugural-callout-cta {
-        width: 100%;
-        justify-content: flex-end;
+        grid-column: 2;
+    }
+}
+
+/* Section titles with a date: "Title (date)" on wide screens; on phones the date drops to its
+   own line, lined up under the title text rather than the icon */
+.title-date::before {
+    content: '(';
+}
+
+.title-date::after {
+    content: ')';
+}
+
+@media (max-width: 600px) {
+    .title-with-date {
+        display: flex;
+        align-items: baseline;
+    }
+
+    .title-with-date > i:first-child {
+        flex-shrink: 0;
+    }
+
+    .title-date {
+        display: block;
+        margin-top: 0.15rem;
+        font-size: 0.7em;
+        font-weight: 600;
+        color: var(--text-muted);
+    }
+
+    .title-date::before,
+    .title-date::after {
+        content: none;
+    }
+}
+
+/* Small heading inside a section, e.g. "Talks & Sessions" between the schedule and the talk cards */
+.subsection-heading {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: baseline;
+    column-gap: 0.6rem;
+    row-gap: 0.15rem;
+    margin: 2.25rem 0 1rem;
+    font-size: 1.1rem;
+    color: var(--text-main);
+}
+
+.subsection-heading > i {
+    margin-right: 0;
+    color: var(--primary-light);
+}
+
+.subsection-hint {
+    margin-left: 0.4rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--text-dim);
+}
+
+/* Phones: the hint drops under the heading text, lined up with it rather than the icon */
+@media (max-width: 600px) {
+    .subsection-heading {
+        grid-template-columns: auto 1fr;
+        margin-top: 1.75rem;
+    }
+
+    .subsection-hint {
+        grid-column: 2;
+        margin-left: 0;
     }
 }
 
@@ -1553,6 +1659,47 @@ mark.find-hit {
 
 .schedule-table td strong {
     color: var(--text-main);
+}
+
+/* Event cell: talk title on the first line, speaker (linked to their profile when there is one) below */
+.schedule-event {
+    display: block;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.schedule-speaker {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 0.3rem;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.schedule-speaker > i {
+    color: var(--primary-light);
+}
+
+.schedule-speaker a {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    color: var(--primary-light);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--transition-fast);
+}
+
+.schedule-speaker a:hover,
+.schedule-speaker a:focus-visible {
+    border-bottom-color: currentColor;
+}
+
+.schedule-speaker a i {
+    font-size: 0.7em;
+    opacity: 0.75;
 }
 
 @media (max-width: 600px) {

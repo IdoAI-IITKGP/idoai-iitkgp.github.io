@@ -67,11 +67,26 @@ function initThemeToggle() {
 
 /* The sun/moon icons are swapped by CSS from data-theme; this keeps the label and hover popup in step */
 function updateThemeIcon(theme) {
+    syncThemeColor(theme);
     const themeBtn = document.getElementById('theme-toggle');
     if (!themeBtn) return;
     const label = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
     themeBtn.setAttribute('data-tooltip', label);
     themeBtn.setAttribute('aria-label', label);
+}
+
+/* Browser bar / installed-app title bar follows the site's theme (even when it differs from the system's) */
+function syncThemeColor(theme) {
+    const color = theme === 'dark' ? '#100d23' : '#faf2df';
+    document.querySelectorAll('meta[name="theme-color"]').forEach(meta => meta.setAttribute('content', color));
+}
+
+/* Installable app: the service worker (sw.js) lets the browser offer "Install app" and keeps
+   visited pages available offline. Needs https (or localhost), so it is skipped on file:// previews. */
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => { /* site still works without it */ });
+    });
 }
 
 /* ==========================================================================

@@ -63,6 +63,18 @@
 
     <!-- Stylesheet -->
     <link rel="stylesheet" href="style.css">
+
+    <!-- Installable app (PWA): manifest, icons and the browser bar colour (kept in step with the theme by js/main.js) -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <meta name="theme-color" content="#faf2df" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#100d23" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="IdoAI">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 
 <body>
@@ -423,7 +435,7 @@
             <a href="events.html#inaugural-2025" class="inaugural-callout">
                 <span class="inaugural-callout-icon"><i class="fa-solid fa-flag-checkered" aria-hidden="true"></i></span>
                 <span class="inaugural-callout-text">
-                    <span class="inaugural-callout-title">Inaugural IdoAI Event &bull; 21 July 2025</span>
+                    <span class="inaugural-callout-title"><span class="inaugural-callout-name">Inaugural IdoAI Event</span> <span class="inaugural-callout-date">21 July 2025</span></span>
                     <span class="inaugural-callout-desc">See the talks from the first-ever IdoAI event.</span>
                 </span>
                 <span class="inaugural-callout-cta">View details <i class="fa-solid fa-arrow-right"
