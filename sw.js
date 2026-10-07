@@ -4,7 +4,7 @@
    Images and fonts: served from the cache straight away and refreshed in the background.
    Bump CACHE_VERSION to drop everything cached by an older version.
    ========================================================================== */
-const CACHE_VERSION = 'idoai-v6';
+const CACHE_VERSION = 'idoai-v7';
 
 const CORE_FILES = [
     './',

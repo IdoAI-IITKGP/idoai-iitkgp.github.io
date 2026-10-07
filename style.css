@@ -288,7 +288,7 @@ a:hover {
     letter-spacing: -0.02em;
 }
 
-/* Wordmark in the favicon's design: cream "Ido", gradient "AI", short signature-gradient bar */
+/* Wordmark in the favicon's design: cream "Ido", orange "AI", short signature-gradient bar */
 .brand-title.brand-wordmark {
     position: relative;
     display: inline-block;
@@ -311,7 +311,7 @@ a:hover {
     transform: translateX(-50%);
 }
 
-/* Header wordmark drops the bar; "AI" wears the hero's orange → indigo blend everywhere (below) */
+/* Header wordmark drops the bar */
 .site-header .brand-wordmark::after {
     content: none;
 }
@@ -324,16 +324,6 @@ a:hover {
 
 .site-header .brand-subtitle {
     margin-top: 0.3rem;
-}
-
-@supports ((-webkit-background-clip: text) or (background-clip: text)) {
-    .brand-wordmark .brand-ai {
-        background: var(--signature-gradient);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        padding-right: 0.04em;
-    }
 }
 
 .brand-subtitle {
