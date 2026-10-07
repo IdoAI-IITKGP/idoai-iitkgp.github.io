@@ -2530,6 +2530,29 @@ span.resource-btn:hover {
     clip-path: inset(0 -100vmax);
 }
 
+/* Designer credit: its own line under the copyright */
+.footer-credit {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.92em;
+    opacity: 0.85;
+}
+
+.footer-credit a {
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: rgba(var(--primary-rgb), 0.6);
+    text-underline-offset: 3px;
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.footer-credit a:hover,
+.footer-credit a:focus-visible {
+    color: #ffb37a; /* the band is dark in both themes, so a fixed light accent */
+    text-decoration-color: currentColor;
+}
+
 /* Talk Poster Block (Home Page Next Seminar Spotlight) */
 .talk-poster-container {
     margin: 1.75rem 0;
@@ -2772,6 +2795,9 @@ span.resource-btn:hover {
     justify-content: center;
     padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
         max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+    /* a zoomed photo can spill past the screen edges; clip (not just hidden) so scrollIntoView can't scroll the viewer */
+    overflow: hidden;
+    overflow: clip;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -2902,11 +2928,41 @@ span.resource-btn:hover {
 
 /* Stepping through gallery photos: arrows at the sides, counter top-left, quick fade between photos */
 .lightbox-img {
-    transition: opacity 0.15s ease;
+    transition: opacity 0.15s ease, transform 0.25s var(--ease-out-expo);
 }
 
 .lightbox-img.is-switching {
     opacity: 0;
+}
+
+/* Zoom (js/main.js): the photo scales and pans in place; pinch and drag go to the viewer, not the page */
+.lightbox-img {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: zoom-in;
+}
+
+/* Dragging / pinching: the photo follows the pointer directly */
+.lightbox-img.is-gesturing {
+    transition: opacity 0.15s ease;
+}
+
+.lightbox-modal.is-zoomed .lightbox-img {
+    cursor: grab;
+}
+
+.lightbox-modal.is-zoomed .lightbox-img.is-gesturing {
+    cursor: grabbing;
+}
+
+/* Controls and caption stay above a zoomed photo */
+.lightbox-toolbar,
+.lightbox-counter,
+.lightbox-caption > *,
+.lightbox-sidebar {
+    position: relative;
+    z-index: 2;
 }
 
 .lightbox-counter {
@@ -3001,44 +3057,121 @@ span.resource-btn:hover {
     border-color: var(--primary-light);
 }
 
-/* Slideshow and the thumbnail toggle only make sense for a set of photos (the toggle only on wide screens);
-   posters get no browser full screen */
+/* Zoom in / out at their limit */
+.lightbox-tool[aria-disabled="true"] {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.lightbox-tool[aria-disabled="true"]:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: none;
+}
+
+/* Slideshow and the thumbnail toggle only make sense for a set of photos; posters get no browser full screen */
 .lightbox-modal:not(.has-series) .lightbox-play,
-.lightbox-modal.is-poster .lightbox-fullscreen,
-.lightbox-thumbs-toggle {
+.lightbox-modal:not(.has-series) .lightbox-thumbs-toggle,
+.lightbox-modal.is-poster .lightbox-fullscreen {
     display: none;
 }
 
-/* Thumbnail sidebar (wide screens, gallery photos only) */
+/* Thumbnails of every photo in the set (gallery photos only): a sidebar on the right on wide screens,
+   a horizontally scrolling strip along the bottom on phones and tablets */
 .lightbox-sidebar {
     display: none;
 }
 
-@media (min-width: 1024px) {
-    .lightbox-modal.has-series .lightbox-thumbs-toggle {
-        display: flex;
+.lightbox-modal.has-series .lightbox-sidebar {
+    display: flex;
+    flex-direction: column;
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.lightbox-modal.has-series.active .lightbox-sidebar {
+    transform: none;
+}
+
+@media (max-width: 1023.98px) {
+    .lightbox-modal.has-series {
+        flex-direction: column;
+    }
+
+    .lightbox-modal.has-series .lightbox-content {
+        min-height: 0;
     }
 
     .lightbox-modal.has-series .lightbox-sidebar {
-        display: flex;
-        flex-direction: column;
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 1200px; /* lines up with the photo area */
+        max-height: 120px;
+        margin-top: 0.6rem;
+        transform: translateY(16px);
+        transition: max-height 0.4s var(--ease-out-expo), margin 0.4s var(--ease-out-expo), opacity 0.3s ease,
+            transform 0.4s var(--ease-out-expo), border-color 0.3s ease;
+    }
+
+    .lightbox-modal .lightbox-sidebar-head {
+        display: none;
+    }
+
+    .lightbox-modal .lightbox-thumbs {
+        grid-template-columns: none;
+        grid-auto-flow: column;
+        grid-auto-columns: 72px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        overscroll-behavior-x: contain;
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+
+    /* Hidden: folds down, the photo takes the freed space */
+    .lightbox-modal.has-series.thumbs-hidden .lightbox-sidebar {
+        max-height: 0;
+        margin-top: 0;
+        opacity: 0;
+        border-color: transparent;
+        pointer-events: none;
+    }
+}
+
+/* Phones on their side: smaller thumbnails so the photo keeps its height */
+@media (max-width: 1023.98px) and (max-height: 520px) and (orientation: landscape) {
+    .lightbox-modal.has-series .lightbox-sidebar {
+        margin-top: 0.4rem;
+    }
+
+    .lightbox-modal .lightbox-thumbs {
+        grid-auto-columns: 56px;
+        padding: 0.4rem;
+        gap: 0.4rem;
+    }
+}
+
+/* Very narrow phones: drop the zoom buttons so the toolbar fits (pinch and double-tap still zoom) */
+@media (max-width: 359.98px) {
+    .lightbox-zoom-in,
+    .lightbox-zoom-out {
+        display: none;
+    }
+}
+
+@media (min-width: 1024px) {
+    .lightbox-modal.has-series .lightbox-sidebar {
         /* ~225px on a 1024px tablet in landscape, up to 300px on large screens */
         flex: 0 0 clamp(220px, 22vw, 300px);
         width: clamp(220px, 22vw, 300px);
         height: 100%;
         margin-left: 1rem;
-        background: rgba(15, 23, 42, 0.72);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: var(--radius-md);
-        overflow: hidden;
         transform: translateX(24px);
         transition: flex-basis 0.4s var(--ease-out-expo), width 0.4s var(--ease-out-expo),
             margin 0.4s var(--ease-out-expo), opacity 0.3s ease, transform 0.4s var(--ease-out-expo),
             border-color 0.3s ease;
-    }
-
-    .lightbox-modal.has-series.active .lightbox-sidebar {
-        transform: none;
     }
 
     /* Hidden: slides shut, the photo takes the freed space */

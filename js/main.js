@@ -529,9 +529,11 @@ function initLightbox() {
     const prevBtn = lightboxContent.querySelector('.lightbox-prev');
     const nextBtn = lightboxContent.querySelector('.lightbox-next');
 
-    // Toolbar (top-right): slideshow, thumbnail sidebar, browser full screen (gallery photos only), close
+    // Toolbar (top-right): zoom, slideshow, thumbnail sidebar, browser full screen (gallery photos only), close
     lightboxContent.insertAdjacentHTML('beforeend', `
         <div class="lightbox-toolbar">
+            <button type="button" class="lightbox-tool lightbox-zoom-out"><i class="fa-solid fa-magnifying-glass-minus" aria-hidden="true"></i></button>
+            <button type="button" class="lightbox-tool lightbox-zoom-in"><i class="fa-solid fa-magnifying-glass-plus" aria-hidden="true"></i></button>
             <button type="button" class="lightbox-tool lightbox-play"><i class="fa-solid fa-play" aria-hidden="true"></i></button>
             <button type="button" class="lightbox-tool lightbox-thumbs-toggle"><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i></button>
             <button type="button" class="lightbox-tool lightbox-fullscreen"><i class="fa-solid fa-expand" aria-hidden="true"></i></button>
@@ -540,6 +542,8 @@ function initLightbox() {
     const playBtn = toolbar.querySelector('.lightbox-play');
     const thumbsBtn = toolbar.querySelector('.lightbox-thumbs-toggle');
     const fsBtn = toolbar.querySelector('.lightbox-fullscreen');
+    const zoomInBtn = toolbar.querySelector('.lightbox-zoom-in');
+    const zoomOutBtn = toolbar.querySelector('.lightbox-zoom-out');
     if (closeBtn) toolbar.appendChild(closeBtn);
 
     // Wide screens: every photo of the current set as thumbnails in a right-hand sidebar; slideshow progress bar on top
@@ -574,6 +578,7 @@ function initLightbox() {
     }
 
     function openLightbox(src, alt, captionHtml) {
+        resetZoom();
         setImage(src, alt, captionHtml);
         lastFocused = document.activeElement;
         lightboxModal.classList.add('active');
@@ -655,7 +660,8 @@ function initLightbox() {
             thumb.classList.toggle('is-active', on);
             if (on) {
                 thumb.setAttribute('aria-current', 'true');
-                thumb.scrollIntoView({ block: 'nearest', behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+                // nearest on both axes: the sidebar scrolls vertically, the bottom strip (small screens) horizontally
+                thumb.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: prefersReducedMotion ? 'auto' : 'smooth' });
             } else {
                 thumb.removeAttribute('aria-current');
             }
@@ -734,12 +740,154 @@ function initLightbox() {
     document.addEventListener('fullscreenchange', syncFullscreen);
     document.addEventListener('webkitfullscreenchange', syncFullscreen);
 
+    // Zoom: buttons, + / - / 0 keys, mouse wheel, double-click / double-tap, pinch; drag or arrow keys pan a zoomed photo
+    const MAX_ZOOM = 4;
+    const ZOOM_STEP = 1.5;
+    let zoom = 1;
+    let panX = 0;
+    let panY = 0;
+
+    function applyZoom() {
+        if (zoom < 1.01) zoom = 1;
+        // Pan no further than the zoomed photo's edges reaching its normal frame
+        const maxX = lightboxImg.offsetWidth * (zoom - 1) / 2;
+        const maxY = lightboxImg.offsetHeight * (zoom - 1) / 2;
+        panX = Math.min(maxX, Math.max(-maxX, panX));
+        panY = Math.min(maxY, Math.max(-maxY, panY));
+        const zoomed = zoom > 1;
+        lightboxImg.style.transform = zoomed ? `translate(${panX}px, ${panY}px) scale(${zoom})` : '';
+        lightboxModal.classList.toggle('is-zoomed', zoomed);
+        zoomOutBtn.setAttribute('aria-disabled', String(!zoomed));
+        zoomInBtn.setAttribute('aria-disabled', String(zoom >= MAX_ZOOM));
+        if (zoomed && playing) setPlaying(false); // the next slide would throw the zoom away
+    }
+
+    // Centre of the unzoomed photo on screen. Read from layout, not getBoundingClientRect(),
+    // which mid-animation would give the transform's in-between position.
+    function photoCentre() {
+        const box = lightboxContent.getBoundingClientRect();
+        return [
+            box.left + lightboxImg.offsetLeft + lightboxImg.offsetWidth / 2,
+            box.top + lightboxImg.offsetTop + lightboxImg.offsetHeight / 2,
+        ];
+    }
+
+    // Zoom to `level`, keeping the photo point under (x, y) on screen in place (default: the photo's centre)
+    function zoomTo(level, x, y) {
+        const next = Math.min(MAX_ZOOM, Math.max(1, level));
+        const [cx, cy] = photoCentre();
+        const qx = x === undefined ? 0 : x - cx;
+        const qy = y === undefined ? 0 : y - cy;
+        const k = next / zoom;
+        panX = qx - k * (qx - panX);
+        panY = qy - k * (qy - panY);
+        zoom = next;
+        applyZoom();
+    }
+
+    // Instantly: a new photo shouldn't animate out of the previous one's zoom
+    function resetZoom() {
+        lightboxImg.classList.add('is-gesturing');
+        zoom = 1;
+        panX = panY = 0;
+        applyZoom();
+        void lightboxImg.offsetWidth;
+        lightboxImg.classList.remove('is-gesturing');
+    }
+
+    // Drag and pinch with pointer events (mouse, pen, fingers); a quick double tap / click toggles zoom
+    const pointers = new Map(); // pointerId -> { x, y }
+    let gesture = null;         // zoom, pan and pointer positions when the current drag / pinch (re)started
+    let tap = null;
+    let lastTap = null;
+
+    function startGesture() {
+        const [a, b] = [...pointers.values()];
+        const [cx, cy] = photoCentre();
+        gesture = { a, zoom, panX, panY };
+        if (b) {
+            gesture.dist = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+            gesture.midX = (a.x + b.x) / 2 - cx;
+            gesture.midY = (a.y + b.y) / 2 - cy;
+        }
+    }
+
+    lightboxImg.draggable = false;
+    lightboxImg.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse') {
+            if (e.button !== 0) return;
+            e.preventDefault(); // no native image drag or text selection
+        }
+        try { lightboxImg.setPointerCapture(e.pointerId); } catch (err) { /* pointer already gone */ }
+        pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        tap = pointers.size === 1 ? { x: e.clientX, y: e.clientY, time: e.timeStamp } : null;
+        startGesture();
+    });
+
+    lightboxImg.addEventListener('pointermove', (e) => {
+        if (!pointers.has(e.pointerId)) return;
+        pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (tap && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) > 8) tap = null;
+        const [a, b] = [...pointers.values()];
+        if (b) {
+            // Pinch: the photo point first under the fingers' midpoint follows the midpoint
+            const [cx, cy] = photoCentre();
+            const next = Math.min(MAX_ZOOM, Math.max(1, gesture.zoom * Math.hypot(a.x - b.x, a.y - b.y) / gesture.dist));
+            const px = (gesture.midX - gesture.panX) / gesture.zoom;
+            const py = (gesture.midY - gesture.panY) / gesture.zoom;
+            panX = (a.x + b.x) / 2 - cx - next * px;
+            panY = (a.y + b.y) / 2 - cy - next * py;
+            zoom = next;
+        } else if (zoom > 1) {
+            panX = gesture.panX + a.x - gesture.a.x;
+            panY = gesture.panY + a.y - gesture.a.y;
+        } else {
+            return; // nothing to pan: a one-finger swipe steps photos instead
+        }
+        lightboxImg.classList.add('is-gesturing');
+        applyZoom();
+    });
+
+    function endPointer(e) {
+        if (!pointers.delete(e.pointerId)) return;
+        if (pointers.size) return startGesture(); // pinch -> drag with the finger left on the photo
+        gesture = null;
+        lightboxImg.classList.remove('is-gesturing');
+        if (e.type === 'pointerup' && tap && e.timeStamp - tap.time < 300) {
+            if (lastTap && tap.time - lastTap.time < 450 && Math.hypot(tap.x - lastTap.x, tap.y - lastTap.y) < 30) {
+                zoomTo(zoom > 1 ? 1 : 2.5, tap.x, tap.y);
+                lastTap = null;
+            } else {
+                lastTap = tap;
+            }
+        }
+        tap = null;
+    }
+    lightboxImg.addEventListener('pointerup', endPointer);
+    lightboxImg.addEventListener('pointercancel', endPointer);
+
+    lightboxImg.addEventListener('wheel', (e) => {
+        e.preventDefault(); // also stops trackpad pinch (ctrl + wheel) zooming the whole page
+        const delta = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1);
+        zoomTo(zoom * Math.exp(-delta * 0.0025), e.clientX, e.clientY);
+    }, { passive: false });
+
+    // The photo's frame changes with full screen, the sidebar and window size: keep the pan in bounds
+    if ('ResizeObserver' in window) {
+        new ResizeObserver(() => { if (zoom > 1) applyZoom(); }).observe(lightboxImg);
+    }
+
     playBtn.addEventListener('click', () => setPlaying(!playing));
     thumbsBtn.addEventListener('click', toggleThumbs);
     fsBtn.addEventListener('click', toggleFullscreen);
+    zoomInBtn.addEventListener('click', () => zoomTo(zoom * ZOOM_STEP));
+    zoomOutBtn.addEventListener('click', () => zoomTo(zoom / ZOOM_STEP));
+    setLabel(zoomInBtn, 'Zoom in (+)');
+    setLabel(zoomOutBtn, 'Zoom out (-)');
     applyThumbs();
     setPlaying(false);
     syncFullscreen();
+    applyZoom();
 
     function showPhoto(i) {
         current = (i + series.length) % series.length;
@@ -753,6 +901,7 @@ function initLightbox() {
             const reveal = () => lightboxImg.classList.remove('is-switching');
             lightboxImg.addEventListener('load', reveal, { once: true });
             lightboxImg.addEventListener('error', reveal, { once: true });
+            resetZoom();
             setImage(...photoArgs(item));
             if (lightboxImg.complete) reveal();
         }, prefersReducedMotion ? 0 : 150);
@@ -768,16 +917,20 @@ function initLightbox() {
     prevBtn.addEventListener('click', () => step(-1));
     nextBtn.addEventListener('click', () => step(1));
 
-    // Swipe left / right on touch screens
+    // Swipe left / right on touch screens (not while zoomed or pinching: the fingers pan / zoom then,
+    // nor on the thumbnail strip, which scrolls sideways)
     let touchX = null;
     let touchY = null;
     lightboxModal.addEventListener('touchstart', (e) => {
-        if (e.touches.length !== 1) return;
+        if (e.touches.length !== 1 || e.target.closest('.lightbox-sidebar')) {
+            touchX = touchY = null;
+            return;
+        }
         touchX = e.touches[0].clientX;
         touchY = e.touches[0].clientY;
     }, { passive: true });
     lightboxModal.addEventListener('touchend', (e) => {
-        if (touchX === null) return;
+        if (touchX === null || zoom > 1) return;
         const dx = e.changedTouches[0].clientX - touchX;
         const dy = e.changedTouches[0].clientY - touchY;
         touchX = touchY = null;
@@ -868,7 +1021,17 @@ function initLightbox() {
         if (!lightboxModal.classList.contains('active')) return;
         if (e.ctrlKey || e.metaKey || e.altKey) return;
         const key = e.key.toLowerCase();
+        const pan = { ArrowLeft: [1, 0], ArrowRight: [-1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[e.key];
         if (e.key === 'Escape') closeLightbox();
+        else if (pan && zoom > 1) {
+            e.preventDefault();
+            panX += pan[0] * 80;
+            panY += pan[1] * 80;
+            applyZoom();
+        }
+        else if (key === '+' || key === '=') zoomTo(zoom * ZOOM_STEP);
+        else if (key === '-' || key === '_') zoomTo(zoom / ZOOM_STEP);
+        else if (key === '0') zoomTo(1);
         else if (e.key === 'ArrowLeft') step(-1);
         else if (e.key === 'ArrowRight') step(1);
         else if (key === 'f' && !lightboxModal.classList.contains('is-poster')) toggleFullscreen();
