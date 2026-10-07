@@ -24,6 +24,9 @@
     --primary-rgb: 192, 83, 26;
     --primary-light: #f5a65b;
     --brand-text: #f5a65b;
+    /* Wordmark colours, taken from the favicon: cream "Ido", orange "AI" */
+    --brand-ido: #fbf3e1;
+    --brand-ai: #f5a65b;
     --brand-indigo: #3b32c4;
     --primary-gradient: #c0531a;
     --secondary: #a8a2ff;
@@ -79,6 +82,8 @@
     --primary-rgb: 192, 83, 26;
     --primary-light: #a8440f;
     --brand-text: #3b30b5;
+    --brand-ido: #221c6e;
+    --brand-ai: #c0531a;
     --brand-indigo: #3b30b5;
     --primary-gradient: #c0531a;
     --secondary: #3b30b5;
@@ -281,6 +286,54 @@ a:hover {
     font-size: 1.5rem;
     font-weight: 800;
     letter-spacing: -0.02em;
+}
+
+/* Wordmark in the favicon's design: cream "Ido", gradient "AI", short signature-gradient bar */
+.brand-title.brand-wordmark {
+    position: relative;
+    display: inline-block;
+    color: var(--brand-ido);
+}
+
+.brand-wordmark .brand-ai {
+    color: var(--brand-ai);
+}
+
+.brand-wordmark::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0.17em;
+    width: 62%;
+    height: 0.12em;
+    border-radius: 999px;
+    background: var(--signature-gradient);
+    transform: translateX(-50%);
+}
+
+/* Header wordmark drops the bar; "AI" wears the hero's orange → indigo blend everywhere (below) */
+.site-header .brand-wordmark::after {
+    content: none;
+}
+
+/* Tight two-line lockup so title and subtitle sit together, centred on the logo */
+.site-header .brand-title {
+    display: block;
+    line-height: 1.1;
+}
+
+.site-header .brand-subtitle {
+    margin-top: 0.3rem;
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .brand-wordmark .brand-ai {
+        background: var(--signature-gradient);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        padding-right: 0.04em;
+    }
 }
 
 .brand-subtitle {
@@ -2253,6 +2306,20 @@ span.resource-btn:hover {
     color: var(--primary-light);
 }
 
+.member-contribution {
+    font-size: 0.9rem;
+    font-style: italic;
+    color: var(--text-muted);
+    line-height: 1.45;
+    margin-top: -0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.member-contribution strong {
+    font-style: normal;
+    color: var(--primary-light);
+}
+
 .member-current {
     display: flex;
     align-items: center;
@@ -2323,6 +2390,7 @@ span.resource-btn:hover {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-wrap: wrap;
     gap: 0.75rem;
     width: 100%;
     margin-top: auto;
