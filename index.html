@@ -167,52 +167,21 @@
             <div class="featured-card">
                 <div class="featured-header">
                     <div class="event-date">
-                        <i class="fa-regular fa-calendar-check"></i> 6 Oct 2026 &bull; 5 PM - 6 PM IST
+                        <i class="fa-regular fa-calendar-check"></i> Wed, 28 Oct 2026 &bull; 5 PM IST &bull; CRR Classroom, Fourth Floor
                     </div>
                 </div>
 
                 <h3 class="featured-title">
-                    Medical Computer Vision for the Clinic: Gallbladder Cancer and Beyond
+                    When is Partial Information Enough to Recover a Secret?
                 </h3>
 
                 <div class="presenter-info">
-                    <!-- <div class="presenter-avatar">MM</div> -->
+                    <!-- <div class="presenter-avatar">SS</div> -->
                     <div>
                         <div class="presenter-name">
-                            Speaker: Dr. Soumen Basu
-                            <a href="https://sbasu276.github.io/" target="_blank" rel="noopener noreferrer"
-                                class="speaker-profile-badge" title="View Profile of Dr. Soumen Basu">
-                                <i class="fa-solid fa-circle-user"></i> Profile
-                            </a>
+                            Speaker: Prof. Santanu Sarkar
                         </div>
-                        <!-- <div class="presenter-role">Department of Artificial Intelligence, IIT Kharagpur</div> -->
-                    </div>
-                </div>
-
-                <!-- Animated talk flyer -->
-                <div class="talk-poster-container talk-banner">
-                    <div class="talk-poster-preview">
-                        <img src="gallery_image/IdoAI_Talk_Teams_Banner.gif"
-                            alt="Talk flyer: Medical Computer Vision for the Clinic: Gallbladder Cancer and Beyond, by Dr. Soumen Basu, Tuesday 6 Oct 2026, 5:00 PM IST, CRR Classroom, 4th Floor"
-                            class="talk-poster-img" width="1500" height="500">
-                    </div>
-                </div>
-
-                <!-- Photo from the session: opens full size on click; the link shows the rest in the gallery -->
-                <div class="session-photo">
-                    <div class="talk-poster-preview lightbox-trigger" data-caption="Dr. Soumen Basu presenting &bull; 6 Oct 2026">
-                        <img src="gallery_image/Souman_basu_1.jpeg" loading="lazy" decoding="async" width="1200" height="1600"
-                            alt="Dr. Soumen Basu presenting his talk &ldquo;Medical Computer Vision for the Clinic: Gallbladder Cancer and Beyond&rdquo; in the CRR Classroom, Department of Artificial Intelligence, IIT Kharagpur, on 6 Oct 2026"
-                            class="talk-poster-img">
-                        <div class="poster-overlay">
-                            <span><i class="fa-solid fa-magnifying-glass-plus"></i> Click to enlarge</span>
-                        </div>
-                    </div>
-                    <div class="session-photo-text">
-                        <span class="session-photo-label"><i class="fa-solid fa-camera" aria-hidden="true"></i> From the session</span>
-                        <p>Dr. Soumen Basu presenting <span class="nowrap">&bull; 6 Oct 2026</span></p>
-                        <a href="gallery.html?event=event-medcv-2026" class="session-photo-link">View in gallery <i
-                                class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                        <div class="presenter-role">Department of Mathematics, IIT Madras</div>
                     </div>
                 </div>
 
@@ -244,10 +213,7 @@
 
                     <div class="featured-actions">
                         <a href="events.html" class="btn btn-primary btn-sm">
-                            Full Schedule & Talk Details<i class="fa-solid fa-arrow-right"></i>
-                        </a>
-                        <a href="content/soumen_ai_talk.pdf" target="_blank" class="btn btn-secondary btn-sm">
-                            <i class="fa-solid fa-file-pdf" style="color: #f59e0b;"></i> Download Slides (.pdf)
+                            Abstract, Speaker Bio & Full Schedule<i class="fa-solid fa-arrow-right"></i>
                         </a>
                     </div>
                 </div>
@@ -266,192 +232,131 @@
                 </a>
             </div>
 
-            <!-- Short versions of the latest talks: poster (if any) and links only.
-                 Full abstracts live on the events page; each "Full abstract & details" link opens that card there.
-                 ids here start with "recent-" so they never clash with the events-page card ids. -->
-            <div class="events-grid">
+            <!-- Recent talks carousel: the four latest talks, one slide each, auto-advancing (js: initTalkCarousel).
+                 Slides are short teasers; the full abstract, bio and resources stay on the events page,
+                 so each "Talk details" button opens that card there. Newest talk first.
+                 To add a talk: copy a slide to the top and drop the last one. A slide without a photo
+                 uses the gradient panel (talk-slide-art) instead of the <img>. -->
+            <div class="talk-carousel" role="region" aria-roledescription="carousel" aria-label="Recent talks">
+                <div class="talk-carousel-stage">
+                    <div class="talk-carousel-viewport">
+                        <div class="talk-carousel-track" aria-live="off">
 
-                <!-- 2026 Talk: Dr. Mahesh Mohan M R -->
-                <div class="event-card" id="recent-esg-geometry" data-keywords="finance financial fintech investment investing responsible investing sustainable finance sustainability environmental social governance stock market trading asset management economics forecasting">
-                    <div class="event-summary">
-                        <div class="event-date-badge"><i class="fa-regular fa-calendar"></i> 15 Sep 2026</div>
-                        <div class="event-speaker">
-                            <a href="https://maheshmohanmr.github.io/" target="_blank" rel="noopener noreferrer"
-                                class="speaker-profile-link" title="View Profile of Dr. Mahesh Mohan M R">
-                                <i class="fa-solid fa-circle-user"></i> Dr. Mahesh Mohan M R
-                            </a>
-                        </div>
-                        <div class="event-topic">Learning the ESG Geometry with Domain-Aware Language Models</div>
-                        <div class="expand-icon"><i class="fa-solid fa-chevron-down"></i></div>
-                    </div>
-                    <div class="event-details-drawer">
-                        <div class="drawer-content">
-                            <div class="talk-poster-container"
-                                style="margin: 0 0 1.5rem; width: 100%; max-width: 100%;">
-                                <div class="talk-poster-preview lightbox-trigger"
-                                    data-caption="Talk Poster &bull; Dr. Mahesh Mohan M R">
-                                    <img src="gallery_image/MMMR_Poster.jpg" loading="lazy" decoding="async"
-                                        alt="Talk Poster - Learning the ESG Geometry with Domain-Aware Language Models"
-                                        class="talk-poster-img" style="max-height: none; width: 100%; height: auto;">
-                                    <div class="poster-overlay">
-                                        <span><i class="fa-solid fa-magnifying-glass-plus"></i> Click to enlarge
-                                            poster</span>
+                            <!-- 6 Oct 2026: Dr. Soumen Basu -->
+                            <article class="talk-slide" role="group" aria-roledescription="slide">
+                                <div class="talk-slide-media">
+                                    <img src="gallery_image/Souman_basu_1.jpeg" alt="" width="1200" height="1600"
+                                        decoding="async" style="object-position: 72% 30%;">
+                                </div>
+                                <div class="talk-slide-content">
+                                    <div class="talk-slide-date"><i class="fa-regular fa-calendar" aria-hidden="true"></i> 6 Oct 2026</div>
+                                    <h3 class="talk-slide-title">Medical Computer Vision for the Clinic: Gallbladder Cancer and Beyond</h3>
+                                    <p class="talk-slide-speaker">Dr. Soumen Basu
+                                        <span>Dept. of Artificial Intelligence, IIT Kharagpur</span></p>
+                                    <p class="talk-slide-teaser">Diagnosing gallbladder cancer from handheld ultrasound with
+                                        deep learning, and the road from specialised models to unified, deployable medical
+                                        computer vision.</p>
+                                    <div class="talk-slide-actions">
+                                        <a href="events.html#talk-6-oct-2026-medical-computer-vision-for-the-clinic-gallbladd"
+                                            class="btn btn-primary btn-sm">Talk details <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                                        <a href="content/soumen_ai_talk.pdf" target="_blank" class="btn btn-sm talk-slide-btn">
+                                            <i class="fa-solid fa-file-pdf" aria-hidden="true"></i> Slides</a>
+                                        <a href="gallery.html?event=event-medcv-2026" class="btn btn-sm talk-slide-btn">
+                                            <i class="fa-solid fa-images" aria-hidden="true"></i> Photos</a>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="resource-links">
-                                <a href="events.html#talk-15-sep-2026-learning-the-esg-geometry-with-domain-aware-lang"
-                                    class="resource-btn resource-btn-primary">
-                                    Full abstract &amp; details <i class="fa-solid fa-arrow-right"></i>
-                                </a>
-                                <a href="content/MMMR_ICML_2026.pdf" target="_blank" class="resource-btn">
-                                    <i class="fa-solid fa-file-pdf" style="color: #f59e0b;"></i>
-                                    Download Slides (.pdf)
-                                </a>
-                                <a href="gallery.html?event=event-esg-2026" class="resource-btn">
-                                    <i class="fa-solid fa-images" style="color:var(--primary);"></i> Event Photos
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            </article>
 
-                <!-- 2026 Talk: Shri Anil Kishore Yadav, IPS (IdoAI for Policing Applications outreach) -->
-                <div class="event-card" id="recent-ai-modern-policing"
-                    data-keywords="police policing law enforcement public safety criminal justice ethics privacy bias robotics surveillance governance policy outreach bprd capt">
-                    <div class="event-summary">
-                        <div class="event-date-badge"><i class="fa-regular fa-calendar"></i> 28 Aug 2026</div>
-                        <div class="event-speaker">
-                            <span class="speaker-name"><i class="fa-solid fa-circle-user"></i> Shri Anil Kishore Yadav,
-                                IPS</span>
-                        </div>
-                        <div class="event-topic">AI Integration in Modern Policing: Needs, Gaps, and the Role of
-                            Academia</div>
-                        <div class="expand-icon"><i class="fa-solid fa-chevron-down"></i></div>
-                    </div>
-                    <div class="event-details-drawer">
-                        <div class="drawer-content">
-                            <!-- Portrait poster, centred (no abstract beside it on Home) -->
-                            <div class="talk-poster-container talk-poster-center">
-                                <div class="talk-poster-preview lightbox-trigger"
-                                    data-caption="Talk Poster &bull; Shri Anil Kishore Yadav, IPS">
-                                    <img src="gallery_image/anil-yadav-Banner.jpg" loading="lazy" decoding="async"
-                                        alt="Talk Poster - AI Integration in Modern Policing: Needs, Gaps, and the Role of Academia"
-                                        class="talk-poster-img" width="1280" height="1810"
-                                        style="max-height: none; width: 100%; height: auto;">
-                                    <div class="poster-overlay">
-                                        <span><i class="fa-solid fa-magnifying-glass-plus"></i> Click to enlarge
-                                            poster</span>
+                            <!-- 15 Sep 2026: Dr. Mahesh Mohan M R -->
+                            <article class="talk-slide" role="group" aria-roledescription="slide">
+                                <div class="talk-slide-media">
+                                    <img src="gallery_image/MMMR_ICL_2026.jpg" alt="" width="1500" height="2000"
+                                        loading="lazy" decoding="async" style="object-position: 50% 38%;">
+                                </div>
+                                <div class="talk-slide-content">
+                                    <div class="talk-slide-date"><i class="fa-regular fa-calendar" aria-hidden="true"></i> 15 Sep 2026</div>
+                                    <h3 class="talk-slide-title">Learning the ESG Geometry with Domain-Aware Language Models</h3>
+                                    <p class="talk-slide-speaker">Dr. Mahesh Mohan M R
+                                        <span>Dept. of Artificial Intelligence, IIT Kharagpur</span></p>
+                                    <p class="talk-slide-teaser">A domain-aware language model that learns geometry-preserving
+                                        representations of ESG risks, returns, news and sentiment, for forecasting and
+                                        smarter asset selection.</p>
+                                    <div class="talk-slide-actions">
+                                        <a href="events.html#talk-15-sep-2026-learning-the-esg-geometry-with-domain-aware-lang"
+                                            class="btn btn-primary btn-sm">Talk details <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                                        <a href="content/MMMR_ICML_2026.pdf" target="_blank" class="btn btn-sm talk-slide-btn">
+                                            <i class="fa-solid fa-file-pdf" aria-hidden="true"></i> Slides</a>
+                                        <a href="gallery.html?event=event-esg-2026" class="btn btn-sm talk-slide-btn">
+                                            <i class="fa-solid fa-images" aria-hidden="true"></i> Photos</a>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="resource-links">
-                                <a href="events.html#talk-28-aug-2026-ai-integration-in-modern-policing-needs-gaps-and"
-                                    class="resource-btn resource-btn-primary">
-                                    Full abstract &amp; details <i class="fa-solid fa-arrow-right"></i>
-                                </a>
-                                <a href="gallery.html?event=event-policing-2026" class="resource-btn">
-                                    <i class="fa-solid fa-images" style="color:var(--primary);"></i> Event Photos
-                                </a>
-                            </div>
+                            </article>
+
+                            <!-- 28 Aug 2026: Shri Anil Kishore Yadav, IPS -->
+                            <article class="talk-slide" role="group" aria-roledescription="slide">
+                                <div class="talk-slide-media">
+                                    <img src="gallery_image/anil-yadav_3.jpg" alt="" width="1600" height="1200"
+                                        loading="lazy" decoding="async" style="object-position: 70% 55%;">
+                                </div>
+                                <div class="talk-slide-content">
+                                    <div class="talk-slide-date"><i class="fa-regular fa-calendar" aria-hidden="true"></i> 28 Aug 2026</div>
+                                    <h3 class="talk-slide-title">AI Integration in Modern Policing: Needs, Gaps, and the Role of Academia</h3>
+                                    <p class="talk-slide-speaker">Shri Anil Kishore Yadav, IPS
+                                        <span>Director, Central Academy for Police Training, Bhopal</span></p>
+                                    <p class="talk-slide-teaser">Where AI can help policing, the technical, legal and ethical
+                                        gaps that remain, and how academia can build, validate and shape trustworthy
+                                        systems.</p>
+                                    <div class="talk-slide-actions">
+                                        <a href="events.html#talk-28-aug-2026-ai-integration-in-modern-policing-needs-gaps-and"
+                                            class="btn btn-primary btn-sm">Talk details <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                                        <a href="gallery.html?event=event-policing-2026" class="btn btn-sm talk-slide-btn">
+                                            <i class="fa-solid fa-images" aria-hidden="true"></i> Photos</a>
+                                    </div>
+                                </div>
+                            </article>
+
+                            <!-- 28 Jul 2026: Dr. Shreya Ghosh (no photo: gradient panel) -->
+                            <article class="talk-slide" role="group" aria-roledescription="slide">
+                                <div class="talk-slide-media talk-slide-art" aria-hidden="true">
+                                    <i class="fa-solid fa-microphone-lines"></i>
+                                </div>
+                                <div class="talk-slide-content">
+                                    <div class="talk-slide-date"><i class="fa-regular fa-calendar" aria-hidden="true"></i> 28 Jul 2026</div>
+                                    <h3 class="talk-slide-title">Automatic Human Behaviour Understanding</h3>
+                                    <p class="talk-slide-speaker">Dr. Shreya Ghosh
+                                        <span>Dept. of Artificial Intelligence, IIT Kharagpur</span></p>
+                                    <p class="talk-slide-teaser">Models that learn to read eye gaze, facial expressions and body
+                                        movement in the wild, for more socially aware, human-centric AI.</p>
+                                    <div class="talk-slide-actions">
+                                        <a href="events.html#talk-28-jul-2026-automatic-human-behaviour-understanding"
+                                            class="btn btn-primary btn-sm">Talk details <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                                        <a href="https://sites.google.com/view/shreyaghosh/home" target="_blank"
+                                            rel="noopener noreferrer" class="btn btn-sm talk-slide-btn">
+                                            <i class="fa-solid fa-circle-user" aria-hidden="true"></i> Speaker</a>
+                                    </div>
+                                </div>
+                            </article>
+
                         </div>
                     </div>
+
+                    <!-- Previous / next sit on the card's edges, pointing at the peeking neighbours (on phones: over the photo).
+                         They live outside the viewport so clicking them doesn't count as hovering or focusing a slide. -->
+                    <button type="button" class="talk-carousel-arrow is-prev" data-carousel="prev" aria-label="Previous talk">
+                        <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="talk-carousel-arrow is-next" data-carousel="next" aria-label="Next talk">
+                        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </button>
                 </div>
 
-                <!-- 2026 Talk: Dr. Shreya Ghosh -->
-                <div class="event-card" id="recent-human-behaviour">
-                    <div class="event-summary">
-                        <div class="event-date-badge"><i class="fa-regular fa-calendar"></i> 28 Jul 2026</div>
-                        <div class="event-speaker">
-                            <a href="https://sites.google.com/view/shreyaghosh/home" target="_blank"
-                                rel="noopener noreferrer" class="speaker-profile-link"
-                                title="View Profile of Dr. Shreya Ghosh">
-                                <i class="fa-solid fa-circle-user"></i> Dr. Shreya Ghosh
-                            </a>
-                        </div>
-                        <div class="event-topic">Automatic Human Behaviour Understanding</div>
-                        <div class="expand-icon"><i class="fa-solid fa-chevron-down"></i></div>
-                    </div>
-                    <div class="event-details-drawer">
-                        <div class="drawer-content">
-                            <div class="resource-links">
-                                <a href="events.html#talk-28-jul-2026-automatic-human-behaviour-understanding"
-                                    class="resource-btn resource-btn-primary">
-                                    Full abstract &amp; details <i class="fa-solid fa-arrow-right"></i>
-                                </a>
-                                <a href="https://sites.google.com/view/shreyaghosh/home" target="_blank"
-                                    rel="noopener noreferrer" class="resource-btn">
-                                    <i class="fa-solid fa-circle-user" style="color:var(--primary);"></i> Speaker
-                                    Profile
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Dots (left) and pause (right); the active dot fills while a slide is shown -->
+                <div class="talk-carousel-controls">
+                    <div class="talk-carousel-dots"></div>
+                    <button type="button" class="talk-carousel-btn" data-carousel="toggle" aria-label="Pause auto-play" data-tooltip="Pause auto-play">
+                        <i class="fa-solid fa-pause" aria-hidden="true"></i>
+                    </button>
                 </div>
-
-                <!-- 2026 Talk: Prof. Dipankar Maity -->
-                <div class="event-card" id="recent-system-level-privacy">
-                    <div class="event-summary">
-                        <div class="event-date-badge"><i class="fa-regular fa-calendar"></i> 16 Jul 2026</div>
-                        <div class="event-speaker">
-                            <a href="https://dipankarmaity.github.io/" target="_blank" rel="noopener noreferrer"
-                                class="speaker-profile-link" title="View Profile of Prof. Dipankar Maity">
-                                <i class="fa-solid fa-circle-user"></i> Prof. Dipankar Maity
-                            </a>
-                        </div>
-                        <div class="event-topic">System-Level Privacy Against Eavesdropping Adversaries</div>
-                        <div class="expand-icon"><i class="fa-solid fa-chevron-down"></i></div>
-                    </div>
-                    <div class="event-details-drawer">
-                        <div class="drawer-content">
-                            <div class="resource-links">
-                                <a href="events.html#talk-16-jul-2026-system-level-privacy-against-eavesdropping-adver"
-                                    class="resource-btn resource-btn-primary">
-                                    Full abstract &amp; details <i class="fa-solid fa-arrow-right"></i>
-                                </a>
-                                <a href="https://dipankarmaity.github.io/" target="_blank"
-                                    rel="noopener noreferrer" class="resource-btn">
-                                    <i class="fa-solid fa-circle-user" style="color:var(--primary);"></i> Speaker
-                                    Profile
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2026 Talk: Prof. Kanad Basu -->
-                <div class="event-card" id="recent-geometry-of-hallucination"
-                    data-keywords="llm large language models generative ai genai hallucination business enterprise deployment alignment compliance risk">
-                    <div class="event-summary">
-                        <div class="event-date-badge"><i class="fa-regular fa-calendar"></i> 6 Jan 2026</div>
-                        <div class="event-speaker">
-                            <a href="https://onlineemba.gmu.edu/profiles/kbasu4" target="_blank"
-                                rel="noopener noreferrer" class="speaker-profile-link"
-                                title="View Profile of Prof. Kanad Basu">
-                                <i class="fa-solid fa-circle-user"></i> Prof. Kanad Basu
-                            </a>
-                        </div>
-                        <div class="event-topic">The Geometry of Hallucination: Why Your AI Will Confidently Mislead You
-                        </div>
-                        <div class="expand-icon"><i class="fa-solid fa-chevron-down"></i></div>
-                    </div>
-                    <div class="event-details-drawer">
-                        <div class="drawer-content">
-                            <div class="resource-links">
-                                <a href="events.html#talk-6-jan-2026-the-geometry-of-hallucination-why-your-ai-will-co"
-                                    class="resource-btn resource-btn-primary">
-                                    Full abstract &amp; details <i class="fa-solid fa-arrow-right"></i>
-                                </a>
-                                <a href="https://onlineemba.gmu.edu/profiles/kbasu4" target="_blank"
-                                    rel="noopener noreferrer" class="resource-btn">
-                                    <i class="fa-solid fa-circle-user" style="color:var(--primary);"></i> Speaker
-                                    Profile
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
 
             <!-- Link to the inaugural IdoAI event (21 July 2025) on the events page -->

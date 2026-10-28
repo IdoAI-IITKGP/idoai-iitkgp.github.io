@@ -1578,6 +1578,556 @@ mark.find-hit {
     }
 }
 
+/* ==========================================================================
+   Home: Recent Talks Carousel (js: initTalkCarousel)
+   One wide slide centred in the content column; the previous and next slides peek in from the
+   page edges. Slides always use the dark "after dusk" palette so photos and text read the same in
+   both themes. Each slide is placed by --offset (0 = current, -1 / 1 = neighbours), set by the script.
+   ========================================================================== */
+.talk-carousel {
+    --slide-h: clamp(24rem, 20rem + 9vw, 31rem);
+    --slide-gap: 1rem;
+    --slide-bg: #15112f;
+    --slide-text: #fbf3e1;
+    --slide-muted: #c9bfd6;
+    /* Bleed to the window edges so neighbours can peek past the column, while the current
+       slide stays exactly as wide as the content column */
+    margin-inline: calc(50% - 50vw);
+    padding-inline: calc(50vw - 50%);
+    overflow-x: hidden;
+    overflow-x: clip;
+}
+
+.talk-carousel-viewport {
+    touch-action: pan-y;
+}
+
+/* All slides share one grid cell, so the carousel is as tall as its longest slide.
+   While dragging, the script moves the whole track with the pointer; on release it eases back
+   in step with the slides. */
+.talk-carousel-track {
+    display: grid;
+    transition: transform 0.8s var(--ease-out-expo);
+}
+
+.talk-carousel.is-dragging .talk-carousel-track {
+    transition: none;
+}
+
+/* The photo and the neighbours can be dragged with a mouse (the text stays selectable) */
+.talk-slide.is-active .talk-slide-media {
+    cursor: grab;
+}
+
+.talk-carousel.is-dragging,
+.talk-carousel.is-dragging .talk-slide,
+.talk-carousel.is-dragging .talk-slide-media {
+    cursor: grabbing;
+}
+
+.talk-slide-media {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.talk-slide-media img {
+    -webkit-user-drag: none;
+}
+
+.talk-slide {
+    grid-area: 1 / 1;
+    position: relative;
+    min-height: var(--slide-h);
+    display: flex;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--slide-bg);
+    color: var(--slide-text);
+    border: 1px solid rgba(255, 236, 200, 0.1);
+    box-shadow: var(--card-shadow);
+    transform: translateX(calc(var(--offset, 0) * (100% + var(--slide-gap))));
+    transition: transform 0.8s var(--ease-out-expo), opacity 0.5s ease;
+}
+
+/* Neighbours: darkened (not faded, which washes out on the cream theme); a click brings them to the centre */
+.talk-slide::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: rgba(11, 9, 25, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+}
+
+.talk-slide:not(.is-active) {
+    cursor: pointer;
+}
+
+.talk-slide:not(.is-active)::after {
+    opacity: 1;
+}
+
+.talk-slide:not(.is-active):hover::after {
+    opacity: 0.6;
+}
+
+.talk-slide:not(.is-active) .talk-slide-content {
+    pointer-events: none;
+}
+
+/* Slides further away wait off-screen */
+.talk-slide.is-away {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* A slide wrapping round to the other side jumps there instead of sweeping across */
+.talk-slide.no-move {
+    transition: opacity 0.5s ease;
+}
+
+/* Photo on the right, fading into the text panel */
+.talk-slide-media {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 60%;
+    overflow: hidden;
+}
+
+.talk-slide-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: scale(1.06);
+    transition: transform 9s linear, scale 0.9s var(--ease-out-expo);
+}
+
+/* Slow push-in while a slide is showing */
+.talk-slide.is-active .talk-slide-media img {
+    transform: scale(1);
+}
+
+/* Hovering the card: the photo (or the mic mark) eases a little closer.
+   Uses `scale`, which stacks on top of the push-in's `transform` */
+@media (hover: hover) {
+    .talk-slide.is-active:hover .talk-slide-media img,
+    .talk-slide.is-active:hover .talk-slide-art i {
+        scale: 1.05;
+    }
+}
+
+.talk-slide-media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg, var(--slide-bg) 0%, rgba(21, 17, 47, 0.72) 22%, rgba(21, 17, 47, 0) 58%),
+        linear-gradient(0deg, rgba(21, 17, 47, 0.45) 0%, rgba(21, 17, 47, 0) 35%);
+    pointer-events: none;
+}
+
+/* Talks without a photo: the flyer's orange → plum → indigo glow with a large mic mark */
+.talk-slide-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(circle at 72% 28%, rgba(224, 123, 44, 0.55), transparent 52%),
+        radial-gradient(circle at 48% 82%, rgba(125, 116, 255, 0.5), transparent 58%),
+        radial-gradient(circle at 90% 90%, rgba(176, 90, 138, 0.45), transparent 50%),
+        linear-gradient(135deg, #2a1f6e, var(--slide-bg));
+}
+
+.talk-slide-art i {
+    margin-left: 18%;
+    font-size: clamp(6rem, 4rem + 6vw, 10rem);
+    color: rgba(255, 248, 236, 0.16);
+    transition: scale 0.9s var(--ease-out-expo);
+}
+
+.talk-slide-content {
+    position: relative;
+    z-index: 1;
+    width: 50%;
+    padding: clamp(1.75rem, 1rem + 2vw, 2.75rem) clamp(1.75rem, 1rem + 2.5vw, 3.25rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.8rem;
+}
+
+.talk-slide-content > * {
+    flex-shrink: 0;
+}
+
+.talk-slide-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    align-self: flex-start;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    background: rgba(245, 166, 91, 0.14);
+    border: 1px solid rgba(245, 166, 91, 0.3);
+    color: #f5a65b;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.talk-slide-title {
+    font-size: clamp(1.45rem, 1rem + 1.25vw, 2.25rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--slide-text);
+    padding-bottom: 0.1em; /* room for descenders under the line clamp */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+}
+
+.talk-slide-speaker {
+    color: var(--slide-text);
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+.talk-slide-speaker span {
+    display: block;
+    font-weight: 400;
+    font-size: 0.875rem;
+    color: var(--slide-muted);
+}
+
+.talk-slide-teaser {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--slide-muted);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+}
+
+.talk-slide-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+}
+
+/* Secondary buttons on the dark slide (the site's .btn-secondary follows the page theme) */
+.talk-slide-btn {
+    background: rgba(255, 248, 236, 0.08);
+    color: var(--slide-text);
+    border: 1px solid rgba(255, 236, 200, 0.2);
+}
+
+.talk-slide-btn:hover,
+.talk-slide-btn:focus-visible {
+    background: rgba(255, 248, 236, 0.16);
+    border-color: rgba(255, 236, 200, 0.4);
+    color: var(--slide-text);
+    transform: translateY(-2px);
+}
+
+.talk-slide-btn i {
+    color: #f5a65b;
+}
+
+/* Controls: dots on the left; pause, previous and next on the right */
+.talk-carousel-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.25rem;
+}
+
+.talk-carousel-dots {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.talk-carousel-dot {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-full);
+    background: var(--text-dim);
+    opacity: 0.5;
+    overflow: hidden;
+    cursor: pointer;
+    transition: width var(--transition-normal), opacity var(--transition-fast), background var(--transition-fast);
+}
+
+.talk-carousel-dot:hover {
+    opacity: 0.85;
+}
+
+/* The current dot stretches into a bar that fills while its slide is showing */
+.talk-carousel-dot.is-active {
+    width: 2.75rem;
+    opacity: 1;
+    background: rgba(var(--primary-rgb), 0.25);
+}
+
+.talk-carousel-dot-fill {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--primary);
+    transform: scaleX(0);
+    transform-origin: left;
+}
+
+.talk-carousel-dot.is-active .talk-carousel-dot-fill {
+    animation: talkDotFill var(--carousel-delay, 7s) linear forwards;
+}
+
+/* Paused (button, hover or keyboard focus): the bar holds where it is; stopped by the button: full */
+.talk-carousel.is-held .talk-carousel-dot.is-active .talk-carousel-dot-fill {
+    animation-play-state: paused;
+}
+
+.talk-carousel.is-stopped .talk-carousel-dot.is-active .talk-carousel-dot-fill {
+    animation: none;
+    transform: scaleX(1);
+}
+
+@keyframes talkDotFill {
+    to {
+        transform: scaleX(1);
+    }
+}
+
+/* Previous / next: centred on the card's edges, half over the peeking neighbour each one brings in */
+.talk-carousel-stage {
+    position: relative;
+}
+
+.talk-carousel-arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 3;
+    width: 2.75rem;
+    height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 236, 200, 0.28);
+    background: rgba(21, 17, 47, 0.72);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    color: var(--slide-text);
+    font-size: 1rem;
+    box-shadow: 0 8px 20px -6px rgba(5, 3, 20, 0.6);
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.talk-carousel-arrow.is-prev {
+    left: 0;
+}
+
+.talk-carousel-arrow.is-next {
+    left: 100%;
+}
+
+.talk-carousel-arrow:hover,
+.talk-carousel-arrow:focus-visible {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+}
+
+.talk-carousel-arrow:active {
+    transform: translate(-50%, -50%) scale(0.92);
+}
+
+.talk-carousel-arrow i {
+    transition: transform var(--transition-fast);
+}
+
+.talk-carousel-arrow.is-prev:hover i {
+    transform: translateX(-2px);
+}
+
+.talk-carousel-arrow.is-next:hover i {
+    transform: translateX(2px);
+}
+
+/* Hovering an arrow lifts the shade off the neighbour it leads to */
+.talk-carousel-stage:has(.is-prev:hover) .talk-slide[data-offset="-1"]::after,
+.talk-carousel-stage:has(.is-next:hover) .talk-slide[data-offset="1"]::after {
+    opacity: 0.25;
+}
+
+html.lite .talk-carousel-arrow {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgba(21, 17, 47, 0.9);
+}
+
+.talk-carousel-btn {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--glass-border);
+    background: var(--bg-card);
+    color: var(--text-main);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.talk-carousel-btn:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+}
+
+/* Hover popup above the pause button (same look as the theme toggle's); text from data-tooltip.
+   Right-aligned to the button so it never runs off the edge of the screen */
+.talk-carousel-btn {
+    position: relative;
+}
+
+.talk-carousel-btn[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 10px);
+    right: 0;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--text-main);
+    color: var(--bg-main);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+/* Only real hover devices get the popup (a tap on a phone would leave it stuck open) */
+@media (hover: hover) {
+    .talk-carousel-btn:hover::after {
+        opacity: 1;
+        transform: translateY(0);
+        transition-delay: 0.25s;
+    }
+}
+
+.talk-carousel-btn:focus-visible::after {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Tablets: a little less photo, a little more room for the text */
+@media (max-width: 900px) {
+    .talk-slide-content {
+        width: 60%;
+    }
+
+    .talk-slide-media {
+        width: 55%;
+    }
+}
+
+/* Phones: photo on top, text below; tighter peeks like the reference carousel */
+@media (max-width: 640px) {
+    .talk-carousel {
+        --slide-h: auto;
+        --slide-gap: 0.75rem;
+    }
+
+    .talk-slide {
+        flex-direction: column;
+    }
+
+    .talk-slide-media {
+        position: relative;
+        width: 100%;
+        height: 15rem;
+        flex-shrink: 0;
+    }
+
+    .talk-slide-media::after {
+        background: linear-gradient(180deg, rgba(21, 17, 47, 0) 55%, var(--slide-bg) 100%);
+    }
+
+    /* Arrows move inside the card, centred on the photo, clear of the text */
+    .talk-carousel-arrow {
+        top: 7.5rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 0.9rem;
+        transform: translateY(-50%);
+    }
+
+    .talk-carousel-arrow:active {
+        transform: translateY(-50%) scale(0.92);
+    }
+
+    .talk-carousel-arrow.is-prev {
+        left: 0.6rem;
+    }
+
+    .talk-carousel-arrow.is-next {
+        left: auto;
+        right: 0.6rem;
+    }
+
+    .talk-slide-art i {
+        margin-left: 0;
+    }
+
+    .talk-slide-content {
+        width: 100%;
+        flex: 1;
+        justify-content: flex-start;
+        margin-top: -2.5rem; /* the date overlaps the photo's fade */
+        padding: 0 1.25rem 1.25rem;
+        gap: 0.65rem;
+    }
+
+    .talk-slide-title {
+        font-size: 1.35rem;
+    }
+
+    .talk-slide-teaser {
+        display: none;
+    }
+}
+
+html.lite .talk-slide-media img {
+    transition: none;
+    transform: none;
+    scale: none;
+}
+
 /* Section titles with a date: "Title (date)" on wide screens; on phones the date drops to its
    own line, lined up under the title text rather than the icon */
 .title-date::before {

@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initCounterAnimation();
     initScrollEffects();
     initRevealOnScroll();
+    initTalkCarousel();
     assignSearchAnchors(document);
     initSiteSearch();
     revealHashTarget(true);
@@ -2117,4 +2118,234 @@ function initSiteSearch() {
             closeSearch();
         }
     });
+}
+
+/* ==========================================================================
+   11. Home: Recent Talks Carousel
+   Centred slides with the neighbours peeking in, looping and auto-advancing every
+   CAROUSEL_DELAY ms. It pauses while someone is reading (mouse over a slide's text, text
+   selected, keyboard focus on a slide), while dragging, while the tab is hidden and while the
+   carousel is scrolled out of view. The pause button stops it; visitors who prefer reduced
+   motion start with it stopped. Slides change by arrows, dots, arrow keys, dragging / swiping,
+   and trackpad two-finger swipes.
+   ========================================================================== */
+const CAROUSEL_DELAY = 7000;
+
+function initTalkCarousel() {
+    const root = document.querySelector('.talk-carousel');
+    if (!root) return;
+    const viewport = root.querySelector('.talk-carousel-viewport');
+    const track = root.querySelector('.talk-carousel-track');
+    const slides = [...root.querySelectorAll('.talk-slide')];
+    const dotsWrap = root.querySelector('.talk-carousel-dots');
+    const toggleBtn = root.querySelector('[data-carousel="toggle"]');
+    const n = slides.length;
+    if (!n) return;
+
+    root.style.setProperty('--carousel-delay', `${CAROUSEL_DELAY}ms`);
+
+    let current = 0;
+    let stopped = false;          // by the pause button
+    const holds = new Set();      // short pauses: 'reading', 'select', 'focus', 'drag', 'hidden', 'offscreen'
+    let timer = null;
+    let startedAt = 0;
+    let remaining = CAROUSEL_DELAY;
+
+    const dots = slides.map((slide, i) => {
+        const title = cleanText(slide.querySelector('.talk-slide-title'));
+        slide.setAttribute('aria-label', `${i + 1} of ${n}: ${title}`);
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'talk-carousel-dot';
+        dot.setAttribute('aria-label', `Show talk ${i + 1}: ${title}`);
+        dot.innerHTML = '<span class="talk-carousel-dot-fill"></span>';
+        dot.addEventListener('click', () => goTo(i));
+        dotsWrap.appendChild(dot);
+        return dot;
+    });
+
+    // Position of slide i relative to the current one, on whichever side is nearer.
+    // The slide straight opposite (even counts) stays on the side it was already on.
+    function offsetOf(i, prev) {
+        let d = ((i - current) % n + n) % n;
+        if (d > n / 2 || (d === n / 2 && prev < 0)) d -= n;
+        return d;
+    }
+
+    function render(instant = false) {
+        slides.forEach((slide, i) => {
+            const prev = Number(slide.dataset.offset || 0);
+            const off = offsetOf(i, prev);
+            // A slide wrapping round to the far side jumps there rather than sweeping across
+            slide.classList.toggle('no-move', instant || Math.abs(off - prev) > 1);
+            slide.dataset.offset = off;
+            slide.style.setProperty('--offset', off);
+            slide.classList.toggle('is-active', off === 0);
+            slide.classList.toggle('is-away', Math.abs(off) > 1);
+            slide.setAttribute('aria-hidden', String(off !== 0));
+            slide.querySelector('.talk-slide-content').inert = off !== 0;
+        });
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('is-active', i === current);
+            dot.setAttribute('aria-current', String(i === current));
+        });
+    }
+
+    function schedule() {
+        clearTimeout(timer);
+        timer = null;
+        root.classList.toggle('is-stopped', stopped);
+        root.classList.toggle('is-held', !stopped && holds.size > 0);
+        // Screen readers hear slide changes the visitor makes, not the automatic ones
+        track.setAttribute('aria-live', stopped || holds.size ? 'polite' : 'off');
+        if (stopped || holds.size) return;
+        startedAt = performance.now();
+        timer = setTimeout(() => goTo(current + 1), remaining);
+    }
+
+    function goTo(i) {
+        current = ((i % n) + n) % n;
+        render();
+        remaining = CAROUSEL_DELAY;
+        schedule();
+    }
+
+    // Pause / resume for one reason, keeping the time left on the current slide
+    function hold(reason, on) {
+        if (on === holds.has(reason)) return;
+        if (on) {
+            if (timer) remaining = Math.max(0, remaining - (performance.now() - startedAt));
+            holds.add(reason);
+        } else {
+            holds.delete(reason);
+        }
+        schedule();
+    }
+
+    function setStopped(value) {
+        stopped = value;
+        const label = value ? 'Resume auto-play' : 'Pause auto-play';
+        toggleBtn.setAttribute('aria-label', label);
+        toggleBtn.setAttribute('data-tooltip', label);
+        toggleBtn.innerHTML = `<i class="fa-solid ${value ? 'fa-play' : 'fa-pause'}" aria-hidden="true"></i>`;
+        remaining = CAROUSEL_DELAY; // the progress bar restarts from empty
+        schedule();
+    }
+
+    root.querySelector('[data-carousel="prev"]').addEventListener('click', () => goTo(current - 1));
+    root.querySelector('[data-carousel="next"]').addEventListener('click', () => goTo(current + 1));
+    toggleBtn.addEventListener('click', () => setStopped(!stopped));
+
+    // A click on a peeking neighbour brings it to the centre
+    slides.forEach((slide, i) => slide.addEventListener('click', (e) => {
+        if (slide.classList.contains('is-active')) return;
+        e.preventDefault();
+        goTo(i);
+    }));
+
+    root.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') goTo(current - 1);
+        else if (e.key === 'ArrowRight') goTo(current + 1);
+    });
+
+    // Drag / swipe: the slides follow the finger (or mouse) and settle on the nearest talk.
+    // Touch works anywhere on the card; the mouse drags from the photo or a neighbour, so the
+    // text stays selectable. Mostly-vertical moves are left to the browser, so the page still
+    // scrolls (touch-action: pan-y).
+    let drag = null;
+    let suppressClick = false;
+
+    viewport.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0) return;
+        if (e.pointerType === 'mouse') {
+            if (e.target.closest('.talk-slide.is-active .talk-slide-content')) return;
+            e.preventDefault(); // no ghost image drag or text selection while dragging
+        }
+        drag = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), dx: 0, moving: false };
+    });
+
+    viewport.addEventListener('pointermove', (e) => {
+        if (!drag || e.pointerId !== drag.id) return;
+        const dx = e.clientX - drag.x;
+        const dy = e.clientY - drag.y;
+        if (!drag.moving) {
+            if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+            if (Math.abs(dy) > Math.abs(dx)) { drag = null; return; } // a scroll, not a swipe
+            drag.moving = true;
+            viewport.setPointerCapture(e.pointerId);
+            root.classList.add('is-dragging');
+            hold('drag', true);
+        }
+        drag.dx = dx;
+        track.style.transform = `translateX(${dx}px)`;
+    });
+
+    function endDrag(e) {
+        if (!drag || e.pointerId !== drag.id) return;
+        const { dx, t, moving } = drag;
+        drag = null;
+        if (!moving) return;
+        root.classList.remove('is-dragging');
+        track.style.transform = ''; // eases back in step with the slides
+        // A short, quick flick counts as well as a long drag
+        const flick = Math.abs(dx) > 30 && performance.now() - t < 300;
+        if (e.type === 'pointerup' && (Math.abs(dx) > viewport.offsetWidth * 0.15 || flick)) {
+            goTo(current + (dx < 0 ? 1 : -1));
+        }
+        hold('drag', false);
+        // The click that ends a mouse drag shouldn't open a link or pick a neighbour
+        suppressClick = true;
+        setTimeout(() => { suppressClick = false; }, 0);
+    }
+    viewport.addEventListener('pointerup', endDrag);
+    viewport.addEventListener('pointercancel', endDrag);
+    viewport.addEventListener('click', (e) => {
+        if (!suppressClick) return;
+        e.preventDefault();
+        e.stopPropagation();
+    }, true);
+
+    // Trackpad two-finger swipes left / right: one gesture moves one talk. Mostly-vertical
+    // wheel movement is ignored, so the page scrolls as usual.
+    let wheelSum = 0;
+    let wheelLocked = false;
+    let wheelIdle;
+    viewport.addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+        e.preventDefault(); // also stops the browser's swipe-to-go-back
+        // The gesture (and its momentum) is over once the events stop for a moment
+        clearTimeout(wheelIdle);
+        wheelIdle = setTimeout(() => { wheelSum = 0; wheelLocked = false; }, 200);
+        if (wheelLocked) return;
+        wheelSum += e.deltaX * (e.deltaMode === 1 ? 16 : 1);
+        if (Math.abs(wheelSum) > 50) {
+            wheelLocked = true;
+            goTo(current + (wheelSum > 0 ? 1 : -1));
+        }
+    }, { passive: false });
+
+    // Reading pauses it: the mouse over the current slide's text, or text selected in a slide
+    slides.forEach(slide => {
+        const content = slide.querySelector('.talk-slide-content');
+        content.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') hold('reading', true); });
+        content.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') hold('reading', false); });
+    });
+    document.addEventListener('selectionchange', () => {
+        const sel = document.getSelection();
+        hold('select', !!sel && !sel.isCollapsed && viewport.contains(sel.anchorNode));
+    });
+
+    viewport.addEventListener('focusin', () => hold('focus', true));
+    viewport.addEventListener('focusout', (e) => {
+        if (!viewport.contains(e.relatedTarget)) hold('focus', false);
+    });
+    document.addEventListener('visibilitychange', () => hold('hidden', document.hidden));
+    if ('IntersectionObserver' in window) {
+        new IntersectionObserver(([entry]) => hold('offscreen', !entry.isIntersecting), { threshold: 0.25 })
+            .observe(viewport);
+    }
+
+    render(true);
+    if (prefersReducedMotion) setStopped(true);
+    else schedule();
 }
