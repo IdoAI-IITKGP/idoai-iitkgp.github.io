@@ -1688,7 +1688,10 @@ mark.find-hit {
     transition: opacity 0.5s ease;
 }
 
-/* Photo on the right, fading into the text panel */
+/* Photo on the right, fading into the text panel. The fade is a mask on the photo itself, not a
+   dark layer on top: the photo moves on its own GPU layer (push-in, hover zoom), and an overlay
+   drawn separately can sit a fraction of a pixel off it, leaving a thin line of photo at the edge.
+   With the mask, the photo's edge pixels are transparent, so there is no edge to show. */
 .talk-slide-media {
     position: absolute;
     top: 0;
@@ -1696,6 +1699,8 @@ mark.find-hit {
     bottom: 0;
     width: 60%;
     overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.28) 22%, #000 58%);
+    mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.28) 22%, #000 58%);
 }
 
 .talk-slide-media img {
@@ -1721,13 +1726,12 @@ mark.find-hit {
     }
 }
 
+/* A light shade along the bottom edge */
 .talk-slide-media::after {
     content: '';
     position: absolute;
     inset: 0;
-    background:
-        linear-gradient(90deg, var(--slide-bg) 0%, rgba(21, 17, 47, 0.72) 22%, rgba(21, 17, 47, 0) 58%),
-        linear-gradient(0deg, rgba(21, 17, 47, 0.45) 0%, rgba(21, 17, 47, 0) 35%);
+    background: linear-gradient(0deg, rgba(21, 17, 47, 0.45) 0%, rgba(21, 17, 47, 0) 35%);
     pointer-events: none;
 }
 
@@ -2072,10 +2076,12 @@ html.lite .talk-carousel-arrow {
         width: 100%;
         height: 15rem;
         flex-shrink: 0;
+        -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
+        mask-image: linear-gradient(180deg, #000 55%, transparent 100%);
     }
 
     .talk-slide-media::after {
-        background: linear-gradient(180deg, rgba(21, 17, 47, 0) 55%, var(--slide-bg) 100%);
+        content: none;
     }
 
     /* Arrows move inside the card, centred on the photo, clear of the text */
