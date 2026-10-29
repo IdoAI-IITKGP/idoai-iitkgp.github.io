@@ -1238,7 +1238,7 @@ function initRevealOnScroll() {
    ========================================================================== */
 const SEARCH_PAGES = ['index.html', 'events.html', 'gallery.html', 'contact.html'];
 const SEARCH_TYPES = {
-    upcoming: { label: 'Upcoming Talk', icon: 'fa-bolt', order: 0 },
+    upcoming: { label: 'Latest Talk', icon: 'fa-bolt', order: 0 },
     talk: { label: 'Talks', icon: 'fa-microphone-lines', order: 1 },
     person: { label: 'People', icon: 'fa-user', order: 2 },
     photo: { label: 'Gallery', icon: 'fa-image', order: 3 },
@@ -1917,7 +1917,7 @@ function initSiteSearch() {
                 </div>
                 <div class="search-idle-title">Jump to</div>
                 <div class="search-chips">
-                    <a class="search-chip" style="--i:5" href="events.html#next-talk"><i class="fa-solid fa-bolt"></i> Upcoming talk</a>
+                    <a class="search-chip" style="--i:5" href="events.html#next-talk"><i class="fa-solid fa-bolt"></i> Latest talk</a>
                     <a class="search-chip" style="--i:6" href="events.html#inaugural-2025"><i class="fa-solid fa-flag-checkered"></i> Inaugural event</a>
                     <a class="search-chip" style="--i:7" href="events.html#archive-2024"><i class="fa-solid fa-box-archive"></i> 2024 archive</a>
                     <a class="search-chip" style="--i:8" href="contact.html#propose"><i class="fa-solid fa-paper-plane"></i> Propose a talk</a>

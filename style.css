@@ -3303,6 +3303,26 @@ span.resource-btn:hover {
     }
 }
 
+/* Two session photos side by side in the home page's Latest Talk card; stacked on phones */
+.session-photo-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0 0;
+}
+
+.session-photo-pair .talk-poster-img {
+    max-height: none;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+@media (max-width: 600px) {
+    .session-photo-pair {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Wide (3:1) animated talk flyer: spans the card and is never cropped or letterboxed */
 .talk-poster-container.talk-banner {
     margin: 0 0 1.5rem;
