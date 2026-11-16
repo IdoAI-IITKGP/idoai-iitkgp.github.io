@@ -159,84 +159,46 @@
             </div>
         </section>
 
-        <!-- Latest Talk Spotlight (shows the next talk instead once one is finalized) -->
+        <!-- Upcoming Talk Spotlight (shows the latest talk instead when no next talk is finalized) -->
         <section class="featured-section container">
-            <h2 class="section-title" style="margin-bottom: 1.5rem;"><i class="fa-solid fa-microphone-lines" aria-hidden="true"></i> Latest Talk</h2>
+            <h2 class="section-title" style="margin-bottom: 1.5rem;"><i class="fa-solid fa-microphone-lines" aria-hidden="true"></i> Upcoming Talk</h2>
             <!-- <p class="section-subtitle">Upcoming departmental talk details</p> -->
 
             <div class="featured-card">
                 <div class="featured-header">
                     <div class="event-date">
-                        <i class="fa-regular fa-calendar-check"></i> Wed, 28 Oct 2026 &bull; 5 PM IST &bull; CRR Classroom, Fourth Floor
+                        <i class="fa-regular fa-calendar-check"></i> Wed, 18 Nov 2026 &bull; 5:30 &ndash; 6:30 PM IST &bull; CRR Classroom, Fourth Floor
                     </div>
                 </div>
 
                 <h3 class="featured-title">
-                    When is Partial Information Enough to Recover a Secret?
+                    Flow-Guided Temporal Attention for Diffusion-Based Video Frame Interpolation
                 </h3>
 
                 <div class="presenter-info">
-                    <!-- <div class="presenter-avatar">SS</div> -->
                     <div>
                         <div class="presenter-name">
-                            Speaker: Prof. Santanu Sarkar
+                            Speaker: Dr. Somdyuti Paul
                         </div>
-                        <div class="presenter-role">Department of Mathematics, IIT Madras</div>
+                        <div class="presenter-role">Dept. of Artificial Intelligence, IIT Kharagpur</div>
                     </div>
                 </div>
 
-                <!-- Two photos from the session: each opens full size on click; the rest are in the gallery -->
-                <div class="session-photo-pair">
-                    <div class="talk-poster-preview lightbox-trigger" data-caption="Prof. Santanu Sarkar presenting &bull; 28 Oct 2026">
-                        <img src="gallery_image/santanu-sarkar_1.jpg" loading="lazy" decoding="async" width="1600" height="1200"
-                            alt="Prof. Santanu Sarkar presenting his talk &ldquo;When is Partial Information Enough to Recover a Secret?&rdquo; in the CRR Classroom, Department of Artificial Intelligence, IIT Kharagpur, on 28 Oct 2026"
-                            class="talk-poster-img">
-                        <div class="poster-overlay">
-                            <span><i class="fa-solid fa-magnifying-glass-plus"></i> Click to enlarge</span>
-                        </div>
-                    </div>
-                    <div class="talk-poster-preview lightbox-trigger" data-caption="Group photo with the speaker &bull; 28 Oct 2026">
-                        <img src="gallery_image/santanu-sarkar_3.jpg" loading="lazy" decoding="async" width="1600" height="1200"
-                            alt="Group photo with Prof. Santanu Sarkar after his talk in the CRR Classroom, Department of Artificial Intelligence, IIT Kharagpur, on 28 Oct 2026"
-                            class="talk-poster-img">
-                        <div class="poster-overlay">
-                            <span><i class="fa-solid fa-magnifying-glass-plus"></i> Click to enlarge</span>
-                        </div>
-                    </div>
+                <div class="abstract-box">
+                    <div class="abstract-title">About the talk</div>
+                    <p>
+                        Dr. Paul will present her work on flow guidance for improving diffusion-based video frame
+                        interpolation, recently accepted at the British Machine Vision Conference (BMVC) 2026. Explicit
+                        optical-flow priors guide the temporal attention of a diffusion transformer, giving the largest
+                        gains under large motion and letting a 62.7M-parameter variant outperform the 118.3M-parameter
+                        EDEN baseline.
+                    </p>
                 </div>
 
                 <div class="featured-footer">
-                    <!-- <div class="countdown-container">
-                        <span class="countdown-label"><i class="fa-solid fa-clock"></i> Next Talk In:</span>
-                        <div class="countdown-timer">
-                            <div class="timer-unit">
-                                <div class="timer-val" id="timer-days">00</div>
-                                <div class="timer-lbl">Days</div>
-                            </div>
-                            <span class="timer-sep">:</span>
-                            <div class="timer-unit">
-                                <div class="timer-val" id="timer-hours">00</div>
-                                <div class="timer-lbl">Hours</div>
-                            </div>
-                            <span class="timer-sep">:</span>
-                            <div class="timer-unit">
-                                <div class="timer-val" id="timer-mins">00</div>
-                                <div class="timer-lbl">Mins</div>
-                            </div>
-                            <span class="timer-sep">:</span>
-                            <div class="timer-unit">
-                                <div class="timer-val" id="timer-secs">00</div>
-                                <div class="timer-lbl">Secs</div>
-                            </div>
-                        </div>
-                    </div> -->
-
                     <div class="featured-actions">
-                        <a href="events.html" class="btn btn-primary btn-sm">
-                            Abstract, Speaker Bio & Full Schedule<i class="fa-solid fa-arrow-right"></i>
-                        </a>
-                        <a href="gallery.html?event=event-crypto-2026" class="btn btn-secondary btn-sm">
-                            <i class="fa-solid fa-images"></i> Event Photos
+                        <a href="events.html#next-talk" class="btn btn-primary btn-sm">
+                            Full Abstract & Details<i class="fa-solid fa-arrow-right"></i>
                         </a>
                     </div>
                 </div>
@@ -265,11 +227,33 @@
                     <div class="talk-carousel-viewport">
                         <div class="talk-carousel-track" aria-live="off">
 
+                            <!-- 28 Oct 2026: Prof. Santanu Sarkar -->
+                            <article class="talk-slide" role="group" aria-roledescription="slide">
+                                <div class="talk-slide-media">
+                                    <img src="gallery_image/santanu-sarkar_1.jpg" alt="" width="1600" height="1200"
+                                        decoding="async" style="object-position: 30% 50%;">
+                                </div>
+                                <div class="talk-slide-content">
+                                    <div class="talk-slide-date"><i class="fa-regular fa-calendar" aria-hidden="true"></i> 28 Oct 2026</div>
+                                    <h3 class="talk-slide-title">When is Partial Information Enough to Recover a Secret?</h3>
+                                    <p class="talk-slide-speaker">Prof. Santanu Sarkar
+                                        <span>Department of Mathematics, IIT Madras</span></p>
+                                    <p class="talk-slide-teaser">Algebraic and lattice attacks, machine-learning-assisted key
+                                        recovery, and fault attacks that recover the parameters of neural networks.</p>
+                                    <div class="talk-slide-actions">
+                                        <a href="events.html#talk-28-oct-2026-when-is-partial-information-enough-to-recover-a-secret"
+                                            class="btn btn-primary btn-sm">Talk details <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                                        <a href="gallery.html?event=event-crypto-2026" class="btn btn-sm talk-slide-btn">
+                                            <i class="fa-solid fa-images" aria-hidden="true"></i> Photos</a>
+                                    </div>
+                                </div>
+                            </article>
+
                             <!-- 6 Oct 2026: Dr. Soumen Basu -->
                             <article class="talk-slide" role="group" aria-roledescription="slide">
                                 <div class="talk-slide-media">
                                     <img src="gallery_image/Souman_basu_1.jpeg" alt="" width="1200" height="1600"
-                                        decoding="async" style="object-position: 72% 30%;">
+                                        loading="lazy" decoding="async" style="object-position: 72% 30%;">
                                 </div>
                                 <div class="talk-slide-content">
                                     <div class="talk-slide-date"><i class="fa-regular fa-calendar" aria-hidden="true"></i> 6 Oct 2026</div>
@@ -334,28 +318,6 @@
                                             class="btn btn-primary btn-sm">Talk details <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
                                         <a href="gallery.html?event=event-policing-2026" class="btn btn-sm talk-slide-btn">
                                             <i class="fa-solid fa-images" aria-hidden="true"></i> Photos</a>
-                                    </div>
-                                </div>
-                            </article>
-
-                            <!-- 28 Jul 2026: Dr. Shreya Ghosh (no photo: gradient panel) -->
-                            <article class="talk-slide" role="group" aria-roledescription="slide">
-                                <div class="talk-slide-media talk-slide-art" aria-hidden="true">
-                                    <i class="fa-solid fa-microphone-lines"></i>
-                                </div>
-                                <div class="talk-slide-content">
-                                    <div class="talk-slide-date"><i class="fa-regular fa-calendar" aria-hidden="true"></i> 28 Jul 2026</div>
-                                    <h3 class="talk-slide-title">Automatic Human Behaviour Understanding</h3>
-                                    <p class="talk-slide-speaker">Dr. Shreya Ghosh
-                                        <span>Dept. of Artificial Intelligence, IIT Kharagpur</span></p>
-                                    <p class="talk-slide-teaser">Models that learn to read eye gaze, facial expressions and body
-                                        movement in the wild, for more socially aware, human-centric AI.</p>
-                                    <div class="talk-slide-actions">
-                                        <a href="events.html#talk-28-jul-2026-automatic-human-behaviour-understanding"
-                                            class="btn btn-primary btn-sm">Talk details <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
-                                        <a href="https://sites.google.com/view/shreyaghosh/home" target="_blank"
-                                            rel="noopener noreferrer" class="btn btn-sm talk-slide-btn">
-                                            <i class="fa-solid fa-circle-user" aria-hidden="true"></i> Speaker</a>
                                     </div>
                                 </div>
                             </article>

@@ -1032,6 +1032,10 @@ html.theme-switching body {
     flex-wrap: wrap;
 }
 
+.countdown-container[hidden] {
+    display: none;
+}
+
 .countdown-label {
     font-size: 0.8rem;
     font-weight: 700;

@@ -1052,35 +1052,22 @@ function initCountdown() {
 
     if (!daysEl || !hoursEl || !minsEl || !secsEl) return;
 
-    // Helper to get the exact next Tuesday at 17:00 (05:00 PM IST)
-    function getNextTuesday() {
-        const now = new Date();
-        const target = new Date();
-        
-        // Day of week: 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
-        let daysToAdd = (2 - now.getDay() + 7) % 7;
-        
-        target.setDate(now.getDate() + daysToAdd);
-        target.setHours(17, 0, 0, 0); // 05:00 PM IST
-        
-        // If today is Tuesday and we are already past 17:00 IST, target next week's Tuesday
-        if (daysToAdd === 0 && now.getTime() >= target.getTime()) {
-            target.setDate(target.getDate() + 7);
-        }
-        
-        return target;
+    // The talk's start time comes from data-countdown on the container, e.g. "2026-11-18T17:30:00+05:30"
+    const container = daysEl.closest('.countdown-container');
+    const target = new Date(container?.dataset.countdown || '');
+    if (!container || isNaN(target.getTime())) {
+        if (container) container.hidden = true;
+        return;
     }
 
+    let timerId;
     function updateTimer() {
-        const now = new Date();
-        const target = getNextTuesday();
-        const diff = target.getTime() - now.getTime();
+        const diff = target.getTime() - Date.now();
 
+        // Talk has started: hide the countdown instead of showing zeros
         if (diff <= 0) {
-            daysEl.textContent = '00';
-            hoursEl.textContent = '00';
-            minsEl.textContent = '00';
-            secsEl.textContent = '00';
+            container.hidden = true;
+            clearInterval(timerId);
             return;
         }
 
@@ -1095,8 +1082,8 @@ function initCountdown() {
         secsEl.textContent = String(secs).padStart(2, '0');
     }
 
+    timerId = setInterval(updateTimer, 1000);
     updateTimer();
-    setInterval(updateTimer, 1000);
 }
 
 /* ==========================================================================
@@ -1238,7 +1225,7 @@ function initRevealOnScroll() {
    ========================================================================== */
 const SEARCH_PAGES = ['index.html', 'events.html', 'gallery.html', 'contact.html'];
 const SEARCH_TYPES = {
-    upcoming: { label: 'Latest Talk', icon: 'fa-bolt', order: 0 },
+    upcoming: { label: 'Upcoming Talk', icon: 'fa-bolt', order: 0 },
     talk: { label: 'Talks', icon: 'fa-microphone-lines', order: 1 },
     person: { label: 'People', icon: 'fa-user', order: 2 },
     photo: { label: 'Gallery', icon: 'fa-image', order: 3 },
@@ -1917,7 +1904,7 @@ function initSiteSearch() {
                 </div>
                 <div class="search-idle-title">Jump to</div>
                 <div class="search-chips">
-                    <a class="search-chip" style="--i:5" href="events.html#next-talk"><i class="fa-solid fa-bolt"></i> Latest talk</a>
+                    <a class="search-chip" style="--i:5" href="events.html#next-talk"><i class="fa-solid fa-bolt"></i> Upcoming talk</a>
                     <a class="search-chip" style="--i:6" href="events.html#inaugural-2025"><i class="fa-solid fa-flag-checkered"></i> Inaugural event</a>
                     <a class="search-chip" style="--i:7" href="events.html#archive-2024"><i class="fa-solid fa-box-archive"></i> 2024 archive</a>
                     <a class="search-chip" style="--i:8" href="contact.html#propose"><i class="fa-solid fa-paper-plane"></i> Propose a talk</a>

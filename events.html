@@ -134,7 +134,7 @@
             <h1 style="font-size: 3rem; margin-bottom: 0.5rem;">IdoAI <span class="text-gradient">Events &
                     Archive</span></h1>
             <p style="font-size: 1.15rem; max-width: 800px; margin: 0 auto; color: var(--text-muted);">
-                View our latest talk highlight, all past events with slides and references.
+                View our upcoming talk, all past events with slides and references.
             </p>
         </div>
 
@@ -145,7 +145,7 @@
             <div
                 style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap;">
                 <div>
-                    <h2 class="section-title"><i class="fa-solid fa-microphone-lines" aria-hidden="true"></i> Latest Session</h2>
+                    <h2 class="section-title"><i class="fa-solid fa-microphone-lines" aria-hidden="true"></i> Upcoming Talk</h2>
                     <!-- <p class="section-subtitle">Upcoming talk details</p> -->
                 </div>
                 <!-- <span class="event-tag"
@@ -156,67 +156,54 @@
 
             <div class="featured-card" style="margin-bottom: 0;">
                 <h3 class="featured-title">
-                    When is Partial Information Enough to Recover a Secret?
+                    Flow-Guided Temporal Attention for Diffusion-Based Video Frame Interpolation
                 </h3>
 
                 <div class="presenter-info">
-                    <!-- <div class="presenter-avatar">SS</div> -->
                     <div>
                         <div class="presenter-name">
-                            Speaker: Prof. Santanu Sarkar
+                            Speaker: Dr. Somdyuti Paul
                         </div>
-                        <div class="presenter-role">Department of Mathematics, IIT Madras</div>
-                    </div>
-                </div>
-
-                <!-- Photo from the session: opens full size on click; the link shows the rest in the gallery -->
-                <div class="session-photo">
-                    <div class="talk-poster-preview lightbox-trigger" data-caption="Prof. Santanu Sarkar presenting &bull; 28 Oct 2026">
-                        <img src="gallery_image/santanu-sarkar_1.jpg" loading="lazy" decoding="async" width="1600" height="1200"
-                            alt="Prof. Santanu Sarkar presenting his talk &ldquo;When is Partial Information Enough to Recover a Secret?&rdquo; in the CRR Classroom, Department of Artificial Intelligence, IIT Kharagpur, on 28 Oct 2026"
-                            class="talk-poster-img" style="object-position: 30% 50%;">
-                        <div class="poster-overlay">
-                            <span><i class="fa-solid fa-magnifying-glass-plus"></i> Click to enlarge</span>
-                        </div>
-                    </div>
-                    <div class="session-photo-text">
-                        <span class="session-photo-label"><i class="fa-solid fa-camera" aria-hidden="true"></i> From the session</span>
-                        <p>Prof. Santanu Sarkar presenting <span class="nowrap">&bull; 28 Oct 2026</span></p>
-                        <a href="gallery.html?event=event-crypto-2026" class="session-photo-link">View in gallery <i
-                                class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                        <div class="presenter-role">Dept. of Artificial Intelligence, IIT Kharagpur</div>
                     </div>
                 </div>
 
                 <div class="abstract-box">
                     <div class="abstract-title">Abstract</div>
                     <p>
-                        This talk explores how mathematical algorithms and machine learning can help recover secrets in
-                        cryptographic systems. I will begin with algebraic attacks on RSA and memory-efficient
-                        algorithms for lattice-based cryptanalysis. I will then discuss machine-learning-assisted
-                        attacks, where learned predictions guide key recovery and exact solvers check candidate
-                        solutions. The talk also considers neural networks as targets, showing how fault attacks can
-                        recover their parameters. I will conclude with future directions in machine learning for
-                        cryptanalysis.
+                        In this talk, she will present her work on flow-guidance for improving diffusion-based video
+                        frame interpolation, which has recently been accepted as a paper at the British Machine Vision
+                        Conference (BMVC) 2026. Recent diffusion-based video frame interpolation (VFI) methods have
+                        demonstrated improved perceptual quality over traditional flow-based approaches.
+                        State-of-the-art results in VFI have recently been achieved by leveraging the temporal attention
+                        mechanism of diffusion transformers (DiTs). While temporal attention enables cross-frame token
+                        interactions, the motion information needs to be implicitly inferred from such token
+                        interactions, which can limit performance in the presence of large motion. Further, implicit
+                        motion modeling from token interactions becomes more challenging as the model&rsquo;s learning
+                        capacity reduces.
                     </p>
                     <br>
-                    <p><em><strong>Speaker Bio:</strong> Santanu Sarkar is a Professor in the Department of Mathematics
-                            at IIT Madras, where he joined in 2014. His research interests include cryptanalysis,
-                            post-quantum cryptography, and machine learning for security. His work combines algebraic,
-                            combinatorial, and computational methods to study cryptographic problems and implementation
-                            vulnerabilities. He is a recipient of the NASI&ndash;Platinum Jubilee Young Scientist Award
-                            and the Alexander von Humboldt Research Fellowship for Experienced Researchers. He has also
-                            held visiting research positions at NIST and LORIA.</em></p>
+                    <p>
+                        To address these limitations, we introduce explicit optical flow guidance to the DiT used for
+                        VFI, building upon EDEN, a DiT-based VFI model. Specifically, we incorporate optical flow priors
+                        for providing local guidance through gated token modulation prior to temporal attention and
+                        global flow-aware conditioning with pooled flow embeddings to modulate input tokens of
+                        transformer blocks via adaptive layer normalization. Experimental results demonstrate improved
+                        interpolation quality across perceptual and temporal consistency metrics. Larger gains are
+                        observed under large-motion scenarios, with 7.57% and 10.02% FloLPIPS gains over the best
+                        competing model achieved on the DAVIS and SNU-FILM (Extreme) benchmarks. Notably, a smaller
+                        variant of our model with only 62.7M parameters trained with explicit motion priors outperforms
+                        the baseline EDEN with 118.3M parameters, highlighting the efficacy of explicit motion priors
+                        as an inductive bias for diffusion-based VFI.
+                    </p>
                 </div>
 
                 <div class="resource-links" style="margin-top: 1rem;">
                     <span class="resource-btn"><i class="fa-solid fa-location-dot" style="color:var(--primary);"></i>
                         CRR Classroom, Fourth Floor</span>
                     <span class="resource-btn"><i class="fa-solid fa-building"></i> CRR Building, IIT Kharagpur</span>
-                    <span class="resource-btn"><i class="fa-regular fa-calendar"></i> Wednesday &bull; 28 Oct 2026 @ 5
-                        PM IST</span>
-                    <a href="gallery.html?event=event-crypto-2026" class="resource-btn">
-                        <i class="fa-solid fa-images" style="color:var(--primary);"></i> Event Photos
-                    </a>
+                    <span class="resource-btn"><i class="fa-regular fa-calendar"></i> Wednesday &bull; 18 Nov 2026 @
+                        5:30 &ndash; 6:30 PM IST</span>
                 </div>
             </div>
         </section>
@@ -232,6 +219,68 @@
             </div>
 
             <div class="events-grid">
+
+                <!-- 2026 Talk: Prof. Santanu Sarkar -->
+                <div class="event-card" id="talk-28-oct-2026-when-is-partial-information-enough-to-recover-a-secret"
+                    data-keywords="cryptography cryptanalysis security rsa lattice post-quantum key recovery fault attack mathematics neural networks">
+                    <div class="event-summary">
+                        <div class="event-date-badge"><i class="fa-regular fa-calendar"></i> 28 Oct 2026</div>
+                        <div class="event-speaker">
+                            <span class="speaker-name"><i class="fa-solid fa-circle-user"></i> Prof. Santanu Sarkar</span>
+                        </div>
+                        <div class="event-topic">When is Partial Information Enough to Recover a Secret?</div>
+                        <div class="expand-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                    </div>
+                    <div class="event-details-drawer">
+                        <div class="drawer-content">
+                            <!-- Photo from the session: opens full size on click; the link shows the rest in the gallery -->
+                            <div class="session-photo">
+                                <div class="talk-poster-preview lightbox-trigger" data-caption="Prof. Santanu Sarkar presenting &bull; 28 Oct 2026">
+                                    <img src="gallery_image/santanu-sarkar_1.jpg" loading="lazy" decoding="async" width="1600" height="1200"
+                                        alt="Prof. Santanu Sarkar presenting his talk &ldquo;When is Partial Information Enough to Recover a Secret?&rdquo; in the CRR Classroom, Department of Artificial Intelligence, IIT Kharagpur, on 28 Oct 2026"
+                                        class="talk-poster-img" style="object-position: 30% 50%;">
+                                    <div class="poster-overlay">
+                                        <span><i class="fa-solid fa-magnifying-glass-plus"></i> Click to enlarge</span>
+                                    </div>
+                                </div>
+                                <div class="session-photo-text">
+                                    <span class="session-photo-label"><i class="fa-solid fa-camera" aria-hidden="true"></i> From the session</span>
+                                    <p>Prof. Santanu Sarkar presenting <span class="nowrap">&bull; 28 Oct 2026</span></p>
+                                    <a href="gallery.html?event=event-crypto-2026" class="session-photo-link">View in gallery <i
+                                            class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                                </div>
+                            </div>
+                            <div class="drawer-abstract">
+                                <p><strong>Abstract:</strong> This talk explores how mathematical algorithms and machine
+                                    learning can help recover secrets in cryptographic systems. I will begin with
+                                    algebraic attacks on RSA and memory-efficient algorithms for lattice-based
+                                    cryptanalysis. I will then discuss machine-learning-assisted attacks, where learned
+                                    predictions guide key recovery and exact solvers check candidate solutions. The talk
+                                    also considers neural networks as targets, showing how fault attacks can recover
+                                    their parameters. I will conclude with future directions in machine learning for
+                                    cryptanalysis.</p>
+                                <br>
+                                <p><em><strong>Speaker Bio:</strong> Santanu Sarkar is a Professor in the Department of
+                                        Mathematics at IIT Madras, where he joined in 2014. His research interests include
+                                        cryptanalysis, post-quantum cryptography, and machine learning for security. His
+                                        work combines algebraic, combinatorial, and computational methods to study
+                                        cryptographic problems and implementation vulnerabilities. He is a recipient of the
+                                        NASI&ndash;Platinum Jubilee Young Scientist Award and the Alexander von Humboldt
+                                        Research Fellowship for Experienced Researchers. He has also held visiting research
+                                        positions at NIST and LORIA.</em></p>
+                            </div>
+                            <div class="resource-links">
+                                <a href="gallery.html?event=event-crypto-2026" class="resource-btn">
+                                    <i class="fa-solid fa-images" style="color:var(--primary);"></i> Event Photos
+                                </a>
+                                <span class="resource-btn"><i class="fa-solid fa-location-dot"
+                                        style="color:var(--primary);"></i> CRR Classroom, Fourth Floor &bull; 5 PM IST</span>
+                                <span class="resource-btn"><i class="fa-solid fa-university"
+                                        style="color:var(--primary);"></i> Department of Mathematics, IIT Madras</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- 2026 Talk: Dr. Soumen Basu -->
                 <div class="event-card" id="talk-6-oct-2026-medical-computer-vision-for-the-clinic-gallbladd"
